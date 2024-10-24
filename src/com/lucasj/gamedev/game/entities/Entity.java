@@ -11,6 +11,7 @@ public abstract class Entity {
 	
 	protected Vector2D velocity;
 	
+	protected Vector2D screenPosition;
 	protected Vector2D position;
 	protected int maxHealth;
 	protected int health = maxHealth;
@@ -26,6 +27,7 @@ public abstract class Entity {
 		maxHealth = 100;
 		position = new Vector2D(0, 0);
 		velocity = new Vector2D(0, 0);
+		this.screenPosition = new Vector2D(0, 0);
 		tag = RandomStringGenerator.generateRandomString(32, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
 	}
 
@@ -36,7 +38,8 @@ public abstract class Entity {
 		this.maxHealth = maxHealth;
 		this.health = maxHealth;
 		this.movementSpeed = movementSpeed * 1000;
-		this.size = size;
+		this.size = (int) (size*game.getCamera().getScale());
+		this.screenPosition = new Vector2D(0, 0);
 		if(tag == null) tag = RandomStringGenerator.generateRandomString(32, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
 		this.tag = tag;
 	}
@@ -56,15 +59,66 @@ public abstract class Entity {
 	            point.getY() >= y && point.getY() <= y + size);
 	}
 	
+	public final boolean isCollidingWithEntity() {
+	    for (Entity entity : game.instantiatedEntities) {
+	        if (entity != this && isCollidingWith(entity)) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+	
 	public final boolean isCollidingWith(Entity other) {
-	    // Check if this entity is colliding with another entity
-	    return this.getPosition().getX() < other.getPosition().getX() + other.getSize()
-	        && this.getPosition().getX() + this.getSize() > other.getPosition().getX()
-	        && this.getPosition().getY() < other.getPosition().getY() + other.getSize()
-	        && this.getPosition().getY() + this.getSize() > other.getPosition().getY();
+	    double thisLeft = this.getScreenPosition().getX();
+	    double thisRight = thisLeft + this.getSize();
+	    double thisTop = this.getScreenPosition().getY();
+	    double thisBottom = thisTop + this.getSize();
+
+	    double otherLeft = other.getScreenPosition().getX();
+	    double otherRight = otherLeft + other.getSize();
+	    double otherTop = other.getScreenPosition().getY();
+	    double otherBottom = otherTop + other.getSize();
+
+	    boolean isColliding = thisLeft < otherRight && thisRight > otherLeft
+	        && thisTop < otherBottom && thisBottom > otherTop;
+
+	    return isColliding;
+	}
+	
+	public final boolean isCollidingWith(Vector2D pos, Vector2D size) {
+		double thisLeft = this.getPosition().getX();
+	    double thisRight = thisLeft + this.getSize();
+	    double thisTop = this.getPosition().getY();
+	    double thisBottom = thisTop + this.getSize();
+
+	    double otherLeft = pos.getX();
+	    double otherRight = otherLeft + size.getX();
+	    double otherTop = pos.getY();
+	    double otherBottom = otherTop + size.getY();
+
+	    // Check if the rectangles overlap
+	    return thisLeft < otherRight && thisRight > otherLeft
+	        && thisTop < otherBottom && thisBottom > otherTop;
+	}
+	
+	public final boolean isCollidingWith(Vector2D point) {
+		// Get the entity's position and size
+	    double entityX = this.getPosition().getX();
+	    double entityY = this.getPosition().getY();
+	    double entityWidth = this.getSize();
+	    double entityHeight = this.getSize(); // Assuming the entity is a square
+
+	    // Check if the point's coordinates are within the entity's bounds
+	    return point.getX() >= entityX 
+	        && point.getX() <= entityX + entityWidth
+	        && point.getY() >= entityY
+	        && point.getY() <= entityY + entityHeight;
 	}
 
-	public abstract void update(double deltaTime);
+	public void update(double deltaTime) {
+		screenPosition = game.getCamera().worldToScreenPosition(position);
+	}
+	
 	public abstract void render(Graphics g);
 	public abstract void entityDeath();
 	public abstract void onEntityCollision(EntityCollisionEvent e);
@@ -73,11 +127,16 @@ public abstract class Entity {
 		entityDeath();
 		
 		game.toRemoveEntities.add(this);
-		System.out.println("KILLING ENTITY: " + this.getTag() + " | " + this.getClass().getTypeName());
+		System.out.println("KILLING ENTITY: " + this.getTag() + " | " + this.getClass().getSimpleName());
 	}
 	
-	public void takeDamage(int dmg) {
+	public boolean takeDamage(int dmg) {
 		this.setHealth(this.getHealth()-dmg);
+		if(health <= 0) {
+			this.die();
+			return true;
+		}
+		return false;
 	}
 	
 	public Vector2D getPosition() {
@@ -86,6 +145,15 @@ public abstract class Entity {
 
 	public Entity setPosition(Vector2D position) {
 		this.position = position;
+		return this;
+	}
+	
+	public Vector2D getScreenPosition() {
+		return screenPosition;
+	}
+
+	public Entity setScreenPosition(Vector2D position) {
+		this.screenPosition = position;
 		return this;
 	}
 
@@ -104,7 +172,6 @@ public abstract class Entity {
 
 	public Entity setHealth(int health) {
 		this.health = health;
-		if(health <= 0) this.die();
 		return this;
 	}
 

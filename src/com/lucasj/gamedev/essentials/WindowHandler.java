@@ -7,6 +7,9 @@ import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 
+import com.lucasj.gamedev.game.entities.player.Player;
+import com.lucasj.gamedev.mathutils.Vector2D;
+
 public class WindowHandler implements ComponentListener, WindowListener{
 
 	private Game game;
@@ -32,6 +35,10 @@ public class WindowHandler implements ComponentListener, WindowListener{
 	@Override
 	public void componentResized(ComponentEvent e) {
 		game.setScreen(frame.getSize());
+		game.getCamera().setViewport(new Vector2D(frame.getSize().getWidth(), frame.getSize().getHeight()));
+		game.getCamera().recalculateScale();
+		game.getMenus().createButtons();
+		game.getQuadtree().setBounds(new Vector2D(0, 0), new Vector2D(frame.getWidth(), frame.getHeight()));
 	}
 
 	@Override
@@ -55,6 +62,7 @@ public class WindowHandler implements ComponentListener, WindowListener{
 	@Override
 	public void windowClosing(WindowEvent arg0) {
 		game.getSettings().save();
+		Player.getGlobalStats().save(game.gameData);
 	}
 
 	@Override

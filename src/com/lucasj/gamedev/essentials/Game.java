@@ -3,20 +3,29 @@ package com.lucasj.gamedev.essentials;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.MouseEvent;
+import java.awt.GraphicsEnvironment;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lucasj.gamedev.events.MouseClickEventListener;
+import com.lucasj.gamedev.Assets.SpriteTools;
+import com.lucasj.gamedev.essentials.ui.Menus;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
+import com.lucasj.gamedev.game.entities.collectibles.Collectible;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
+import com.lucasj.gamedev.game.entities.enemy.Skeleton;
 import com.lucasj.gamedev.game.entities.enemy.Zombie;
 import com.lucasj.gamedev.game.entities.player.Player;
+import com.lucasj.gamedev.game.entities.projectiles.Projectile;
 import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
+import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.os.GameData;
 import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.settings.SettingsManager;
 import com.lucasj.gamedev.utils.GraphicUtils;
@@ -24,154 +33,141 @@ import com.lucasj.gamedev.world.map.MapManager;
 import com.lucasj.gamedev.world.particles.ParticleEmitter;
 
 @SuppressWarnings("unused")
-public class Game implements MouseClickEventListener{
+public class Game {
 
     private InputHandler input;
     public List<Entity> instantiatedEntities;
+    public List<Collectible> instantiatedCollectibles;
+    public List<Collectible> toRemoveCollectibles;
+    public List<Entity> instantiatedEntitiesOnScreen;
     public List<Entity> toAddEntities;
     public List<Entity> toRemoveEntities;
     private EntityCollisionEvent collisionEvent;
+    
+    private List<CollisionSurface> collisionSurfaces;
 
 	public List<ParticleEmitter> activeParticles;
-    GameState gameState;
+    private GameState gameState;
     private SettingsManager settings;
     private Dimension screen;
     private MapManager mapm;
     private GraphicUtils gUtils;
     private WavesManager wavesManager;
+    private Quadtree quadtree;
+    private Camera camera;
+    
+    public boolean testing = false;
+    
+    private boolean paused;
+    
+    private Menus menus;
     
     private Player p;
+    
+    public Font font;
 
-    // Button variables declared at class level
-    private int playButtonX, playButtonY, playWidth;
-    private int exitButtonX, exitButtonY, exitWidth;
-
+    GameData gameData;
+    
     public Game(InputHandler input, GraphicUtils gUtils, SettingsManager settings, Dimension screen) {
+    	gameData = new GameData("projectgame", "playerStats.dat");
+    	Player.getGlobalStats().load(gameData);
+    	referenceEnemies();
         this.settings = settings;
         this.screen = screen;
+        paused = false;
+        gameState = GameState.mainmenu;
+        quadtree = new Quadtree(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
+        menus = new Menus(this);
+
+        this.input = input;
+        input.addMouseClickListener(menus);
+        
+        camera = new Camera(this, new Vector2D(getWidth(), getHeight()), new Vector2D(0, 0));
         instantiatedEntities = new ArrayList<Entity>();
+        instantiatedEntitiesOnScreen = new ArrayList<Entity>();
+        
+        instantiatedCollectibles = new ArrayList<Collectible>();
+        toRemoveCollectibles = new ArrayList<Collectible>();
+        
         toAddEntities = new ArrayList<Entity>();
         toRemoveEntities = new ArrayList<Entity>();
         this.gUtils = gUtils;
-        mapm = new MapManager();
+        mapm = new MapManager(this);
         wavesManager = new WavesManager(this);
         
-        this.input = input;
-        input.addMouseClickListener(this);
-        
-        gameState = GameState.mainmenu;
-        
         activeParticles = new ArrayList<>();
+        collisionSurfaces = new ArrayList<>();
+        CollisionSurface surface = new CollisionSurface(this, new Vector2D(300, 400), 100, 500);
         
-        p = (Player) new Player(this, input).setTag("Player");
-        p.setPosition(new Vector2D(settings.getIntSetting("width") / 2, settings.getIntSetting("height") / 2));
-        p.instantiate();
+        File fontFile = new File(SpriteTools.assetDirectory + "/DanielLinssen/m6x11.ttf");
+        try {
+            // Load the font file and derive it at a default size
+            font = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(Font.PLAIN, 24f);
+            // Register the font in the GraphicsEnvironment
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(font);
+        } catch (FontFormatException | IOException e) {
+            e.printStackTrace();
+        }
         
     }
 
     public void update(double deltaTime) {
-        if (gameState == GameState.game) { // -------------------------------------------------------------------------------- Game State
-            int parallelThreshold = 1000;
-//            System.out.println("In: " + instantiatedEntities.size());
-//            System.out.println("Adding: " + toAddEntities.size());
-//            System.out.println("Removing: " + toRemoveEntities.size());
-            instantiatedEntities.addAll(toAddEntities);
-            instantiatedEntities.removeAll(toRemoveEntities);
-            toRemoveEntities.clear();
-            toAddEntities.clear();
-            if (instantiatedEntities.size() <= 0) return;
-            if (instantiatedEntities.size() > parallelThreshold) {
-                instantiatedEntities.parallelStream().forEach(entity -> {
-                	entity.update(deltaTime);
-                });
-            } else {
-                instantiatedEntities.forEach(entity -> {
-                	entity.update(deltaTime);
-                });
-            }
-            
-            activeParticles.forEach(particle -> {
-            	particle.update();
-            });
-
-            checkEntityCollisions();
+        if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
             wavesManager.update(deltaTime);
         }
     }
-
-    @Override
-    public void onMouseClicked(MouseEvent e) {
-        int x = e.getX();
-        int y = e.getY();
-        
-        if(gameState == GameState.mainmenu) {
-	        // Check if the "Play" button was clicked
-	        if (x >= playButtonX - 20 && x <= playButtonX + playWidth + 20 &&
-	            y >= playButtonY - 40 && y <= playButtonY + 10) {
-	            // Switch to game state
-	            gameState = GameState.game;
-	        }
-	
-	        // Check if the "Exit" button was clicked
-	        if (x >= exitButtonX - 20 && x <= exitButtonX + exitWidth + 20 &&
-	            y >= exitButtonY - 40 && y <= exitButtonY + 10) {
-	            // Exit the game or perform exit logic
-	            System.exit(0);  // Close the application
-	        }
-        }
+    
+    public void instantiatePlayer() {
+    	p = (Player) new Player(this, getInput()).setTag("Player").setMaxHealth(100).setHealth(100);
+        p.setPosition(new Vector2D(this.getSettings().getIntSetting("width"), this.getSettings().getIntSetting("height")));
+        p.instantiate();
+    }
+    
+    public void referenceEnemies() {
+    	System.out.println("Initialzing enemy types...");
+    	Zombie.initializeClass();
+    	Skeleton.initializeClass();
     }
 
     public void render(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        if (gameState == GameState.mainmenu) {
-            // Cast to Graphics2D for more control over rendering
+    	Graphics2D g2d = (Graphics2D) g;
+    	menus.render(g);
+    	
+    	if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
+        
+    		Vector2D cameraPosition = camera.getWorldPosition();
+    	    double viewportWidth = camera.getViewport().getX();
+    	    double viewportHeight = camera.getViewport().getY();
 
-            // Set font and color for the title
-            g2d.setFont(new Font("Arial", Font.BOLD, 50));  // Large font for the title
-            g2d.setColor(Color.WHITE);
+    	    double extendedLeftBound = cameraPosition.getX() - (viewportWidth / 2);
+    	    double extendedRightBound = cameraPosition.getX() + viewportWidth + (viewportWidth / 2);
+    	    double extendedTopBound = cameraPosition.getY() - (viewportHeight / 2);
+    	    double extendedBottomBound = cameraPosition.getY() + viewportHeight + (viewportHeight / 2);
 
-            // Draw the title of the game "Game"
-            String title = "Game";
-            int titleWidth = g2d.getFontMetrics().stringWidth(title);
-            g2d.drawString(title, (getWidth() - titleWidth) / 2, 100);  // Centered horizontally, Y = 100
-
-            // Set font and color for the buttons
-            g2d.setFont(new Font("Arial", Font.PLAIN, 30));  // Medium font for buttons
-            g2d.setColor(Color.LIGHT_GRAY);
-
-            // Update "Play" button variables
-            String playText = "Play";
-            playWidth = g2d.getFontMetrics().stringWidth(playText);
-            playButtonX = (getWidth() - playWidth) / 2;
-            playButtonY = 200;  // Y-position for the "Play" button
-            g2d.fillRect(playButtonX - 20, playButtonY - 40, playWidth + 40, 50);  // Draw button rectangle
-            g2d.setColor(Color.BLACK);  // Text color
-            g2d.drawString(playText, playButtonX, playButtonY);  // Draw "Play" text
-
-            // Update "Exit" button variables
-            String exitText = "Exit";
-            exitWidth = g2d.getFontMetrics().stringWidth(exitText);
-            exitButtonX = (getWidth() - exitWidth) / 2;
-            exitButtonY = 300;  // Y-position for the "Exit" button
-            g2d.setColor(Color.LIGHT_GRAY);
-            g2d.fillRect(exitButtonX - 20, exitButtonY - 40, exitWidth + 40, 50);  // Draw button rectangle
-            g2d.setColor(Color.BLACK);  // Text color
-            g2d.drawString(exitText, exitButtonX, exitButtonY);  // Draw "Exit" text
-
-            // Optionally, draw button borders or more styling for clarity
-            g2d.setColor(Color.DARK_GRAY);
-            g2d.drawRect(playButtonX - 20, playButtonY - 40, playWidth + 40, 50);  // Border for Play button
-            g2d.drawRect(exitButtonX - 20, exitButtonY - 40, exitWidth + 40, 50);  // Border for Exit button
-        }
-
-        if (gameState == GameState.game) { // -------------------------------------------------------------------------------- Game State
-            mapm.render(g);
-            instantiatedEntities.forEach(entity -> {
-                entity.render(g);
+    		
+    		this.getCollisionSurfaces().forEach(surf -> {
+            	surf.render(g);
             });
-            wavesManager.render(g);
+        	this.instantiatedCollectibles.forEach(collectible -> {
+            	collectible.render(g);
+            });
+        	this.instantiatedEntities.forEach(entity -> {
+        		if(!(entity instanceof Player)) entity.render(g);
+        		
+        		if (entity.getPosition().getX() >= extendedLeftBound && entity.getPosition().getX() <= extendedRightBound &&
+        				entity.getPosition().getY() >= extendedTopBound && entity.getPosition().getY() <= extendedBottomBound) {
+        	            instantiatedEntitiesOnScreen.add(entity);
+        	        }
+        		
+            });
+        	if(p == null) instantiatePlayer(); 
+        	p.render(g);
+        	this.getWavesManager().render(g);
         }
-        gUtils.drawVignette(g2d, getWidth(), getHeight(), 0, 0, 0, 180);
+ 
+
+        this.getGraphicUtils().drawVignette(g2d, this.getWidth(), this.getHeight(), 0, 0, 0, 180);
     }
     
     private void renderSurface(Graphics g, CollisionSurface surface) {
@@ -182,7 +178,7 @@ public class Game implements MouseClickEventListener{
                    surface.getHeight());
     }
     
-    private void checkEntityCollisions() {
+    public void checkEntityCollisions() {
         // Loop through all entities and check for collisions
         for (int i = 0; i < instantiatedEntities.size(); i++) {
             Entity entityA = instantiatedEntities.get(i);
@@ -198,7 +194,10 @@ public class Game implements MouseClickEventListener{
                 	} else if (entityB.importance > entityA.importance) {
                 		collider = entityA;
                 		entity = entityB;
-                	} else return;
+                	} else {
+                	    // Handle the case where both entities have the same importance
+                	    continue;
+                	}
                     EntityCollisionEvent e = new EntityCollisionEvent(
                         entity,
                         collider,
@@ -207,8 +206,14 @@ public class Game implements MouseClickEventListener{
                             (entityA.getPosition().getY() + entityB.getPosition().getY()) / 2
                         )
                     );
-
+                    if (entityB instanceof Projectile) {
+                        Projectile projectile = (Projectile) entityB;
+                        if (projectile.getSender().getClass().equals(entityA.getClass())) {
+                            continue;
+                        }
+                    }
                     // Notify the listeners of both entities
+                    System.out.println("Collision with " + entityA.getClass().getSimpleName() + " and " + entityB.getClass().getSimpleName());
                     entityA.onEntityCollision(e);
                     entityB.onEntityCollision(e);
                 }
@@ -218,6 +223,7 @@ public class Game implements MouseClickEventListener{
     
     private void initializeEnemyTypes() {
     	Enemy.addEnemyType(Zombie.class);
+    	Enemy.addEnemyType(Skeleton.class);
     }
 
     public int getWidth() {
@@ -227,18 +233,6 @@ public class Game implements MouseClickEventListener{
     public int getHeight() {
         return screen.height;
     }
-
-	@Override
-	public void onMousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onMouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	public InputHandler getInput() {
 		return input;
@@ -264,5 +258,53 @@ public class Game implements MouseClickEventListener{
 
 	public SettingsManager getSettings() {
 		return settings;
+	}
+
+	public WavesManager getWavesManager() {
+		return wavesManager;
+	}
+
+	public List<CollisionSurface> getCollisionSurfaces() {
+		return collisionSurfaces;
+	}
+
+	public GameState getGameState() {
+		return gameState;
+	}
+
+	public void setGameState(GameState gameState) {
+		this.gameState = gameState;
+	}
+
+	public Camera getCamera() {
+		return camera;
+	}
+
+	public MapManager getMapManager() {
+		return mapm;
+	}
+
+	public GraphicUtils getGraphicUtils() {
+		return gUtils;
+	}
+
+	public void setP(Player p) {
+		this.p = p;
+	}
+
+	public Menus getMenus() {
+		return menus;
+	}
+
+	public Quadtree getQuadtree() {
+		return quadtree;
+	}
+
+	public boolean isPaused() {
+		return paused;
+	}
+
+	public void setPaused(boolean paused) {
+		this.paused = paused;
 	}
 }

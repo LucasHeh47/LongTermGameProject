@@ -32,6 +32,7 @@ public abstract class Projectile extends Entity {
 	}
 	
 	public void update(double deltaTime) {
+		super.update(deltaTime);
 		updateProjectile(deltaTime);
 		if(timeToLive != -1) {
 			if((System.currentTimeMillis() - timeCreated)/1000.0 >= timeToLive) {

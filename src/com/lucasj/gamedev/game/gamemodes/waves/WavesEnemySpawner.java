@@ -6,6 +6,7 @@ import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
+import com.lucasj.gamedev.game.entities.enemy.Enemy.EnemyWavesData;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
 public class WavesEnemySpawner {
@@ -17,16 +18,18 @@ public class WavesEnemySpawner {
 	
     public WavesEnemySpawner(Game game) {
         this.game = game;
-
-        Enemy.getEnemyTypes().forEach(enemyType -> {
+        calculateSpawnableEnemies();
+    }
+    
+    public void calculateSpawnableEnemies() {
+    	spawnableEnemies.clear();
+    	Enemy.getEnemyTypes().forEach(enemyType -> {
             try {
-                // Use reflection to get the static method getWavesData() from the class
-                Enemy.EnemyWavesData wavesData = (Enemy.EnemyWavesData) enemyType
-                    .getMethod("getWavesData")
-                    .invoke(null);  // Pass null because it's a static method
+                EnemyWavesData wavesData = Enemy.getWavesData(enemyType);
                 
                 // Use the wavesData as needed
-                if (wavesData != null && wavesData.spawnRate != -1) {
+                System.out.println(wavesData.startRound);
+                if (wavesData != null && wavesData.spawnRate != -1 && wavesData.startRound <= game.getWavesManager().getWave()) {
                     spawnableEnemies.add(enemyType);
                     totalSpawnWeight += wavesData.spawnRate;
                 }
@@ -37,7 +40,7 @@ public class WavesEnemySpawner {
         });
     }
 	
-    public void spawnEnemy(Vector2D position) {
+    public void spawnEnemy(int health, Vector2D position) {
         if (spawnableEnemies.isEmpty()) {
             System.out.println("No enemies available to spawn.");
             return;
@@ -50,19 +53,14 @@ public class WavesEnemySpawner {
         // Iterate through the enemies to find the one that matches the random weight
         for (Class<? extends Enemy> enemyType : spawnableEnemies) {
             try {
-                // Get the waves data for this enemy type
-                Enemy.EnemyWavesData wavesData = (Enemy.EnemyWavesData) enemyType
-                    .getMethod("getWavesData")
-                    .invoke(null);
+            	EnemyWavesData wavesData = Enemy.getWavesData(enemyType);
 
                 cumulativeWeight += wavesData.spawnRate;
 
                 // If the random number falls within the cumulative weight, spawn this enemy
                 if (randomWeight <= cumulativeWeight) {
                 	
-                	// Calculuate Damage based on wave --------------
-                	
-                    spawn(enemyType, position);
+                    spawn(enemyType, position, health);
                     break;
                 }
                 
@@ -72,11 +70,12 @@ public class WavesEnemySpawner {
         }
     }
 
-    private void spawn(Class<? extends Enemy> enemyType, Vector2D position) {
+    private void spawn(Class<? extends Enemy> enemyType, Vector2D position, int health) {
         try {
             // Example spawning logic
-            Enemy enemy = new Enemy.Builder(game, position, enemyType).setHealth(100).setMovementSpeed(100).setSize(50).setTag(null).build();
-
+            Enemy enemy = new Enemy.Builder(game, position, enemyType).setHealth(health).setMovementSpeed(8).setSize(25).setTag(null).build();
+            enemy.setAggroRange(1500);
+            enemy.instantiate();
             System.out.println("Spawned enemy: " + enemyType.getSimpleName());
 
         } catch (Exception e) {

@@ -7,6 +7,8 @@ import java.awt.Graphics2D;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
+import com.lucasj.gamedev.game.entities.enemy.Enemy;
+import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
 public class Bullet extends Projectile {
@@ -32,7 +34,7 @@ public class Bullet extends Projectile {
 	public void render(Graphics g) {
 		Graphics2D g2d = (Graphics2D)g;
 		g2d.setColor(Color.blue);
-		g2d.fillOval((int)position.getX(), (int)position.getY(), 
+		g2d.fillOval((int)screenPosition.getX(), (int)screenPosition.getY(), 
 				size, size);
 		
 	}
@@ -43,12 +45,9 @@ public class Bullet extends Projectile {
 
 	@Override
 	public void onEntityCollision(EntityCollisionEvent e) {
-		if(e.getCollider() == this.getSender()) return;
-		System.out.println(e.getCollider().getTag());
-		e.getCollider().takeDamage(this.getDamage());
-		System.out.println("Damage Dealt: " + this.getDamage());
-		System.out.println("Health: " + e.getCollider().getHealth() + "/" + e.getCollider().getMaxHealth());
-		System.out.println("Collision");
+		if(this.getSender() instanceof Player && e.getCollider() instanceof Player) return;
+		boolean died = e.getCollider().takeDamage(this.getDamage());
+		if(e.getCollider() instanceof Enemy && died) game.getWavesManager().killedEnemy();
 		die();
 	}
 
