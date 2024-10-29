@@ -5,6 +5,7 @@ import java.awt.image.BufferedImage;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.events.collectibles.CoinCollectedEvent;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
@@ -47,6 +48,8 @@ public class Coin extends Collectible {
 	void collect(Player p) {
 		p.addMoney(cashAmount);
 		game.toRemoveCollectibles.add(this);
+		CoinCollectedEvent e = new CoinCollectedEvent(cashAmount, p);
+		game.getEventManager().dispatchEvent(e);
 	}
 
 }

@@ -23,6 +23,7 @@ public class WavesEnemySpawner {
     
     public void calculateSpawnableEnemies() {
     	spawnableEnemies.clear();
+    	totalSpawnWeight = 0;
     	Enemy.getEnemyTypes().forEach(enemyType -> {
             try {
                 EnemyWavesData wavesData = Enemy.getWavesData(enemyType);
@@ -50,6 +51,7 @@ public class WavesEnemySpawner {
         int randomWeight = random.nextInt(totalSpawnWeight) + 1;
         int cumulativeWeight = 0;
 
+        System.out.println("Spawning");
         // Iterate through the enemies to find the one that matches the random weight
         for (Class<? extends Enemy> enemyType : spawnableEnemies) {
             try {
@@ -73,6 +75,7 @@ public class WavesEnemySpawner {
     private void spawn(Class<? extends Enemy> enemyType, Vector2D position, int health) {
         try {
             // Example spawning logic
+        	System.out.println("Spawned");
             Enemy enemy = new Enemy.Builder(game, position, enemyType).setHealth(health).setMovementSpeed(8).setSize(25).setTag(null).build();
             enemy.setAggroRange(1500);
             enemy.instantiate();

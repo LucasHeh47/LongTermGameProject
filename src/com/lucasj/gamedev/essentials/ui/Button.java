@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
+import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 
 public class Button {
     private String text;
@@ -34,26 +35,9 @@ public class Button {
         this.decidingFactor = () -> {
         	return true;
         };
-        menu.addButton(this);
-    }
-    
-    public Button(Game game, Menus menu, GameState state, String text, int x, int y, int width, int height, Color bgColor, Color textColor, Runnable onClick, Supplier<Boolean> decidingFactor) {
-        this.text = text;
-        this.game = game;
-        this.gameState = state;
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.bgColor = bgColor;
-        this.textColor = textColor;
-        this.onClick = onClick;
-        this.menu = menu;
-        this.decidingFactor = decidingFactor;
-        menu.addButton(this);
     }
 
-    public void render(Graphics2D g2d, Font font) {
+	public void render(Graphics2D g2d, Font font) {
     	if(!decidingFactor.get()) return;
         g2d.setColor(bgColor);
         g2d.fillRect(x, y, width, height);

@@ -8,9 +8,9 @@ import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.lucasj.gamedev.events.KeyboardEventListener;
-import com.lucasj.gamedev.events.MouseClickEventListener;
-import com.lucasj.gamedev.events.MouseMotionEventListener;
+import com.lucasj.gamedev.events.input.KeyboardEventListener;
+import com.lucasj.gamedev.events.input.MouseClickEventListener;
+import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 
 public class InputHandler implements KeyListener, MouseListener, MouseMotionListener {
 

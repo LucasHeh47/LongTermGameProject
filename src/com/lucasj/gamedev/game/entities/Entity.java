@@ -3,11 +3,11 @@ package com.lucasj.gamedev.game.entities;
 import java.awt.Graphics;
 
 import com.lucasj.gamedev.essentials.Game;
-import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
+import com.lucasj.gamedev.events.entities.EntityCollisionEventListener;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.utils.RandomStringGenerator;
 
-public abstract class Entity {
+public abstract class Entity implements EntityCollisionEventListener {
 	
 	protected Vector2D velocity;
 	
@@ -19,16 +19,19 @@ public abstract class Entity {
 	protected int size = 25;
 	protected String tag;
 	public int importance;
+	protected boolean isAlive;
 	
 	protected Game game;
 	
 	public Entity(Game game) {
 		this.game = game;
 		maxHealth = 100;
+		isAlive = true;
 		position = new Vector2D(0, 0);
 		velocity = new Vector2D(0, 0);
 		this.screenPosition = new Vector2D(0, 0);
 		tag = RandomStringGenerator.generateRandomString(32, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
+		
 	}
 
 	public Entity(Game game, Vector2D position, Vector2D velocity, int maxHealth, int movementSpeed, int size, String tag) {
@@ -38,10 +41,11 @@ public abstract class Entity {
 		this.maxHealth = maxHealth;
 		this.health = maxHealth;
 		this.movementSpeed = movementSpeed * 1000;
-		this.size = (int) (size*game.getCamera().getScale());
+		this.size = size;
 		this.screenPosition = new Vector2D(0, 0);
 		if(tag == null) tag = RandomStringGenerator.generateRandomString(32, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
 		this.tag = tag;
+		isAlive = true;
 	}
 	
 	public void instantiate() {
@@ -115,16 +119,30 @@ public abstract class Entity {
 	        && point.getY() <= entityY + entityHeight;
 	}
 
+	public final boolean isCollidingWithScreen(Vector2D point) {
+		// Get the entity's position and size
+	    double entityX = this.getScreenPosition().getX();
+	    double entityY = this.getScreenPosition().getY();
+	    double entityWidth = this.getSize();
+	    double entityHeight = this.getSize(); // Assuming the entity is a square
+
+	    // Check if the point's coordinates are within the entity's bounds
+	    return point.getX() >= entityX 
+	        && point.getX() <= entityX + entityWidth
+	        && point.getY() >= entityY
+	        && point.getY() <= entityY + entityHeight;
+	}
+	
 	public void update(double deltaTime) {
 		screenPosition = game.getCamera().worldToScreenPosition(position);
 	}
 	
 	public abstract void render(Graphics g);
 	public abstract void entityDeath();
-	public abstract void onEntityCollision(EntityCollisionEvent e);
 	
 	public final void die() {
 		entityDeath();
+		isAlive = false;
 		
 		game.toRemoveEntities.add(this);
 		System.out.println("KILLING ENTITY: " + this.getTag() + " | " + this.getClass().getSimpleName());
@@ -210,5 +228,9 @@ public abstract class Entity {
 	public Entity setTag(String tag) {
 		this.tag = tag;
 		return this;
+	}
+
+	public boolean isAlive() {
+		return isAlive;
 	}
 }

@@ -1,0 +1,1 @@
+With input events only extend by the class itself not by GameEventListener<...EventListener> for now until i redo InputHandler

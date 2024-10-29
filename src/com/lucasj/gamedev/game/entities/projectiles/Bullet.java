@@ -46,9 +46,14 @@ public class Bullet extends Projectile {
 	@Override
 	public void onEntityCollision(EntityCollisionEvent e) {
 		if(this.getSender() instanceof Player && e.getCollider() instanceof Player) return;
+		if(!e.getCollider().isAlive()) return;
 		boolean died = e.getCollider().takeDamage(this.getDamage());
+		System.out.println("died -----------------------------");
 		if(e.getCollider() instanceof Enemy && died) game.getWavesManager().killedEnemy();
 		die();
+		if(this.playerAttackEvent != null) {
+			this.playerAttackEvent.registerHit();
+		}
 	}
 
 	@Override

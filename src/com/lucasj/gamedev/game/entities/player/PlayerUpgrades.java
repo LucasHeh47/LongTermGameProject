@@ -12,7 +12,6 @@ public class PlayerUpgrades {
     private float upgradedMaxHealth = 0;
     private boolean hasHealthRegen = false;
     private float upgradedHealthRegen = 0;
-    private float upgradedShieldRegen = 0;
     private float upgradedDamageMultiplier = 0;
     private float upgradedMovementSpeedMultiplier = 0;
     
@@ -30,6 +29,21 @@ public class PlayerUpgrades {
     	this.game = game;
     }
 
+    public boolean upgrade(String type) {
+    	if(player.removeGem(1)) {
+    		if(type.equals("regen")) {
+    			this.upgradedHealthRegen += this.healthRegenUpgrade;
+    		} else if(type.equals("damage")) {
+    			this.upgradedDamageMultiplier += this.damageMultiplierUpgrade;
+    		} else if(type.equals("movement")) {
+    			this.upgradedMovementSpeedMultiplier += this.movementSpeedMultiplier;
+    		} else if(type.equals("maxHealth")) {
+    			this.upgradedMaxHealth += this.maxHealthUpgrade;
+    		}
+    	} else return false;
+    	return true;
+    }
+    
     // Getters
     public float getMaxHealth() {
         return DEFAULT_MAX_HEALTH + upgradedMaxHealth;

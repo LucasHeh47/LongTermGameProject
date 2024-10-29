@@ -7,7 +7,8 @@ import java.awt.Graphics2D;
 import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
-import com.lucasj.gamedev.game.entities.npc.NPC;
+import com.lucasj.gamedev.game.entities.enemy.Enemy;
+import com.lucasj.gamedev.game.entities.npc.NPCManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.world.particles.ParticleEmitter;
 
@@ -25,6 +26,8 @@ public class WavesManager {
 	private Game game;
 	private WavesEnemySpawner enemySpawner;
 	
+	private NPCManager npcManager;
+	
 	private long lastSpawn;
 	private float spawnRate;
 	private Random rand = new Random();
@@ -39,17 +42,19 @@ public class WavesManager {
 	
 	public WavesManager(Game game) {
 		this.game = game;
-		enemySpawner = new WavesEnemySpawner(game);
 		spawnRate = 1f;
 	}
 	
 	public void startWaves() {
 		wave = 0;
+		enemySpawner = new WavesEnemySpawner(game);
 		game.instantiatedEntities.clear();
 		game.instantiatedEntitiesOnScreen.clear();
 		game.toAddEntities.clear();
 		game.toRemoveEntities.clear();
 		game.instantiatedCollectibles.clear();
+		npcManager = new NPCManager(game, game.getPlayer());
+		npcManager.instantiateNPCs();
 		newWave();
 	}
 	
@@ -59,9 +64,9 @@ public class WavesManager {
 		intermissionTimer = System.currentTimeMillis();
 		enemySpawner.calculateSpawnableEnemies();
 		betweenWaves = true;
-		enemiesSpawnedThisWave = 0;
-		enemiesKilledThisWave = 0;
-		enemiesThisWave = getEnemyCount(wave);
+		this.enemiesSpawnedThisWave = 0;
+		this.enemiesKilledThisWave = 0;
+		this.enemiesThisWave = getEnemyCount(wave);
 	}
 	
 	public void update(double deltaTime) {
@@ -114,7 +119,7 @@ public class WavesManager {
 
 	    // Check for entity collisions using quadtree optimization
 	    game.checkEntityCollisions();
-
+	    
 	    // Intermission logic between waves
 	    if (betweenWaves) {
 	        if ((System.currentTimeMillis() - intermissionTimer) / 1000.0 >= 1) {
@@ -155,18 +160,24 @@ public class WavesManager {
 	        g2d.drawString(Integer.toString(intermissionLength-intermissionTick), (game.getWidth() - titleWidth) / 2, 100);
 		}
 
-		g2d.setFont(game.font.deriveFont(64f)); // Derive the font size explicitly as a float
+		g2d.setFont(game.font.deriveFont(58f)); // Derive the font size explicitly as a float
 		
 		// Measure the width of the money string to center it if needed
 	    int titleWidth = g2d.getFontMetrics().stringWidth("$" + Integer.toString(this.wave));
 
 	    g2d.setColor(Color.black);
-	    g2d.drawString("Wave: " + Integer.toString(this.wave), 520, game.getHeight() - 125);
-		
+	    g2d.drawString("Wave: " + Integer.toString(this.wave), 520, game.getHeight() - 160);
+	    g2d.drawString("Left: " + Integer.toString(enemiesThisWave - enemiesKilledThisWave), 520, game.getHeight() - 100);
+	    int enemyCount = (int) game.instantiatedEntities.stream()
+                .filter(entity -> entity instanceof Enemy)
+                .count();
+
+	    g2d.drawString("Active: " + enemyCount, 520, game.getHeight() - 40);
 	}
 	
 	public void killedEnemy() {
 		enemiesKilledThisWave++;
+		System.out.println("Killed " + enemiesKilledThisWave + "/" + enemiesThisWave);
 	}
 	
 	public int getEnemyHealth(int wave) {
@@ -181,6 +192,10 @@ public class WavesManager {
 
 	public int getWave() {
 		return wave;
+	}
+
+	public NPCManager getNPCManager() {
+		return npcManager;
 	}
 
 }

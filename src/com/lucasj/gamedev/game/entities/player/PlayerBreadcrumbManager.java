@@ -43,12 +43,10 @@ public class PlayerBreadcrumbManager {
 	
 	public void addCrumb(Breadcrumb crumb) {
 		activeBreadcrumbs.add(crumb);
-		System.out.println("New crumb");
 	}
 	
 	public void removeLast() {
 		activeBreadcrumbs.remove();
-		System.out.println("Removed oldest crumb");
 	}
 	
 	public void removeCrumb(Breadcrumb crumb) {

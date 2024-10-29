@@ -16,11 +16,14 @@ import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.essentials.InputHandler;
-import com.lucasj.gamedev.events.KeyboardEventListener;
-import com.lucasj.gamedev.events.MouseClickEventListener;
-import com.lucasj.gamedev.events.MouseMotionEventListener;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
-import com.lucasj.gamedev.events.entities.PlayerMoveEventListener;
+import com.lucasj.gamedev.events.input.KeyboardEventListener;
+import com.lucasj.gamedev.events.input.MouseClickEventListener;
+import com.lucasj.gamedev.events.input.MouseMotionEventListener;
+import com.lucasj.gamedev.events.player.PlayerAttackEvent;
+import com.lucasj.gamedev.events.player.PlayerMoveEvent;
+import com.lucasj.gamedev.events.player.PlayerMoveEventListener;
+import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
@@ -70,6 +73,8 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 	private boolean isSprinting;
 	private boolean isReadyToSprint;
 	
+	private PlayerUpgrades playerUpgrades;
+	
 	private float xp;
 	
 	private static PlayerStats globalStats = new PlayerStats();
@@ -86,6 +91,7 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 		this.movementSpeed = 500;
 		importance = 1;
 		crumbManager = new PlayerBreadcrumbManager(game, this, 0.6);
+		this.playerUpgrades = new PlayerUpgrades(game, this);
 		input.addKeyboardListener(this);
 		input.addMouseClickListener(this);
 		input.addMouseMotionListener(this);
@@ -233,6 +239,8 @@ private void renderStaminaBar(Graphics2D g2d) {
 	    if(isReadyToSprint && stamina > 0 && isMoving) {
 	    	movement = movement.multiply(sprintMultiplier);
 	    	stamina -= staminaUseRate;
+	    	PlayerStaminaUseEvent e = new PlayerStaminaUseEvent(staminaUseRate);
+	    	game.getEventManager().dispatchEvent(e);
 	    	isSprinting = true;
 	    } else isSprinting = false;
 	    if(stamina <= 0 && !breathing) {
@@ -247,9 +255,14 @@ private void renderStaminaBar(Graphics2D g2d) {
 	    	stamina += staminaUseRate/1.5;
 	    	if(stamina > maxStamina) stamina = maxStamina;
 	    }
-	    
+
+	    PlayerMoveEvent e = new PlayerMoveEvent();
+	    e.setPositionBefore(this.position.copy());
 	    
 	    this.position = this.position.add(movement);
+	    e.setPositionAfter(this.position.copy());
+	    e.setPositionChange(movement);
+	    if(e.getPositionChange() != new Vector2D(0, 0)) game.getEventManager().dispatchEvent(e);
 
 	    // Calculate camera boundaries and player position relative to the camera
 	    Vector2D newCamPos = this.position.subtract(new Vector2D(game.getWidth() / 2, game.getHeight() / 2));
@@ -291,13 +304,24 @@ private void renderStaminaBar(Graphics2D g2d) {
 	}
 	
 	private void attack(double deltaTime) {
+		if(!isClickAnAttack()) return;
 		float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
 		float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
 		Vector2D vel = new Vector2D(dx, dy).normalize();
 		Vector2D bulletVelocity = vel.multiply(bulletSpeed*25*deltaTime);
 		Bullet b = new Bullet(game, this, this.position.add(new Vector2D(this.getSize()).divide(2)), bulletVelocity, 10, null, 2, 10);
 		b.instantiate();
+		PlayerAttackEvent e = new PlayerAttackEvent(b, 10);
+		b.setPlayerAttackEvent(e);
+		game.getEventManager().dispatchEvent(e);
 		lastAttack = System.currentTimeMillis();
+	}
+	
+	private boolean isClickAnAttack() {
+		if (game.getWavesManager().getNPCManager().getPlayerUpgradeNPC().isOpen()) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -316,13 +340,13 @@ private void renderStaminaBar(Graphics2D g2d) {
 
 	@Override
 	public void onMousePressed(MouseEvent e) {
-		playerAttacking = true;
+		if(e.getButton() == MouseEvent.BUTTON1) playerAttacking = true;
 		
 	}
 
 	@Override
 	public void onMouseReleased(MouseEvent e) {
-		playerAttacking = false;
+		if(e.getButton() == MouseEvent.BUTTON1) playerAttacking = false;
 	}
 
 	@Override
@@ -452,6 +476,10 @@ private void renderStaminaBar(Graphics2D g2d) {
 			return true;
 		}
 		return false;
+	}
+
+	public PlayerUpgrades getPlayerUpgrades() {
+		return playerUpgrades;
 	}
 	
 }

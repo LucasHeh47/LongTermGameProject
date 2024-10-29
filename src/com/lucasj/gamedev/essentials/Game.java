@@ -14,6 +14,7 @@ import java.util.List;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.ui.Menus;
+import com.lucasj.gamedev.events.EventManager;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.collectibles.Collectible;
@@ -55,6 +56,7 @@ public class Game {
     private WavesManager wavesManager;
     private Quadtree quadtree;
     private Camera camera;
+    private EventManager eventManager;
     
     public boolean testing = false;
     
@@ -71,6 +73,7 @@ public class Game {
     public Game(InputHandler input, GraphicUtils gUtils, SettingsManager settings, Dimension screen) {
     	gameData = new GameData("projectgame", "playerStats.dat");
     	Player.getGlobalStats().load(gameData);
+    	eventManager = new EventManager();
     	referenceEnemies();
         this.settings = settings;
         this.screen = screen;
@@ -214,8 +217,7 @@ public class Game {
                     }
                     // Notify the listeners of both entities
                     System.out.println("Collision with " + entityA.getClass().getSimpleName() + " and " + entityB.getClass().getSimpleName());
-                    entityA.onEntityCollision(e);
-                    entityB.onEntityCollision(e);
+                    this.getEventManager().dispatchEvent(e);
                 }
             }
         }
@@ -302,9 +304,14 @@ public class Game {
 
 	public boolean isPaused() {
 		return paused;
-	}
+	};
 
 	public void setPaused(boolean paused) {
 		this.paused = paused;
 	}
+
+	public EventManager getEventManager() {
+		return eventManager;
+	}
+	
 }

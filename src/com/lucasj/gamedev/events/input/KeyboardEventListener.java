@@ -1,4 +1,4 @@
-package com.lucasj.gamedev.events;
+package com.lucasj.gamedev.events.input;
 
 import java.awt.event.KeyEvent;
 

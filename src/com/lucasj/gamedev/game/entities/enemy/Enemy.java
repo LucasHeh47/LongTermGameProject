@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.lucasj.gamedev.essentials.Game;
-import com.lucasj.gamedev.events.MouseMotionEventListener;
+import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.Breadcrumb;
 import com.lucasj.gamedev.game.entities.collectibles.Coin;
@@ -183,6 +183,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	 * Do not override as it will remove healthbar
 	 */
 	public void render(Graphics g) {
+		if(!isAlive) return;
 		// Health bar
 		g.setColor(Color.black);
 	    g.fillRect((int) (screenPosition.getX() - (size * 0.25)), (int) (screenPosition.getY() - (size * 0.6)),
@@ -227,6 +228,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	 * Do not Override
 	 */
 	public void update(double deltaTime) {
+		if(!isAlive) return;
 		super.update(deltaTime);
 		if(game.instantiatedEntitiesOnScreen.contains(this)) {
 	        applyFlockingBehavior(deltaTime);

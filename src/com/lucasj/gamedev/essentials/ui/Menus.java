@@ -10,57 +10,106 @@ import java.util.List;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
-import com.lucasj.gamedev.events.MouseClickEventListener;
+import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.game.entities.player.Player;
-import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.world.map.MapManager;
 
 public class Menus implements MouseClickEventListener {
     
     private Game game;
-    private List<Button> buttons;
+    private List<GUI> GUIs;
     
     public Menus(Game game) {
     	this.game = game;
-    	this.buttons = new ArrayList<>();
-    	createButtons();
+    	this.GUIs = new ArrayList<>();
+    	createGUIs();
     }
     
-    public void createButtons() {
-    	buttons.clear();
-    	Button playWaves = new Button(game, this, GameState.mainmenu, "Play Waves", (game.getWidth() - 225) / 2, 200, 250, 50,
-            Color.LIGHT_GRAY, Color.BLACK, () -> {
-                game.setGameState(GameState.wavesmenu);
-                game.getMapManager().map.generateMap();
-            });
+    public void createGUIs() {
+    	GUIs.clear();
+    	
+    	GUI mainMenu = new GUI(game, this, () -> {
+    		return game.getGameState() == GameState.mainmenu;
+    	}, () -> {
+    		List<Button> buttons = new ArrayList<>();
+    		buttons.add(new Button(game, this, GameState.mainmenu, "Play Waves", (game.getWidth() - 225) / 2, 200, 250, 50,
+    	            Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	                game.setGameState(GameState.wavesmenu);
+    	                game.getMapManager().map.generateMap();
+    	            }));
 
-        Button exit = new Button(game, this, GameState.mainmenu, "Exit", (game.getWidth() - 225) / 2, 300, 250, 50,
-            Color.LIGHT_GRAY, Color.BLACK, () -> System.exit(0));
+    	    buttons.add(new Button(game, this, GameState.mainmenu, "Exit", (game.getWidth() - 225) / 2, 300, 250, 50,
+    	            Color.LIGHT_GRAY, Color.BLACK, () -> System.exit(0)));
+    	    return buttons;
+    	});
+    	
     
-
-        Button play = new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 200) / 2, 200, 200, 50,
-            Color.LIGHT_GRAY, Color.BLACK, () -> {
-                game.setGameState(GameState.waves);
-                game.getMapManager().map.generateMap();
-                game.getWavesManager().startWaves();
-                game.instantiatePlayer();
-            });
+    	GUI wavesMenu = new GUI(game, this, () -> {
+    		return game.getGameState() == GameState.wavesmenu;
+    	}, () -> {
+    		List<Button> buttons = new ArrayList<>();
+    		
+    		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 200) / 2, 200, 200, 50,
+    	            Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	                game.setGameState(GameState.waves);
+    	                game.getMapManager().map.generateMap();
+    	                game.getWavesManager().startWaves();
+    	                game.instantiatePlayer();
+    	            }));
+    	        
+    	    buttons.add(new Button(game, this, GameState.wavesmenu, "Back", (game.getWidth() - 200) / 2, 255, 200, 50,
+    	                Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	                    game.setGameState(GameState.mainmenu);
+    	                    game.getMapManager().map.generateMap();
+    	                }));
+    	    return buttons;
+    	});
         
-        Button backToMainMenu = new Button(game, this, GameState.waves, "Back to Menu", (game.getWidth() - 225) / 2, 300, 250, 50,
-                Color.LIGHT_GRAY, Color.BLACK, () -> {
-                    game.getPlayer().die();
-                    game.setPaused(false);
-                }, () -> {
-                	return game.isPaused();
-                });
-        
-        Button resumeGame = new Button(game, this, GameState.waves, "Resume Game", (game.getWidth() - 225) / 2, 200, 250, 50,
-                Color.LIGHT_GRAY, Color.BLACK, () -> {
-                    game.setPaused(false);
-                }, () -> {
-                	return game.isPaused();
-                });
+        GUI pausedGame = new GUI(game, this, () -> {
+        	return game.getGameState() == GameState.waves && game.isPaused();
+        }, () -> {
+        	List<Button> buttons = new ArrayList<>();
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Back to Menu", (game.getWidth() - 225) / 2, 300, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.getPlayer().die();
+                        game.setPaused(false);
+                    }));
             
+            buttons.add(new Button(game, this, GameState.waves, "Resume Game", (game.getWidth() - 225) / 2, 200, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.setPaused(false);
+                    }));
+            return buttons;
+        });
+        
+            
+        
+        // NPCS ------------
+        
+        GUI playerUpgradeMenu = new GUI(game, this, () ->{
+        	return game.getGameState() == GameState.waves && 
+        			game.getWavesManager() != null && 
+        			game.getWavesManager().getNPCManager() != null && 
+        			game.getWavesManager().getNPCManager().getPlayerUpgradeNPC() != null &&
+        			game.getWavesManager().getNPCManager().getPlayerUpgradeNPC().isOpen();
+        			
+        }, () -> {
+        	List<Button> buttons = new ArrayList<>();
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Health", (game.getWidth() - 225) / 2, 300, 250, 50,
+                Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    boolean success = game.getPlayer().getPlayerUpgrades().upgrade("health");
+                }));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "X", (game.getWidth() - 225) / 2, 200, 50, 50,
+                Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    game.getWavesManager().getNPCManager().getPlayerUpgradeNPC().close();
+                    System.out.println("CLICKCCKKCKC");
+                }));
+        	
+        	return buttons;
+        });
     }
 	
 	public void render(Graphics g) {
@@ -72,8 +121,8 @@ public class Menus implements MouseClickEventListener {
         mapm.render(g);
 
         // Render buttons
-        for (Button button : buttons) {
-            if(button.getGameState() == game.getGameState()) button.render(g2d, font.deriveFont(48.0f));
+        for (GUI gui : GUIs) {
+            gui.render(g2d);
         }
         
         if(game.getGameState() == GameState.mainmenu) {
@@ -107,17 +156,24 @@ public class Menus implements MouseClickEventListener {
 	
 	@Override
 	public void onMouseClicked(MouseEvent e) {
-		for (Button button : buttons) {
-            if (button.isClicked(e)) {
-                button.click();
-                break;
-            }
-        }
-		
+	    // Iterate through all GUIs
+	    for (GUI gui : GUIs) {
+	        // Check if the GUI is currently active
+	        if (gui.getDecider().get()) {
+	            // Iterate through the buttons of the active GUI
+	            for (Button button : gui.getButtons().get()) {
+	                // Check if the button was clicked
+	                if (button.isClicked(e)) {
+	                    button.click(); // Trigger the button's action
+	                    return; // Exit after clicking to avoid multiple activations
+	                }
+	            }
+	        }
+	    }
 	}
 	
-	public void addButton(Button button) {
-		this.buttons.add(button);
+	public void addGUI(GUI gui) {
+		this.GUIs.add(gui);
 	}
 
 	@Override

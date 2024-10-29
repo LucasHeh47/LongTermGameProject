@@ -37,7 +37,7 @@ public class WindowHandler implements ComponentListener, WindowListener{
 		game.setScreen(frame.getSize());
 		game.getCamera().setViewport(new Vector2D(frame.getSize().getWidth(), frame.getSize().getHeight()));
 		game.getCamera().recalculateScale();
-		game.getMenus().createButtons();
+		game.getMenus().createGUIs();
 		game.getQuadtree().setBounds(new Vector2D(0, 0), new Vector2D(frame.getWidth(), frame.getHeight()));
 	}
 
