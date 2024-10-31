@@ -7,6 +7,7 @@ import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ public class Game {
     public List<Collectible> instantiatedCollectibles;
     public List<Collectible> toRemoveCollectibles;
     public List<Entity> instantiatedEntitiesOnScreen;
+    private Quadtree<Entity> entityQuadtree;
     public List<Entity> toAddEntities;
     public List<Entity> toRemoveEntities;
     private EntityCollisionEvent collisionEvent;
@@ -59,6 +61,9 @@ public class Game {
     private EventManager eventManager;
     
     public boolean testing = false;
+    
+    private short renderScreenTick = 0;
+    private short lengthToCheckScreen = 5;
     
     private boolean paused;
     
@@ -88,6 +93,7 @@ public class Game {
         camera = new Camera(this, new Vector2D(getWidth(), getHeight()), new Vector2D(0, 0));
         instantiatedEntities = new ArrayList<Entity>();
         instantiatedEntitiesOnScreen = new ArrayList<Entity>();
+        entityQuadtree = new Quadtree<>(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
         
         instantiatedCollectibles = new ArrayList<Collectible>();
         toRemoveCollectibles = new ArrayList<Collectible>();
@@ -117,7 +123,28 @@ public class Game {
 
     public void update(double deltaTime) {
         if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
+        	this.renderScreenTick++;
+        	if (this.renderScreenTick >= this.lengthToCheckScreen) {
+        		this.entityQuadtree.setBounds(this.camera.getWorldPosition(), this.camera.getWorldPosition().add(this.camera.getViewport()));
+        		Vector2D cameraPosition = camera.getWorldPosition();
+        		double viewportWidth = camera.getViewport().getX();
+        		double viewportHeight = camera.getViewport().getY();
+
+        		double extendedLeftBound = cameraPosition.getX() - (viewportWidth * camera.getScale() / 2);
+        		double extendedRightBound = cameraPosition.getX() + viewportWidth  * camera.getScale() + (viewportWidth * camera.getScale() / 2);
+        		double extendedTopBound = cameraPosition.getY() - (viewportHeight * camera.getScale()  / 2);
+        		double extendedBottomBound = cameraPosition.getY() + viewportHeight * camera.getScale()  + (viewportHeight * camera.getScale()  / 2);
+        		
+    	        List<Entity> newOnScreenEntities = new ArrayList<>();
+
+    	        entityQuadtree.retrieve(newOnScreenEntities, new Vector2D(extendedLeftBound, extendedTopBound), 
+                        new Vector2D(extendedRightBound, extendedBottomBound));
+    	        instantiatedEntitiesOnScreen = newOnScreenEntities; // Only swap after retrieval
+    	        this.renderScreenTick = 0;
+    	    }
+        	
             wavesManager.update(deltaTime);
+            
         }
     }
     
@@ -136,9 +163,8 @@ public class Game {
     public void render(Graphics g) {
     	Graphics2D g2d = (Graphics2D) g;
     	menus.render(g);
-    	
     	if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
-        
+    		
     		Vector2D cameraPosition = camera.getWorldPosition();
     	    double viewportWidth = camera.getViewport().getX();
     	    double viewportHeight = camera.getViewport().getY();
@@ -147,7 +173,6 @@ public class Game {
     	    double extendedRightBound = cameraPosition.getX() + viewportWidth + (viewportWidth / 2);
     	    double extendedTopBound = cameraPosition.getY() - (viewportHeight / 2);
     	    double extendedBottomBound = cameraPosition.getY() + viewportHeight + (viewportHeight / 2);
-
     		
     		this.getCollisionSurfaces().forEach(surf -> {
             	surf.render(g);
@@ -155,13 +180,8 @@ public class Game {
         	this.instantiatedCollectibles.forEach(collectible -> {
             	collectible.render(g);
             });
-        	this.instantiatedEntities.forEach(entity -> {
+        	this.instantiatedEntitiesOnScreen.forEach(entity -> {
         		if(!(entity instanceof Player)) entity.render(g);
-        		
-        		if (entity.getPosition().getX() >= extendedLeftBound && entity.getPosition().getX() <= extendedRightBound &&
-        				entity.getPosition().getY() >= extendedTopBound && entity.getPosition().getY() <= extendedBottomBound) {
-        	            instantiatedEntitiesOnScreen.add(entity);
-        	        }
         		
             });
         	if(p == null) instantiatePlayer(); 

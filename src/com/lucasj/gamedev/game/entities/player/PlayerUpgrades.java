@@ -9,7 +9,7 @@ public class PlayerUpgrades {
     private final float DEFAULT_DAMAGE_MULTIPLIER = 1.0f;
     private final float DEFAULT_MOVEMENT_SPEED_MULTIPLIER = 1.0f;
     
-    private float upgradedMaxHealth = 0;
+    private int upgradedMaxHealth = 0;
     private boolean hasHealthRegen = false;
     private float upgradedHealthRegen = 0;
     private float upgradedDamageMultiplier = 0;
@@ -27,10 +27,16 @@ public class PlayerUpgrades {
     public PlayerUpgrades(Game game, Player p) {
     	this.player = p;
     	this.game = game;
+    	this.upgradedMaxHealth = DEFAULT_MAX_HEALTH;
+    	this.upgradedHealthRegen = DEFAULT_HEALTH_REGEN;
+    	this.upgradedDamageMultiplier = DEFAULT_DAMAGE_MULTIPLIER;
+    	this.upgradedMovementSpeedMultiplier = DEFAULT_MOVEMENT_SPEED_MULTIPLIER;
+    	
     }
 
     public boolean upgrade(String type) {
     	if(player.removeGem(1)) {
+    		System.out.println("Purchasing: " + type);
     		if(type.equals("regen")) {
     			this.upgradedHealthRegen += this.healthRegenUpgrade;
     		} else if(type.equals("damage")) {
@@ -39,14 +45,27 @@ public class PlayerUpgrades {
     			this.upgradedMovementSpeedMultiplier += this.movementSpeedMultiplier;
     		} else if(type.equals("maxHealth")) {
     			this.upgradedMaxHealth += this.maxHealthUpgrade;
+    			this.player.setMaxHealth(this.upgradedMaxHealth);
     		}
-    	} else return false;
+    	} else {
+    		System.out.println("Not enough to purchase");
+    		return false;
+    	}
     	return true;
     }
     
+    public boolean unlockHealthRegen() {
+    	if(hasHealthRegen) return true;
+    	if(player.removeGem(5)) {
+    		hasHealthRegen = true;
+    		return true;
+    	}
+    	return false;
+    }
+    
     // Getters
-    public float getMaxHealth() {
-        return DEFAULT_MAX_HEALTH + upgradedMaxHealth;
+    public int getMaxHealth() {
+        return upgradedMaxHealth;
     }
 
     public boolean hasHealthRegen() {
@@ -54,15 +73,15 @@ public class PlayerUpgrades {
     }
 
     public float getHealthRegen() {
-        return DEFAULT_HEALTH_REGEN + upgradedHealthRegen;
+        return upgradedHealthRegen;
     }
 
     public float getDamageMultiplier() {
-        return DEFAULT_DAMAGE_MULTIPLIER + upgradedDamageMultiplier;
+        return upgradedDamageMultiplier;
     }
 
     public float getMovementSpeedMultiplier() {
-        return DEFAULT_MOVEMENT_SPEED_MULTIPLIER + upgradedMovementSpeedMultiplier;
+        return upgradedMovementSpeedMultiplier;
     }
 }
 

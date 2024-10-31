@@ -34,7 +34,7 @@ public class WavesManager {
 	
 	// Base values
     private final int BASE_HEALTH = 25;
-    private final int BASE_ENEMIES = 7; // default: 7
+    private final int BASE_ENEMIES = 700; // default: 7
 
     // Growth rates
     private final double HEALTH_GROWTH_RATE = 0.15;

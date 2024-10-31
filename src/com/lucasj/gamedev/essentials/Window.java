@@ -45,6 +45,7 @@ public class Window extends Canvas implements Runnable {
         inputHandler = new InputHandler();
         
         frame.pack();
+        frame.setMinimumSize(new Dimension(1920, 1080));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);  // Center the window
         frame.setVisible(true);

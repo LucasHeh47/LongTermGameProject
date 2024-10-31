@@ -27,6 +27,7 @@ import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
+import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
 public class Player extends Entity implements MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
@@ -62,6 +63,9 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 	private float attackSpeed = 0.2f;
 	private long lastAttack = 0;
 	
+	private long lastTimeHurt;
+	private float timeToRegen = 2.5f;
+	
 	private float staminaUseRate = 0.25f;
 	private float stamina = 100;
 	private int maxStamina = 100;
@@ -73,6 +77,8 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 	private boolean isSprinting;
 	private boolean isReadyToSprint;
 	
+	private Gun equippedGun;
+	
 	private PlayerUpgrades playerUpgrades;
 	
 	private float xp;
@@ -82,7 +88,7 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 	private BreadcrumbCache crumbCache = new BreadcrumbCache();
 	
 	private int money = 0;
-	private int gems = 0;
+	private int gems = 5;
 	
 	public Player(Game game, InputHandler input) {
 		super(game);
@@ -124,6 +130,7 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 			lastAnimationUpdate = System.currentTimeMillis();
 		}
 		if(!isMoving) animationTick = 1;
+		regenHealth();
 	}
 
 	@Override
@@ -210,6 +217,14 @@ private void renderStaminaBar(Graphics2D g2d) {
 	    g2d.drawString("Gems: " + Integer.toString(this.gems), 100, game.getHeight() - 270);
 	}
 	
+	private void regenHealth() {
+		if(this.getPlayerUpgrades().hasHealthRegen() && (System.currentTimeMillis() - this.lastTimeHurt)/1000.0 > this.timeToRegen) {
+			System.out.println("Regenerating");
+			this.health += this.getPlayerUpgrades().getHealthRegen();
+	    	if(health > maxHealth) health = maxHealth;
+		}
+	}
+	
 	private void move(double deltaTime) {
 		
 		Vector2D camPosUpdate = new Vector2D(0, 0);
@@ -234,7 +249,7 @@ private void renderStaminaBar(Graphics2D g2d) {
 	    }
 
 	    Vector2D movement = camPosUpdate.multiply(movementSpeed * deltaTime);
-	    
+	    movement = movement.multiply(this.getPlayerUpgrades().getMovementSpeedMultiplier());
 	    
 	    if(isReadyToSprint && stamina > 0 && isMoving) {
 	    	movement = movement.multiply(sprintMultiplier);
@@ -307,11 +322,14 @@ private void renderStaminaBar(Graphics2D g2d) {
 		if(!isClickAnAttack()) return;
 		float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
 		float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
+		
+		// Implement the guns fire() method
 		Vector2D vel = new Vector2D(dx, dy).normalize();
 		Vector2D bulletVelocity = vel.multiply(bulletSpeed*25*deltaTime);
-		Bullet b = new Bullet(game, this, this.position.add(new Vector2D(this.getSize()).divide(2)), bulletVelocity, 10, null, 2, 10);
+		int damage = (int) (10 * this.getPlayerUpgrades().getDamageMultiplier());
+		Bullet b = new Bullet(game, this, this.position.add(new Vector2D(this.getSize()).divide(2)), bulletVelocity, 10, null, 2, damage);
 		b.instantiate();
-		PlayerAttackEvent e = new PlayerAttackEvent(b, 10);
+		PlayerAttackEvent e = new PlayerAttackEvent(b, damage);
 		b.setPlayerAttackEvent(e);
 		game.getEventManager().dispatchEvent(e);
 		lastAttack = System.currentTimeMillis();
@@ -322,6 +340,11 @@ private void renderStaminaBar(Graphics2D g2d) {
 			return false;
 		}
 		return true;
+	}
+	
+	public boolean takeDamage(float dmg) {
+		this.lastTimeHurt = System.currentTimeMillis();
+		return super.takeDamage(dmg);
 	}
 
 	@Override
@@ -480,6 +503,14 @@ private void renderStaminaBar(Graphics2D g2d) {
 
 	public PlayerUpgrades getPlayerUpgrades() {
 		return playerUpgrades;
+	}
+
+	public Gun getEquippedGun() {
+		return equippedGun;
+	}
+
+	public void setEquippedGun(Gun equippedGun) {
+		this.equippedGun = equippedGun;
 	}
 	
 }

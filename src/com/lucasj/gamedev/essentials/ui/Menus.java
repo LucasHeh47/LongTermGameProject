@@ -12,6 +12,7 @@ import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.game.entities.player.Player;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.world.map.MapManager;
 
 public class Menus implements MouseClickEventListener {
@@ -97,12 +98,36 @@ public class Menus implements MouseClickEventListener {
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Health", (game.getWidth() - 225) / 2, 300, 250, 50,
+        	Button regen = (new Button(game, this, GameState.waves, "Unlock Health Regen", ((int) ((game.getWidth() - 225) / 1.2)), 600, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	Debug.log("DEBUG", "Unlocking Health Regen");
+                        boolean success = game.getPlayer().getPlayerUpgrades().unlockHealthRegen();
+                    }));
+        	
+        	if(!game.getPlayer().getPlayerUpgrades().hasHealthRegen()) buttons.add(regen);
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Health", ((int) ((game.getWidth() - 225) / 1.2)), 300, 250, 50,
                 Color.LIGHT_GRAY, Color.BLACK, () -> {
                     boolean success = game.getPlayer().getPlayerUpgrades().upgrade("health");
                 }));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "X", (game.getWidth() - 225) / 2, 200, 50, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Max Health", ((int) ((game.getWidth() - 225) / 1.2)), 375, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        boolean success = game.getPlayer().getPlayerUpgrades().upgrade("maxHealth");
+                    }));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Damage", ((int) ((game.getWidth() - 225) / 1.2)), 450, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        boolean success = game.getPlayer().getPlayerUpgrades().upgrade("damage");
+                    }));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Movement", ((int) ((game.getWidth() - 225) / 1.2)), 525, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        boolean success = game.getPlayer().getPlayerUpgrades().upgrade("movement");
+                        System.out.println("Got movement");
+                    }));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "X", ((int) ((game.getWidth() - 225) / 1.2)), 200, 50, 50,
                 Color.LIGHT_GRAY, Color.BLACK, () -> {
                     game.getWavesManager().getNPCManager().getPlayerUpgradeNPC().close();
                     System.out.println("CLICKCCKKCKC");

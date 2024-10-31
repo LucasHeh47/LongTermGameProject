@@ -13,8 +13,8 @@ public abstract class Entity implements EntityCollisionEventListener {
 	
 	protected Vector2D screenPosition;
 	protected Vector2D position;
-	protected int maxHealth;
-	protected int health = maxHealth;
+	protected float maxHealth;
+	protected float health = maxHealth;
 	protected int movementSpeed = 3;
 	protected int size = 25;
 	protected String tag;
@@ -148,7 +148,7 @@ public abstract class Entity implements EntityCollisionEventListener {
 		System.out.println("KILLING ENTITY: " + this.getTag() + " | " + this.getClass().getSimpleName());
 	}
 	
-	public boolean takeDamage(int dmg) {
+	public boolean takeDamage(float dmg) {
 		this.setHealth(this.getHealth()-dmg);
 		if(health <= 0) {
 			this.die();
@@ -175,20 +175,20 @@ public abstract class Entity implements EntityCollisionEventListener {
 		return this;
 	}
 
-	public int getMaxHealth() {
+	public float getMaxHealth() {
 		return maxHealth;
 	}
 
-	public Entity setMaxHealth(int maxHealth) {
+	public Entity setMaxHealth(float maxHealth) {
 		this.maxHealth = maxHealth;
 		return this;
 	}
 
-	public int getHealth() {
+	public float getHealth() {
 		return health;
 	}
 
-	public Entity setHealth(int health) {
+	public Entity setHealth(float health) {
 		this.health = health;
 		return this;
 	}

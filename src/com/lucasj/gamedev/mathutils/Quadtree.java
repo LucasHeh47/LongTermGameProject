@@ -2,19 +2,18 @@ package com.lucasj.gamedev.mathutils;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.lucasj.gamedev.game.entities.Entity;
 
-public class Quadtree {
+public class Quadtree<T> {
 
     private int MAX_ENTITIES = 4; // Maximum entities per node before splitting
     private int MAX_LEVELS = 5; // Maximum depth of the quadtree
 
     private int level; // Current level of the node
-    private List<Entity> entities; // Entities in this node
+    private List<T> entities; // Entities in this node
     private Vector2D boundsTopLeft; // Top-left corner of the boundary
     private Vector2D boundsBottomRight; // Bottom-right corner of the boundary
-    private Quadtree[] nodes; // Four child nodes
+    private Quadtree<T>[] nodes; // Four child nodes
 
     public Quadtree(int level, Vector2D boundsTopLeft, Vector2D boundsBottomRight) {
         this.level = level;
@@ -35,9 +34,7 @@ public class Quadtree {
     }
     
     public void setBounds(Vector2D newBoundsTopLeft, Vector2D newBoundsBottomRight) {
-        // Clear current entities and nodes
-        clear();
-        // Update the bounds
+        clear(); // Clear current entities and nodes
         this.boundsTopLeft = newBoundsTopLeft;
         this.boundsBottomRight = newBoundsBottomRight;
     }
@@ -48,10 +45,10 @@ public class Quadtree {
         double x = boundsTopLeft.getX();
         double y = boundsTopLeft.getY();
 
-        nodes[0] = new Quadtree(level + 1, new Vector2D(x, y), new Vector2D(x + subWidth, y + subHeight));
-        nodes[1] = new Quadtree(level + 1, new Vector2D(x + subWidth, y), new Vector2D(x + 2 * subWidth, y + subHeight));
-        nodes[2] = new Quadtree(level + 1, new Vector2D(x, y + subHeight), new Vector2D(x + subWidth, y + 2 * subHeight));
-        nodes[3] = new Quadtree(level + 1, new Vector2D(x + subWidth, y + subHeight), new Vector2D(x + 2 * subWidth, y + 2 * subHeight));
+        nodes[0] = new Quadtree<>(level + 1, new Vector2D(x, y), new Vector2D(x + subWidth, y + subHeight));
+        nodes[1] = new Quadtree<>(level + 1, new Vector2D(x + subWidth, y), new Vector2D(x + 2 * subWidth, y + subHeight));
+        nodes[2] = new Quadtree<>(level + 1, new Vector2D(x, y + subHeight), new Vector2D(x + subWidth, y + 2 * subHeight));
+        nodes[3] = new Quadtree<>(level + 1, new Vector2D(x + subWidth, y + subHeight), new Vector2D(x + 2 * subWidth, y + 2 * subHeight));
     }
 
     private int getIndex(Entity entity) {
@@ -62,20 +59,16 @@ public class Quadtree {
         boolean bottomQuadrant = pos.getY() >= midY;
 
         if (pos.getX() < midX) {
-            if (topQuadrant) return 0;
-            else if (bottomQuadrant) return 2;
+            return topQuadrant ? 0 : 2;
         } else if (pos.getX() >= midX) {
-            if (topQuadrant) return 1;
-            else if (bottomQuadrant) return 3;
+            return topQuadrant ? 1 : 3;
         }
-
         return -1; // Object cannot be fully contained in one quadrant
     }
 
-    public void insert(Entity entity) {
+    public void insert(T entity) {
         if (nodes[0] != null) {
-            int index = getIndex(entity);
-
+            int index = getIndex((Entity) entity);
             if (index != -1) {
                 nodes[index].insert(entity);
                 return;
@@ -91,7 +84,7 @@ public class Quadtree {
 
             int i = 0;
             while (i < entities.size()) {
-                int index = getIndex(entities.get(i));
+                int index = getIndex((Entity) entities.get(i));
                 if (index != -1) {
                     nodes[index].insert(entities.remove(i));
                 } else {
@@ -101,13 +94,35 @@ public class Quadtree {
         }
     }
 
-    public List<Entity> retrieve(List<Entity> returnEntities, Entity entity) {
-        int index = getIndex(entity);
+    public List<T> retrieve(List<T> returnEntities, T entity) {
+        int index = getIndex((Entity) entity);
         if (index != -1 && nodes[0] != null) {
             nodes[index].retrieve(returnEntities, entity);
         }
 
         returnEntities.addAll(entities);
         return returnEntities;
+    }
+
+    // New retrieve method that finds all entities within a rectangular area
+    public List<T> retrieve(List<T> returnEntities, Vector2D areaTopLeft, Vector2D areaBottomRight) {
+        if (!intersects(areaTopLeft, areaBottomRight)) {
+            return returnEntities; // No intersection with this node's bounds, so skip
+        }
+
+        returnEntities.addAll(entities); // Add entities within this node if they intersect
+
+        if (nodes[0] != null) { // Recursively check child nodes if they exist
+            for (Quadtree<T> node : nodes) {
+                node.retrieve(returnEntities, areaTopLeft, areaBottomRight);
+            }
+        }
+        return returnEntities;
+    }
+
+    // Helper method to check if this node's bounds intersect the given rectangular area
+    private boolean intersects(Vector2D areaTopLeft, Vector2D areaBottomRight) {
+        return !(boundsBottomRight.getX() < areaTopLeft.getX() || boundsTopLeft.getX() > areaBottomRight.getX()
+                || boundsBottomRight.getY() < areaTopLeft.getY() || boundsTopLeft.getY() > areaBottomRight.getY());
     }
 }
