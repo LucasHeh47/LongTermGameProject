@@ -6,19 +6,19 @@ import com.lucasj.gamedev.game.entities.player.Player;
 public class CoinCollectedEvent implements GameEvent {
 
 	private int amountCollected;
-	private Player playerCollected;
+	private Player player;
 	
 	public CoinCollectedEvent(int amountCollected, Player playerCollected) {
 		this.amountCollected = amountCollected;
-		this.playerCollected = playerCollected;
+		this.player = playerCollected;
 	}
 	
 	public int getAmountCollected() {
 		return this.amountCollected;
 	}
 
-	public Player getPlayerCollected() {
-		return playerCollected;
+	public Player getPlayer() {
+		return player;
 	}
 
 	@Override

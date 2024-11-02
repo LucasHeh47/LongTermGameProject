@@ -4,6 +4,7 @@ import java.awt.Graphics;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEventListener;
+import com.lucasj.gamedev.events.entities.EntityDeathEvent;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.utils.RandomStringGenerator;
 
@@ -20,6 +21,8 @@ public abstract class Entity implements EntityCollisionEventListener {
 	protected String tag;
 	public int importance;
 	protected boolean isAlive;
+	
+	private Entity killer;
 	
 	protected Game game;
 	
@@ -143,7 +146,8 @@ public abstract class Entity implements EntityCollisionEventListener {
 	public final void die() {
 		entityDeath();
 		isAlive = false;
-		
+		EntityDeathEvent e = new EntityDeathEvent(this, killer);
+		game.getEventManager().dispatchEvent(e);
 		game.toRemoveEntities.add(this);
 		System.out.println("KILLING ENTITY: " + this.getTag() + " | " + this.getClass().getSimpleName());
 	}
@@ -232,5 +236,9 @@ public abstract class Entity implements EntityCollisionEventListener {
 
 	public boolean isAlive() {
 		return isAlive;
+	}
+
+	public void setKiller(Entity killer) {
+		this.killer = killer;
 	}
 }

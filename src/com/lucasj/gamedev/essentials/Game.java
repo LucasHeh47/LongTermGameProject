@@ -151,6 +151,7 @@ public class Game {
     public void instantiatePlayer() {
     	p = (Player) new Player(this, getInput()).setTag("Player").setMaxHealth(100).setHealth(100);
         p.setPosition(new Vector2D(this.getSettings().getIntSetting("width"), this.getSettings().getIntSetting("height")));
+        this.setP(p);
         p.instantiate();
     }
     
@@ -184,8 +185,7 @@ public class Game {
         		if(!(entity instanceof Player)) entity.render(g);
         		
             });
-        	if(p == null) instantiatePlayer(); 
-        	p.render(g);
+        	if(p != null) p.render(g);
         	this.getWavesManager().render(g);
         }
  

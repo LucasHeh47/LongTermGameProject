@@ -8,12 +8,16 @@ import java.util.Map;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEvent;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEventListener;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
+import com.lucasj.gamedev.events.entities.EntityDeathEvent;
+import com.lucasj.gamedev.events.entities.EntityDeathEventListener;
 import com.lucasj.gamedev.events.player.PlayerAttackEvent;
 import com.lucasj.gamedev.events.player.PlayerAttackEventListener;
 import com.lucasj.gamedev.events.player.PlayerMoveEvent;
 import com.lucasj.gamedev.events.player.PlayerMoveEventListener;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEventListener;
+import com.lucasj.gamedev.events.waves.WaveEndEvent;
+import com.lucasj.gamedev.events.waves.WaveEndEventListener;
 import com.lucasj.gamedev.misc.Debug;
 
 public class EventManager {
@@ -24,6 +28,7 @@ public class EventManager {
     	eventMap.computeIfAbsent(eventToListenFor, k -> new ArrayList<>());
         
         eventMap.get(eventToListenFor).add(listening);
+        Debug.log("EventManager", "Adding " + listening.getClass().getSimpleName() + " to " + eventToListenFor.getSimpleName());
     }
     
     public void removeListener(Object listener, Class<? extends GameEvent> eventListeningFor) {
@@ -71,6 +76,24 @@ public class EventManager {
                 listeners.forEach(listener -> {
                     if (listener instanceof PlayerAttackEventListener) {
                         ((PlayerAttackEventListener) listener).onPlayerAttack((PlayerAttackEvent) e);
+                    }
+                });
+            }
+    	} else if (e instanceof EntityDeathEvent) {
+    		List<Object> listeners = eventMap.get(EntityDeathEvent.class);
+            if (listeners != null) {
+                listeners.forEach(listener -> {
+                    if (listener instanceof EntityDeathEventListener) {
+                        ((EntityDeathEventListener) listener).onEntityDeath((EntityDeathEvent) e);
+                    }
+                });
+            }
+    	} else if (e instanceof WaveEndEvent) {
+    		List<Object> listeners = eventMap.get(WaveEndEvent.class);
+            if (listeners != null) {
+                listeners.forEach(listener -> {
+                    if (listener instanceof WaveEndEventListener) {
+                        ((WaveEndEventListener) listener).onWaveEnd((WaveEndEvent) e);
                     }
                 });
             }

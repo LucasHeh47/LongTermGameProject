@@ -49,7 +49,10 @@ public class Bullet extends Projectile {
 		if(!e.getCollider().isAlive()) return;
 		boolean died = e.getCollider().takeDamage(this.getDamage());
 		System.out.println("died -----------------------------");
-		if(e.getCollider() instanceof Enemy && died) game.getWavesManager().killedEnemy();
+		if(e.getCollider() instanceof Enemy && died) {
+			game.getWavesManager().killedEnemy();
+			e.getCollider().setKiller(this.getSender());
+		}
 		die();
 		if(this.playerAttackEvent != null) {
 			this.playerAttackEvent.registerHit();

@@ -87,6 +87,8 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 	private PlayerBreadcrumbManager crumbManager;
 	private BreadcrumbCache crumbCache = new BreadcrumbCache();
 	
+	private PlayerRewarder playerRewarder;
+	
 	private int money = 0;
 	private int gems = 5;
 	
@@ -95,6 +97,7 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 		this.input = input;
 		this.size = (int) (30*game.getCamera().getScale());
 		this.movementSpeed = 500;
+		this.playerRewarder = new PlayerRewarder(game);
 		importance = 1;
 		crumbManager = new PlayerBreadcrumbManager(game, this, 0.6);
 		this.playerUpgrades = new PlayerUpgrades(game, this);
@@ -511,6 +514,10 @@ private void renderStaminaBar(Graphics2D g2d) {
 
 	public void setEquippedGun(Gun equippedGun) {
 		this.equippedGun = equippedGun;
+	}
+
+	public PlayerRewarder getPlayerRewarder() {
+		return playerRewarder;
 	}
 	
 }

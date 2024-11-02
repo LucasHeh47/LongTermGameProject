@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.events.waves.WaveEndEvent;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.npc.NPCManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
@@ -34,7 +35,7 @@ public class WavesManager {
 	
 	// Base values
     private final int BASE_HEALTH = 25;
-    private final int BASE_ENEMIES = 700; // default: 7
+    private final int BASE_ENEMIES = 7; // default: 7
 
     // Growth rates
     private final double HEALTH_GROWTH_RATE = 0.15;
@@ -139,8 +140,8 @@ public class WavesManager {
 
 	    // Check if the wave should transition to the next
 	    if (enemiesKilledThisWave == enemiesThisWave) {
-	        if(this.wave % 5 == 0) game.getPlayer().addGem(2);
-	        else game.getPlayer().addGem(1);
+	        WaveEndEvent e = new WaveEndEvent(wave);
+	        this.game.getEventManager().dispatchEvent(e);
 	        newWave();
 	    }
 	}
