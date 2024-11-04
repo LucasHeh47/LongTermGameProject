@@ -40,7 +40,6 @@ import com.lucasj.gamedev.physics.CollisionSurface;
  */
 public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	
-	
 	// WAVES DATA --------------------------------
 	public static class EnemyWavesData {
 		

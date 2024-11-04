@@ -7,9 +7,9 @@ import java.awt.FontFormatException;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +27,6 @@ import com.lucasj.gamedev.game.entities.projectiles.Projectile;
 import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.os.GameData;
 import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.settings.SettingsManager;
@@ -164,8 +163,17 @@ public class Game {
     
     public void referenceEnemies() {
     	System.out.println("Initialzing enemy types...");
-    	Zombie.initializeClass();
-    	Skeleton.initializeClass();
+    	this.referenceEnemy(Zombie.class);
+    	this.referenceEnemy(Skeleton.class);
+    }
+    
+    public void referenceEnemy(Class<? extends Enemy> enemy) {
+    	try {
+            Method method = enemy.getMethod("initializeClass");
+            method.invoke(null); // Invoke static method
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void render(Graphics g) {
