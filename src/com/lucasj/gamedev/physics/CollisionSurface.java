@@ -1,5 +1,6 @@
 package com.lucasj.gamedev.physics;
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 import com.lucasj.gamedev.essentials.Game;
@@ -12,12 +13,14 @@ public class CollisionSurface {
     private int height;
     private Game game;
     private Vector2D screenPosition;
+    private Color color;
     
-    public CollisionSurface(Game game, Vector2D position, int width, int height) {
+    public CollisionSurface(Game game, Vector2D position, int width, int height, Color color) {
         this.position = position;
         this.width = width;
         this.height = height;
         this.game = game;
+        this.color = color;
         this.screenPosition = game.getCamera().screenToWorldPosition(position);
         game.getCollisionSurfaces().add(this);
     }
@@ -28,6 +31,7 @@ public class CollisionSurface {
     }
     
     public void render(Graphics g) {
+    	g.setColor(color);
     	g.fillRect((int)this.getScreenPosition().getX(),
     			(int)this.getScreenPosition().getY(),
     			this.getWidth(),

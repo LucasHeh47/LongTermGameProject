@@ -16,11 +16,12 @@ public class Button {
     private Color bgColor, textColor;
     private Runnable onClick;
     private GameState gameState;
+    private Tooltip tooltip;
     private Menus menu;
     private Supplier<Boolean> decidingFactor;
     private Game game;
     
-    public Button(Game game, Menus menu, GameState state, String text, int x, int y, int width, int height, Color bgColor, Color textColor, Runnable onClick) {
+    public Button(Game game, Menus menu, GameState state, String text, int x, int y, int width, int height, Color bgColor, Color textColor, Runnable onClick, Tooltip tooltip) {
         this.text = text;
         this.game = game;
         this.gameState = state;
@@ -32,6 +33,7 @@ public class Button {
         this.textColor = textColor;
         this.onClick = onClick;
         this.menu = menu;
+        this.tooltip = tooltip;
         this.decidingFactor = () -> {
         	return true;
         };
@@ -68,5 +70,29 @@ public class Button {
 
 	public GameState getGameState() {
 		return gameState;
+	}
+
+	public Tooltip getTooltip() {
+		return tooltip;
+	}
+
+	public void setTooltip(Tooltip tooltip) {
+		this.tooltip = tooltip;
+	}
+
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
 	}
 }

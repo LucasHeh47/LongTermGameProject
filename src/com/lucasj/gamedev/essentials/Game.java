@@ -27,6 +27,7 @@ import com.lucasj.gamedev.game.entities.projectiles.Projectile;
 import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.os.GameData;
 import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.settings.SettingsManager;
@@ -89,6 +90,7 @@ public class Game {
 
         this.input = input;
         input.addMouseClickListener(menus);
+        input.addMouseMotionListener(menus);
         
         camera = new Camera(this, new Vector2D(getWidth(), getHeight()), new Vector2D(0, 0));
         instantiatedEntities = new ArrayList<Entity>();
@@ -106,7 +108,7 @@ public class Game {
         
         activeParticles = new ArrayList<>();
         collisionSurfaces = new ArrayList<>();
-        CollisionSurface surface = new CollisionSurface(this, new Vector2D(300, 400), 100, 500);
+        CollisionSurface surface = new CollisionSurface(this, new Vector2D(300, 400), 100, 500, Color.DARK_GRAY);
         
         File fontFile = new File(SpriteTools.assetDirectory + "/DanielLinssen/m6x11.ttf");
         try {
@@ -130,10 +132,15 @@ public class Game {
         		double viewportWidth = camera.getViewport().getX();
         		double viewportHeight = camera.getViewport().getY();
 
-        		double extendedLeftBound = cameraPosition.getX() - (viewportWidth * camera.getScale() / 2);
-        		double extendedRightBound = cameraPosition.getX() + viewportWidth  * camera.getScale() + (viewportWidth * camera.getScale() / 2);
-        		double extendedTopBound = cameraPosition.getY() - (viewportHeight * camera.getScale()  / 2);
-        		double extendedBottomBound = cameraPosition.getY() + viewportHeight * camera.getScale()  + (viewportHeight * camera.getScale()  / 2);
+        		double extendedLeftBound = cameraPosition.getX() - (viewportWidth / 2);
+        		double extendedRightBound = cameraPosition.getX() + viewportWidth + (viewportWidth / 2);
+        		double extendedTopBound = cameraPosition.getY() - (viewportHeight  / 2);
+        		double extendedBottomBound = cameraPosition.getY() + viewportHeight + (viewportHeight  / 2);
+        		
+//        		System.out.println("Left Bound: " + extendedLeftBound);
+//        		System.out.println("Right Bound: " + extendedRightBound);
+//        		System.out.println("Top Bound: " + extendedTopBound);
+//        		System.out.println("Bottom Bound: " + extendedBottomBound);
         		
     	        List<Entity> newOnScreenEntities = new ArrayList<>();
 

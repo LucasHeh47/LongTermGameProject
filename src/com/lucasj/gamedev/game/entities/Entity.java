@@ -4,6 +4,7 @@ import java.awt.Graphics;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEventListener;
+import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.utils.RandomStringGenerator;
@@ -154,6 +155,8 @@ public abstract class Entity implements EntityCollisionEventListener {
 	
 	public boolean takeDamage(float dmg) {
 		this.setHealth(this.getHealth()-dmg);
+		EntityDamagedEvent e = new EntityDamagedEvent(this, this.killer, dmg);
+		game.getEventManager().dispatchEvent(e);
 		if(health <= 0) {
 			this.die();
 			return true;

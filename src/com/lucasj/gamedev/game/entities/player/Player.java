@@ -21,6 +21,7 @@ import com.lucasj.gamedev.events.input.KeyboardEventListener;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.events.player.PlayerAttackEvent;
+import com.lucasj.gamedev.events.player.PlayerDamageTakenEvent;
 import com.lucasj.gamedev.events.player.PlayerMoveEvent;
 import com.lucasj.gamedev.events.player.PlayerMoveEventListener;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
@@ -222,7 +223,6 @@ private void renderStaminaBar(Graphics2D g2d) {
 	
 	private void regenHealth() {
 		if(this.getPlayerUpgrades().hasHealthRegen() && (System.currentTimeMillis() - this.lastTimeHurt)/1000.0 > this.timeToRegen) {
-			System.out.println("Regenerating");
 			this.health += this.getPlayerUpgrades().getHealthRegen();
 	    	if(health > maxHealth) health = maxHealth;
 		}
@@ -347,6 +347,8 @@ private void renderStaminaBar(Graphics2D g2d) {
 	
 	public boolean takeDamage(float dmg) {
 		this.lastTimeHurt = System.currentTimeMillis();
+		PlayerDamageTakenEvent e = new PlayerDamageTakenEvent(this, dmg);
+		game.getEventManager().dispatchEvent(e);
 		return super.takeDamage(dmg);
 	}
 
@@ -518,6 +520,10 @@ private void renderStaminaBar(Graphics2D g2d) {
 
 	public PlayerRewarder getPlayerRewarder() {
 		return playerRewarder;
+	}
+
+	public int getGems() {
+		return gems;
 	}
 	
 }

@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.events.entities.EntityAggroEvent;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.Breadcrumb;
@@ -147,6 +148,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	private boolean isPathToPlayerClear = false;
 	protected float damageMultiplier = 1.0f;
 	private int aggroRange = 750;
+	private Player aggrod = null;
 	private int attackRange = 25;
 	private float attackRate = 1.0f;
 	private long lastAttack;
@@ -423,12 +425,23 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	    // Add logic for wandering or waiting if no breadcrumb is available
 	    // For example, enemies could wander randomly or look for alternate routes
 	    this.velocity = this.velocity.multiply(0.8); // Slow down if idle
+	    
+	    // Reset aggrod when the enemy is idle
+	    this.aggrod = null;
 	}
 	
 	private void moveToPosition(Vector2D targetPosition, double deltaTime) {
 	    Vector2D direction = targetPosition.subtract(this.position).normalize();
 	    this.velocity = direction.multiply(getMovementSpeed() * deltaTime);
 
+	    if (targetPosition.equals(game.getPlayer().getPosition()) && this.aggrod != game.getPlayer()) {
+	        this.aggrod = game.getPlayer();
+	        
+	        EntityAggroEvent e = new EntityAggroEvent(this, this.aggrod);
+	        game.getEventManager().dispatchEvent(e);
+	        
+	    }
+	    
 	    // Update position based on velocity
 	    Vector2D newPosition = this.position.add(velocity.divide(50));
 
@@ -699,5 +712,13 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
         this.aggroRange = range;
         return this;
     }
+
+	public Player getAggrod() {
+		return aggrod;
+	}
+
+	public void setAggrod(Player aggrod) {
+		this.aggrod = aggrod;
+	}
 
 }

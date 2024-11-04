@@ -8,6 +8,8 @@ import java.util.Map;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEvent;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEventListener;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
+import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
+import com.lucasj.gamedev.events.entities.EntityDamagedEventListener;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEventListener;
 import com.lucasj.gamedev.events.player.PlayerAttackEvent;
@@ -94,6 +96,15 @@ public class EventManager {
                 listeners.forEach(listener -> {
                     if (listener instanceof WaveEndEventListener) {
                         ((WaveEndEventListener) listener).onWaveEnd((WaveEndEvent) e);
+                    }
+                });
+            }
+    	} else if (e instanceof EntityDamagedEvent) {
+    		List<Object> listeners = eventMap.get(EntityDamagedEvent.class);
+            if (listeners != null) {
+                listeners.forEach(listener -> {
+                    if (listener instanceof EntityDamagedEventListener) {
+                        ((EntityDamagedEventListener) listener).onEntityDamaged((EntityDamagedEvent) e);
                     }
                 });
             }
