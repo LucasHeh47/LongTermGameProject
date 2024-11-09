@@ -113,5 +113,9 @@ public class Vector2D {
         }
         return this;
     }
+
+	public Vector2D add(int i) {
+		return new Vector2D(this.x + i, this.y + i);
+	}
 }
 

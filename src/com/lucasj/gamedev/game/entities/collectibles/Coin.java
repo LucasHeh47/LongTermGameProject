@@ -46,7 +46,7 @@ public class Coin extends Collectible {
 
 	@Override
 	void collect(Player p) {
-		game.toRemoveCollectibles.add(this);
+		game.instantiatedCollectibles.remove(this);
 		CoinCollectedEvent e = new CoinCollectedEvent(cashAmount, p);
 		System.out.println("CSODSOOSO PICK P");
 		game.getEventManager().dispatchEvent(e);

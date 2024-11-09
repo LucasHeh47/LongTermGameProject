@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
@@ -20,6 +21,7 @@ public class Button {
     private Menus menu;
     private Supplier<Boolean> decidingFactor;
     private Game game;
+    private int borderRadius; // New property for border radius
     
     public Button(Game game, Menus menu, GameState state, String text, int x, int y, int width, int height, Color bgColor, Color textColor, Runnable onClick, Tooltip tooltip) {
         this.text = text;
@@ -42,9 +44,20 @@ public class Button {
 	public void render(Graphics2D g2d, Font font) {
     	if(!decidingFactor.get()) return;
         g2d.setColor(bgColor);
-        g2d.fillRect(x, y, width, height);
+     // Create a rounded rectangle shape if borderRadius > 0, otherwise a regular rectangle
+        if (borderRadius > 0) {
+            g2d.fill(new RoundRectangle2D.Float(x, y, width, height, borderRadius, borderRadius));
+        } else {
+            g2d.fillRect(x, y, width, height);
+        }
+
+        // Draw border
         g2d.setColor(Color.DARK_GRAY);
-        g2d.drawRect(x, y, width, height);
+        if (borderRadius > 0) {
+            g2d.draw(new RoundRectangle2D.Float(x, y, width, height, borderRadius, borderRadius));
+        } else {
+            g2d.drawRect(x, y, width, height);
+        }
         
         g2d.setFont(font);
         g2d.setColor(textColor);
@@ -64,6 +77,7 @@ public class Button {
 
     public void click() {
         if (onClick != null) {
+        	menu.setActiveTooltip(tooltip);
             onClick.run();
         }
     }
@@ -94,5 +108,19 @@ public class Button {
 
 	public int getHeight() {
 		return height;
+	}
+
+	public int getBorderRadius() {
+		return borderRadius;
+	}
+
+	public Button setBorderRadius(int borderRadius) {
+		this.borderRadius = borderRadius;
+		return this;
+	}
+
+	public void setPosition(int x, int y) {
+		this.x = x;
+		this.y = y;
 	}
 }

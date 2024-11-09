@@ -14,6 +14,8 @@ import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.player.Player;
+import com.lucasj.gamedev.game.entities.player.PlayerPlaceableManager;
+import com.lucasj.gamedev.game.entities.player.PlayerUpgrades;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.world.map.MapManager;
@@ -45,10 +47,10 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                game.setGameState(GameState.wavesmenu);
     	                game.getMapManager().map.generateMap();
-    	            }, null));
+    	            }, null).setBorderRadius(20));
 
     	    buttons.add(new Button(game, this, GameState.mainmenu, "Exit", (game.getWidth() - 225) / 2, 300, 250, 50,
-    	            Color.LIGHT_GRAY, Color.BLACK, () -> System.exit(0), null));
+    	            Color.LIGHT_GRAY, Color.BLACK, () -> System.exit(0), null).setBorderRadius(20));
     	    return buttons;
     	});
     	
@@ -58,19 +60,19 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	}, () -> {
     		List<Button> buttons = new ArrayList<>();
     		
-    		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 200) / 2, 200, 200, 50,
+    		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 800), 200, 800, 200,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                game.setGameState(GameState.waves);
     	                game.getMapManager().map.generateMap();
     	                game.getWavesManager().startWaves();
     	                game.instantiatePlayer();
-    	            }, null));
+    	            }, null).setBorderRadius(20));
     	        
     	    buttons.add(new Button(game, this, GameState.wavesmenu, "Back", (game.getWidth() - 200) / 2, 255, 200, 50,
     	                Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                    game.setGameState(GameState.mainmenu);
     	                    game.getMapManager().map.generateMap();
-    	                }, null));
+    	                }, null).setBorderRadius(20));
     	    return buttons;
     	});
         
@@ -92,8 +94,8 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
             return buttons;
         });
         
+        if(game.getGameState() != GameState.waves) return;
             
-        
         // NPCS ------------
         
         GUI playerUpgradeMenu = new GUI(game, this, () ->{
@@ -106,7 +108,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
-        	Button regen = (new Button(game, this, GameState.waves, "Unlock Health Regen", ((int) ((game.getWidth() - 225) / 1.2)), 600, 250, 50,
+        	Button regen = (new Button(game, this, GameState.waves, "Unlock Health Regen", 50, 400, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                     	Debug.log("DEBUG", "Unlocking Health Regen");
                         boolean success = game.getPlayer().getPlayerUpgrades().unlockHealthRegen();
@@ -123,69 +125,130 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	
         	if(!game.getPlayer().getPlayerUpgrades().hasHealthRegen()) buttons.add(regen);
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Health", ((int) ((game.getWidth() - 225) / 1.2)), 300, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Health Regen", 50, 100, 250, 50,
                 Color.LIGHT_GRAY, Color.BLACK, () -> {
                     boolean success = game.getPlayer().getPlayerUpgrades().upgrade("health");
                 }, 
-                new Tooltip(game, "1 Gem", "Upgrading will increase your health regeneration.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                new Tooltip(game, game.getPlayer().getPlayerUpgrades().getCost("health") + " Gem(s)", "Upgrading will increase your health regeneration.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
                 	List<Supplier<String>> list = new ArrayList<>();
                 	list.add(() -> {
                 		boolean hasRegen = game.getPlayer().getPlayerUpgrades().hasHealthRegen();
                 		return hasRegen ? "" : "{RED}(!) Health Regen Not Unlocked";
                 	});
                 	list.add(() -> {
-                		boolean hasGems = game.getPlayer().getGems() >= 1;
+                		boolean hasGems = game.getPlayer().getGems() >= game.getPlayer().getPlayerUpgrades().getCost("health");
                 		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
                 	});
                 	return list;
                 })));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Max Health", ((int) ((game.getWidth() - 225) / 1.2)), 375, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Max Health", 50, 175, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         boolean success = game.getPlayer().getPlayerUpgrades().upgrade("maxHealth");
                     }, 
-                    new Tooltip(game, "1 Gem", "Purchasing will extend your max health.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    new Tooltip(game, game.getPlayer().getPlayerUpgrades().getCost("maxHealth") + " Gem(s)", "Purchasing will extend your max health.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
                     	List<Supplier<String>> list = new ArrayList<>();
                     	list.add(() -> {
-                    		boolean hasGems = game.getPlayer().getGems() >= 1;
+                    		boolean hasGems = game.getPlayer().getGems() >= game.getPlayer().getPlayerUpgrades().getCost("maxHealth");
                     		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
                     	});
                     	return list;
                     })
                     ));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Damage", ((int) ((game.getWidth() - 225) / 1.2)), 450, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Damage", 50, 250, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         boolean success = game.getPlayer().getPlayerUpgrades().upgrade("damage");
                     }, 
-                    new Tooltip(game, "1 Gem", "Purchasing will upgrade your damage multiplier.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    new Tooltip(game, game.getPlayer().getPlayerUpgrades().getCost("damage") + " Gem(s)", "Purchasing will upgrade your damage multiplier.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
                     	List<Supplier<String>> list = new ArrayList<>();
                     	list.add(() -> {
-                    		boolean hasGems = game.getPlayer().getGems() >= 1;
+                    		boolean hasGems = game.getPlayer().getGems() >= game.getPlayer().getPlayerUpgrades().getCost("damage");
                     		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
                     	});
                     	return list;
                     })
                     ));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Movement", ((int) ((game.getWidth() - 225) / 1.2)), 525, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Movement", 50, 325, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         boolean success = game.getPlayer().getPlayerUpgrades().upgrade("movement");
                         System.out.println("Got movement");
                     }, 
-                    new Tooltip(game, "1 Gem", "Purchasing will upgrade your movement speed.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    new Tooltip(game, game.getPlayer().getPlayerUpgrades().getCost("movement") + " Gem(s)", "Purchasing will upgrade your movement speed.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
                     	List<Supplier<String>> list = new ArrayList<>();
                     	list.add(() -> {
-                    		boolean hasGems = game.getPlayer().getGems() >= 1;
+                    		boolean hasGems = game.getPlayer().getGems() >= game.getPlayer().getPlayerUpgrades().getCost("movement");
                     		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
                     	});
                     	return list;
                     })
                     ));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "X", ((int) ((game.getWidth() - 225) / 1.2)), 200, 50, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "X", 0, 0, 50, 50,
                 Color.LIGHT_GRAY, Color.BLACK, () -> {
                     game.getWavesManager().getNPCManager().getPlayerUpgradeNPC().close();
+                }, null).setBorderRadius(50));
+        	
+        	return buttons;
+        }).setPanel(new Panel(
+        	    (int) ((game.getWidth() - 275) / 1.2),  // x position, based on button alignment
+        	    150,                                    // y position, starting above the first button
+        	    350,                                    // width to fit buttons with padding
+        	    800,                                    // height to cover all upgrade buttons
+        	    new Color(50, 50, 50, 180),             // bgColor, semi-transparent dark color
+        	    Color.BLACK,                            // borderColor, black for definition
+        	    20,                                     // borderRadius, for rounded corners
+        	    15                                      // padding for inner spacing
+        	));
+        
+        GUI craftingTableMenu = new GUI(game, this, () ->{
+        	return game.getGameState() == GameState.waves && 
+        			game.getWavesManager() != null && 
+        			game.getWavesManager().getNPCManager() != null && 
+        			game.getWavesManager().getNPCManager().getCraftingTable() != null &&
+        			game.getWavesManager().getNPCManager().getCraftingTable().isOpen();
+        			
+        }, () -> {
+        	List<Button> buttons = new ArrayList<>();
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Turret", ((int) ((game.getWidth() - 225) / 1.2)), 300, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.getPlayer().getPlaceableManager().purchase("turret");
+                    }, 
+                    new Tooltip(game, "$" + PlayerPlaceableManager.turretCost, "Placeable turret (30s){NL}Click (1) to place.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasEnough= game.getPlayer().getMoney() >= PlayerPlaceableManager.turretCost;
+                    		return hasEnough ? "" : "{RED}(!) Not Enough Money!";
+                    	});
+                    	list.add(() -> {
+                    		boolean invEmpty = game.getPlayer().getPlaceableManager().getEquippedPlaceable() == null;
+                    		return invEmpty ? "" : "{RED}(!) Holding a placeable already!";
+                    	});
+                    	return list;
+                    })));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Landmine", ((int) ((game.getWidth() - 225) / 1.2)), 375, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.getPlayer().getPlaceableManager().purchase("landmine");
+                    }, 
+                    new Tooltip(game, "$" +  + PlayerPlaceableManager.landmineCost, "Placeable Landmine{NL}Click (1) to place.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasEnough = game.getPlayer().getMoney() >= PlayerPlaceableManager.landmineCost;
+                    		return hasEnough ? "" : "{RED}(!) Not Enough Money!";
+                    	});
+                    	list.add(() -> {
+                    		boolean invEmpty = game.getPlayer().getPlaceableManager().getEquippedPlaceable() == null;
+                    		return invEmpty ? "" : "{RED}(!) Holding a placeable already!";
+                    	});
+                    	return list;
+                    })));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "X", ((int) ((game.getWidth() - 225) / 1.2)), 200, 50, 50,
+                Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    game.getWavesManager().getNPCManager().getCraftingTable().close();
                 }, null));
         	
         	return buttons;
@@ -196,9 +259,6 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 		Graphics2D g2d = (Graphics2D) g;
         Font font = game.font;
         g2d.setFont(font);
-
-        MapManager mapm = game.getMapManager();
-        mapm.render(g);
 
         // Render buttons
         for (GUI gui : GUIs) {
@@ -314,6 +374,10 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 	public void onMouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void setActiveTooltip(Tooltip activeTooltip) {
+		this.activeTooltip = activeTooltip;
 	}
 
 	

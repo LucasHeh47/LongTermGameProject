@@ -24,6 +24,7 @@ import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.Breadcrumb;
 import com.lucasj.gamedev.game.entities.collectibles.Coin;
+import com.lucasj.gamedev.game.entities.placeables.data.LandmineEnemyDistanceData;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
@@ -552,7 +553,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	    boolean isBlocked = false;
 
 	    // Loop through all collision surfaces in the game
-	    for (CollisionSurface surface : game.getCollisionSurfaces()) {
+	    for (CollisionSurface surface : game.getCollisionSurfaces().toList()) {
 	        double surfaceLeft = surface.getPosition().getX();
 	        double surfaceRight = surfaceLeft + surface.getWidth();
 	        double surfaceTop = surface.getPosition().getY();
@@ -663,7 +664,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	    double avoidanceRadius = this.size; // Increased radius for better reaction to obstacles
 	    Vector2D avoidanceForce = new Vector2D(0, 0);
 
-	    for (CollisionSurface surface : game.getCollisionSurfaces()) {
+	    for (CollisionSurface surface : game.getCollisionSurfaces().toList()) {
 	        double surfaceLeft = surface.getPosition().getX();
 	        double surfaceRight = surfaceLeft + surface.getWidth();
 	        double surfaceTop = surface.getPosition().getY();
@@ -687,6 +688,46 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 
     
     // END OF AI ------------------------------------------------------------------------------------------------------------------------------------------------------------
+	
+	public static List<Entity> getEntitiesInRadius(Game game, Vector2D center, int radius) {
+	    // Define the top-left and bottom-right bounds of the search area
+	    Vector2D areaTopLeft = new Vector2D(center.getX() - radius, center.getY() - radius);
+	    Vector2D areaBottomRight = new Vector2D(center.getX() + radius, center.getY() + radius);
+
+	    // Retrieve all entities within the bounding box using the quadtree
+	    List<Entity> entitiesInRadius = new ArrayList<>();
+	    game.getQuadtree().retrieve(entitiesInRadius, areaTopLeft, areaBottomRight);
+
+	    // Filter entities that are strictly within the circular radius
+	    entitiesInRadius.removeIf(entity -> entity.getPosition().distanceTo(center) > radius);
+
+	    return entitiesInRadius;
+	}
+	
+	public static List<LandmineEnemyDistanceData> getEntitiesInLandmineRadius(Game game, Vector2D center, int radius) {
+	    // Define the top-left and bottom-right bounds of the search area
+	    Vector2D areaTopLeft = new Vector2D(center.getX() - radius, center.getY() - radius);
+	    Vector2D areaBottomRight = new Vector2D(center.getX() + radius, center.getY() + radius);
+
+	    // Temporary list to retrieve entities from the quadtree
+	    List<Entity> retrievedEntities = new ArrayList<>();
+	    game.getQuadtree().retrieve(retrievedEntities, areaTopLeft, areaBottomRight);
+
+	    // List to store entities and their distances within the circular radius
+	    List<LandmineEnemyDistanceData> entitiesInRadius = new ArrayList<>();
+
+	    // Filter entities strictly within the circular radius and populate LandmineEnemyDistanceData
+	    for (Entity entity : retrievedEntities) {
+	        double distance = entity.getPosition().distanceTo(center);
+	        if (distance <= radius) {
+	            entitiesInRadius.add(new LandmineEnemyDistanceData(entity, (int) distance));
+	        }
+	    }
+
+	    return entitiesInRadius;
+	}
+
+
 	
 	public static void registerWavesData(Class<? extends Enemy> enemyClass, EnemyWavesData data) {
         wavesDataMap.put(enemyClass, data);

@@ -6,6 +6,7 @@ import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEventListener;
 import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
+import com.lucasj.gamedev.game.entities.npc.NPC;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.utils.RandomStringGenerator;
 
@@ -53,7 +54,7 @@ public abstract class Entity implements EntityCollisionEventListener {
 	}
 	
 	public void instantiate() {
-		game.toAddEntities.add(this);
+		game.instantiatedEntities.add(this);
 	}
 	
 	public final boolean isPointColliding(Vector2D point) {
@@ -68,7 +69,7 @@ public abstract class Entity implements EntityCollisionEventListener {
 	}
 	
 	public final boolean isCollidingWithEntity() {
-	    for (Entity entity : game.instantiatedEntities) {
+	    for (Entity entity : game.instantiatedEntities.toList()) {
 	        if (entity != this && isCollidingWith(entity)) {
 	            return true;
 	        }
@@ -149,11 +150,12 @@ public abstract class Entity implements EntityCollisionEventListener {
 		isAlive = false;
 		EntityDeathEvent e = new EntityDeathEvent(this, killer);
 		game.getEventManager().dispatchEvent(e);
-		game.toRemoveEntities.add(this);
+		game.instantiatedEntities.remove(this);
 		System.out.println("KILLING ENTITY: " + this.getTag() + " | " + this.getClass().getSimpleName());
 	}
 	
 	public boolean takeDamage(float dmg) {
+		if(this instanceof NPC) return false;
 		this.setHealth(this.getHealth()-dmg);
 		EntityDamagedEvent e = new EntityDamagedEvent(this, this.killer, dmg);
 		game.getEventManager().dispatchEvent(e);

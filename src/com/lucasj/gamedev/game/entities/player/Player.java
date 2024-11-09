@@ -10,7 +10,6 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.List;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
@@ -23,27 +22,20 @@ import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.events.player.PlayerAttackEvent;
 import com.lucasj.gamedev.events.player.PlayerDamageTakenEvent;
 import com.lucasj.gamedev.events.player.PlayerMoveEvent;
-import com.lucasj.gamedev.events.player.PlayerMoveEventListener;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
+import com.lucasj.gamedev.game.entities.placeables.Landmine;
+import com.lucasj.gamedev.game.entities.placeables.Placeable;
+import com.lucasj.gamedev.game.entities.placeables.Turret;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
 import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
+import com.lucasj.gamedev.utils.ConcurrentList;
 
 public class Player extends Entity implements MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
 
-	// Player move event
-	private List<PlayerMoveEventListener> movementListeners = new ArrayList<>();
-	
-    public void addPlayerMoveListener(PlayerMoveEventListener listener) {
-    	movementListeners.add(listener);
-    }
-
-    public void removePlayerMoveListener(PlayerMoveEventListener listener) {
-    	movementListeners.remove(listener);
-    }
-    
 	private BufferedImage[][] walking;
 	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right
 	private float animationSpeed = 0.1f;
@@ -57,7 +49,7 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 	
 	private float playerRotation = 0.0f;
 	
-	InputHandler input;
+	private InputHandler input;
 	
 	private boolean playerAttacking = false;
 	private float bulletSpeed = 40.0f;
@@ -84,17 +76,23 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 	
 	private float xp;
 	
+	private ConcurrentList<Placeable> activePlaceables;
+	private PlayerPlaceableManager placeableManager;
+	private boolean placingMode;
+	
 	private static PlayerStats globalStats = new PlayerStats();
 	private PlayerBreadcrumbManager crumbManager;
 	private BreadcrumbCache crumbCache = new BreadcrumbCache();
 	
 	private PlayerRewarder playerRewarder;
 	
-	private int money = 0;
+	private int money = 5000;
 	private int gems = 5;
 	
 	public Player(Game game, InputHandler input) {
 		super(game);
+		activePlaceables = new ConcurrentList<>();
+		placeableManager = new PlayerPlaceableManager(game, this);
 		this.input = input;
 		this.size = (int) (30*game.getCamera().getScale());
 		this.movementSpeed = 500;
@@ -117,6 +115,7 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 
 	@Override
 	public void update(double deltaTime) {
+		this.activePlaceables.update();
 		this.screenPosition = new Vector2D(game.getWidth()/2, game.getHeight()/2);
 		isMoving = false;
 		crumbCache.updateDistances(new ArrayList<>(crumbManager.activeBreadcrumbs));
@@ -135,11 +134,21 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 		}
 		if(!isMoving) animationTick = 1;
 		regenHealth();
+
+		this.activePlaceables.forEach(placeable -> {
+			placeable.update(deltaTime);
+		});
+		
 	}
 
 	@Override
 	public void render(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
+		
+
+		this.activePlaceables.forEach(placeable -> {
+			placeable.render(g);
+		});
 		
 		if(game.testing) {
 			g2d.setColor(new Color(255, 150, 150, 77));
@@ -315,6 +324,7 @@ private void renderStaminaBar(Graphics2D g2d) {
 	    this.screenPosition = this.position.subtract(game.getCamera().getWorldPosition());
 
 
+
 		float dx = (float) (mousePosition.getX() - this.getScreenPosition().add(new Vector2D(this.getSize()).divide(2)).getX());
 		float dy = (float) (mousePosition.getY() - this.getScreenPosition().add(new Vector2D(this.getSize()).divide(2)).getY());
 
@@ -327,6 +337,7 @@ private void renderStaminaBar(Graphics2D g2d) {
 		float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
 		
 		// Implement the guns fire() method
+		game.getCamera().shake(1, 50);
 		Vector2D vel = new Vector2D(dx, dy).normalize();
 		Vector2D bulletVelocity = vel.multiply(bulletSpeed*25*deltaTime);
 		int damage = (int) (10 * this.getPlayerUpgrades().getDamageMultiplier());
@@ -401,7 +412,12 @@ private void renderStaminaBar(Graphics2D g2d) {
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
         	game.setPaused(!game.isPaused());
         }
-		
+		if(e.getKeyCode() == KeyEvent.VK_1) {
+			if(this.placeableManager.getEquippedPlaceable() != null) {
+				this.placeableManager.getEquippedPlaceable().instantiate(mousePosition);
+				this.placeableManager.setEquippedPlaceable(null);
+			}
+		}
 	}
 
 	@Override
@@ -505,6 +521,14 @@ private void renderStaminaBar(Graphics2D g2d) {
 		}
 		return false;
 	}
+	
+	public boolean removeMoney(int num) {
+		if(this.money >= num) {
+			this.money -= num;
+			return true;
+		}
+		return false;
+	}
 
 	public PlayerUpgrades getPlayerUpgrades() {
 		return playerUpgrades;
@@ -524,6 +548,26 @@ private void renderStaminaBar(Graphics2D g2d) {
 
 	public int getGems() {
 		return gems;
+	}
+
+	public ConcurrentList<Placeable> getActivePlaceables() {
+		return activePlaceables;
+	}
+
+	public PlayerPlaceableManager getPlaceableManager() {
+		return placeableManager;
+	}
+
+	public Vector2D getMousePosition() {
+		return mousePosition;
+	}
+
+	public boolean getPlacingMode() {
+		return placingMode;
+	}
+
+	public void setPlacingMode(boolean placingMode) {
+		this.placingMode = placingMode;
 	}
 	
 }

@@ -3,6 +3,7 @@ package com.lucasj.gamedev.mathutils;
 import java.util.ArrayList;
 import java.util.List;
 import com.lucasj.gamedev.game.entities.Entity;
+import com.lucasj.gamedev.utils.ConcurrentList;
 
 public class Quadtree<T> {
 
@@ -95,29 +96,57 @@ public class Quadtree<T> {
     }
 
     public List<T> retrieve(List<T> returnEntities, T entity) {
-        int index = getIndex((Entity) entity);
-        if (index != -1 && nodes[0] != null) {
-            nodes[index].retrieve(returnEntities, entity);
+        if (nodes[0] != null) {
+            int index = getIndex((Entity) entity);
+            if (index != -1) {
+                nodes[index].retrieve(returnEntities, entity);
+            }
         }
 
-        returnEntities.addAll(entities);
+        // Only add entities in this node that are within a specific range (if needed)
+        for (T e : entities) {
+            if (isNearby((Entity) e, (Entity) entity)) { // Implement `isNearby` for custom range checks
+                returnEntities.add(e);
+            }
+        }
+
         return returnEntities;
+    }
+
+    // Helper method to check if two entities are nearby (implement as needed)
+    private boolean isNearby(Entity e1, Entity e2) {
+        double range = 100; // Define the nearby range
+        return e1.getPosition().distanceTo(e2.getPosition()) <= range;
     }
 
     // New retrieve method that finds all entities within a rectangular area
     public List<T> retrieve(List<T> returnEntities, Vector2D areaTopLeft, Vector2D areaBottomRight) {
+        // Check if this node’s area intersects the search area; skip if not
         if (!intersects(areaTopLeft, areaBottomRight)) {
-            return returnEntities; // No intersection with this node's bounds, so skip
+            return returnEntities;
         }
 
-        returnEntities.addAll(entities); // Add entities within this node if they intersect
-
-        if (nodes[0] != null) { // Recursively check child nodes if they exist
+        // Recursively retrieve entities from child nodes if they exist
+        if (nodes[0] != null) {
             for (Quadtree<T> node : nodes) {
                 node.retrieve(returnEntities, areaTopLeft, areaBottomRight);
             }
         }
+
+        // Add entities within this node that fall within the specified bounds
+        for (T entity : entities) {
+            if (entityWithinBounds((Entity) entity, areaTopLeft, areaBottomRight)) {
+                returnEntities.add(entity);
+            }
+        }
+
         return returnEntities;
+    }
+    // Helper method to check if an entity is within the specified bounds
+    private boolean entityWithinBounds(Entity entity, Vector2D areaTopLeft, Vector2D areaBottomRight) {
+        Vector2D pos = entity.getPosition();
+        return pos.getX() >= areaTopLeft.getX() && pos.getX() <= areaBottomRight.getX()
+                && pos.getY() >= areaTopLeft.getY() && pos.getY() <= areaBottomRight.getY();
     }
 
     // Helper method to check if this node's bounds intersect the given rectangular area
@@ -125,4 +154,5 @@ public class Quadtree<T> {
         return !(boundsBottomRight.getX() < areaTopLeft.getX() || boundsTopLeft.getX() > areaBottomRight.getX()
                 || boundsBottomRight.getY() < areaTopLeft.getY() || boundsTopLeft.getY() > areaBottomRight.getY());
     }
+
 }

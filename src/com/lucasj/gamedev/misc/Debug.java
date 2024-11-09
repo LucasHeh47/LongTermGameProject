@@ -6,4 +6,12 @@ public class Debug {
 		System.out.println("[" + type + "] " + message);
 	}
 	
+	public static void log(Object obj, String message) {
+		System.out.println("[" + obj.getClass().getSimpleName().toUpperCase() + "] " + message);
+	}
+	
+	public static void log(Object obj, Object message) {
+		System.out.println("[" + obj.getClass().getSimpleName().toUpperCase() + "] " + message);
+	}
+	
 }

@@ -8,6 +8,7 @@ import java.util.Random;
 import com.lucasj.gamedev.essentials.Camera;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 
 public class Map {
 
@@ -48,6 +49,7 @@ public class Map {
 
 	    // Get the camera's world position and viewport
 	    Camera camera = game.getCamera();
+	    Debug.log(this, camera.getWorldPosition() == null);
 	    Vector2D cameraWorldPos = camera.getWorldPosition();
 	    Vector2D viewport = camera.getViewport();
 

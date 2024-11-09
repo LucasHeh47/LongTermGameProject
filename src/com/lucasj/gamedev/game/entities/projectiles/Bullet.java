@@ -8,6 +8,7 @@ import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
+import com.lucasj.gamedev.game.entities.placeables.Turret;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
@@ -46,6 +47,7 @@ public class Bullet extends Projectile {
 	@Override
 	public void onEntityCollision(EntityCollisionEvent e) {
 		if(this.getSender() instanceof Player && e.getCollider() instanceof Player) return;
+		if(this.getSender() instanceof Turret && e.getCollider() instanceof Player) return;
 		if(!e.getCollider().isAlive()) return;
 		boolean died = e.getCollider().takeDamage(this.getDamage());
 		System.out.println("died -----------------------------");

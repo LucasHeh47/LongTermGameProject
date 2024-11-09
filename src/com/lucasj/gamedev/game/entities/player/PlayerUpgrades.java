@@ -16,10 +16,15 @@ public class PlayerUpgrades {
     private float upgradedMovementSpeedMultiplier = 0;
     
     // How much you get from each upgrade
-    private int maxHealthUpgrade = 5;
-    private float healthRegenUpgrade = 0.01f;
-    private float damageMultiplierUpgrade = 0.075f;
+    private int maxHealthUpgrade = 10;
+    private float healthRegenUpgrade = 0.03f;
+    private float damageMultiplierUpgrade = 0.25f;
     private float movementSpeedMultiplier = 0.05f;
+    
+    private int regenUpgradeCount = 0;
+    private int damageUpgradeCount = 0;
+    private int movementUpgradeCount = 0;
+    private int maxHealthUpgradeCount = 0;
     
     private Player player;
     private Game game;
@@ -35,23 +40,51 @@ public class PlayerUpgrades {
     }
 
     public boolean upgrade(String type) {
-    	if(player.removeGem(1)) {
-    		System.out.println("Purchasing: " + type);
-    		if(type.equals("regen")) {
-    			this.upgradedHealthRegen += this.healthRegenUpgrade;
-    		} else if(type.equals("damage")) {
-    			this.upgradedDamageMultiplier += this.damageMultiplierUpgrade;
-    		} else if(type.equals("movement")) {
-    			this.upgradedMovementSpeedMultiplier += this.movementSpeedMultiplier;
-    		} else if(type.equals("maxHealth")) {
-    			this.upgradedMaxHealth += this.maxHealthUpgrade;
-    			this.player.setMaxHealth(this.upgradedMaxHealth);
-    		}
-    	} else {
-    		System.out.println("Not enough to purchase");
-    		return false;
-    	}
-    	return true;
+        int cost = getCost(type);
+        if (player.removeGem(cost)) {
+            System.out.println("Purchasing: " + type);
+            switch (type) {
+                case "health":
+                    this.upgradedHealthRegen += this.healthRegenUpgrade;
+                    regenUpgradeCount++;
+                    break;
+                case "damage":
+                    this.upgradedDamageMultiplier += this.damageMultiplierUpgrade;
+                    damageUpgradeCount++;
+                    break;
+                case "movement":
+                    this.upgradedMovementSpeedMultiplier += this.movementSpeedMultiplier;
+                    movementUpgradeCount++;
+                    break;
+                case "maxHealth":
+                    this.upgradedMaxHealth += this.maxHealthUpgrade;
+                    this.player.setMaxHealth(this.upgradedMaxHealth);
+                    maxHealthUpgradeCount++;
+                    break;
+                default:
+                    System.out.println("Unknown upgrade type");
+                    return false;
+            }
+            return true;
+        } else {
+            System.out.println("Not enough to purchase");
+            return false;
+        }
+    }
+    
+    public int getCost(String type) {
+        switch (type) {
+            case "health":
+                return regenUpgradeCount + 1;
+            case "damage":
+                return damageUpgradeCount + 1;
+            case "movement":
+                return movementUpgradeCount + 1;
+            case "maxHealth":
+                return maxHealthUpgradeCount + 1;
+            default:
+                return Integer.MAX_VALUE; // Unknown upgrade type
+        }
     }
     
     public boolean unlockHealthRegen() {

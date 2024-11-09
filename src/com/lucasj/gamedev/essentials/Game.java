@@ -22,6 +22,7 @@ import com.lucasj.gamedev.game.entities.collectibles.Collectible;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.enemy.Skeleton;
 import com.lucasj.gamedev.game.entities.enemy.Zombie;
+import com.lucasj.gamedev.game.entities.placeables.Landmine;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.projectiles.Projectile;
 import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
@@ -30,26 +31,22 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.os.GameData;
 import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.settings.SettingsManager;
+import com.lucasj.gamedev.utils.ConcurrentList;
 import com.lucasj.gamedev.utils.GraphicUtils;
 import com.lucasj.gamedev.world.map.MapManager;
-import com.lucasj.gamedev.world.particles.ParticleEmitter;
 
 @SuppressWarnings("unused")
 public class Game {
 
     private InputHandler input;
-    public List<Entity> instantiatedEntities;
-    public List<Collectible> instantiatedCollectibles;
-    public List<Collectible> toRemoveCollectibles;
-    public List<Entity> instantiatedEntitiesOnScreen;
+    public ConcurrentList<Entity> instantiatedEntities;
+    public ConcurrentList<Collectible> instantiatedCollectibles;
+    public ConcurrentList<Entity> instantiatedEntitiesOnScreen;
     private Quadtree<Entity> entityQuadtree;
-    public List<Entity> toAddEntities;
-    public List<Entity> toRemoveEntities;
     private EntityCollisionEvent collisionEvent;
     
-    private List<CollisionSurface> collisionSurfaces;
+    private ConcurrentList<CollisionSurface> collisionSurfaces;
 
-	public List<ParticleEmitter> activeParticles;
     private GameState gameState;
     private SettingsManager settings;
     private Dimension screen;
@@ -78,13 +75,18 @@ public class Game {
     public Game(InputHandler input, GraphicUtils gUtils, SettingsManager settings, Dimension screen) {
     	gameData = new GameData("projectgame", "playerStats.dat");
     	Player.getGlobalStats().load(gameData);
+    	
     	eventManager = new EventManager();
+    	
     	referenceEnemies();
+    	
         this.settings = settings;
         this.screen = screen;
         paused = false;
         gameState = GameState.mainmenu;
+        
         quadtree = new Quadtree(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
+        
         menus = new Menus(this);
 
         this.input = input;
@@ -92,21 +94,18 @@ public class Game {
         input.addMouseMotionListener(menus);
         
         camera = new Camera(this, new Vector2D(getWidth(), getHeight()), new Vector2D(0, 0));
-        instantiatedEntities = new ArrayList<Entity>();
-        instantiatedEntitiesOnScreen = new ArrayList<Entity>();
+        instantiatedEntities = new ConcurrentList<Entity>();
+        instantiatedEntitiesOnScreen = new ConcurrentList<Entity>();
         entityQuadtree = new Quadtree<>(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
         
-        instantiatedCollectibles = new ArrayList<Collectible>();
-        toRemoveCollectibles = new ArrayList<Collectible>();
+        instantiatedCollectibles = new ConcurrentList<Collectible>();
         
-        toAddEntities = new ArrayList<Entity>();
-        toRemoveEntities = new ArrayList<Entity>();
         this.gUtils = gUtils;
+        
         mapm = new MapManager(this);
         wavesManager = new WavesManager(this);
         
-        activeParticles = new ArrayList<>();
-        collisionSurfaces = new ArrayList<>();
+        collisionSurfaces = new ConcurrentList<>();
         CollisionSurface surface = new CollisionSurface(this, new Vector2D(300, 400), 100, 500, Color.DARK_GRAY);
         
         File fontFile = new File(SpriteTools.assetDirectory + "/DanielLinssen/m6x11.ttf");
@@ -123,35 +122,49 @@ public class Game {
     }
 
     public void update(double deltaTime) {
+    	input.getKeyboardListeners().update();
+    	input.getMouseClickListeners().update();
+    	input.getMouseMotionListeners().update();
+    	
+    	camera.update(deltaTime);
+    	
         if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
         	this.renderScreenTick++;
         	if (this.renderScreenTick >= this.lengthToCheckScreen) {
-        		this.entityQuadtree.setBounds(this.camera.getWorldPosition(), this.camera.getWorldPosition().add(this.camera.getViewport()));
         		Vector2D cameraPosition = camera.getWorldPosition();
-        		double viewportWidth = camera.getViewport().getX();
-        		double viewportHeight = camera.getViewport().getY();
+        	    Vector2D viewport = camera.getViewport();
 
-        		double extendedLeftBound = cameraPosition.getX() - (viewportWidth / 2);
-        		double extendedRightBound = cameraPosition.getX() + viewportWidth + (viewportWidth / 2);
-        		double extendedTopBound = cameraPosition.getY() - (viewportHeight  / 2);
-        		double extendedBottomBound = cameraPosition.getY() + viewportHeight + (viewportHeight  / 2);
-        		
-//        		System.out.println("Left Bound: " + extendedLeftBound);
-//        		System.out.println("Right Bound: " + extendedRightBound);
-//        		System.out.println("Top Bound: " + extendedTopBound);
-//        		System.out.println("Bottom Bound: " + extendedBottomBound);
-        		
-    	        List<Entity> newOnScreenEntities = new ArrayList<>();
+        	    // Define extended bounds in world coordinates
+        	    double extendedLeftBound = cameraPosition.getX() - (viewport.getX() / 2);
+        	    double extendedRightBound = cameraPosition.getX() + viewport.getX() * 1.5;
+        	    double extendedTopBound = cameraPosition.getY() - (viewport.getY() / 2);
+        	    double extendedBottomBound = cameraPosition.getY() + viewport.getY() * 1.5;
 
-    	        entityQuadtree.retrieve(newOnScreenEntities, new Vector2D(extendedLeftBound, extendedTopBound), 
-                        new Vector2D(extendedRightBound, extendedBottomBound));
-    	        instantiatedEntitiesOnScreen = newOnScreenEntities; // Only swap after retrieval
-    	        this.renderScreenTick = 0;
+        	    // Update quadtree bounds
+        	    this.entityQuadtree.setBounds(new Vector2D(extendedLeftBound, extendedTopBound),
+        	                                  new Vector2D(extendedRightBound, extendedBottomBound));
+
+        	    // Retrieve visible entities
+        	    List<Entity> newOnScreenEntities = new ArrayList<>();
+        	    entityQuadtree.retrieve(newOnScreenEntities, 
+        	                            new Vector2D(extendedLeftBound, extendedTopBound), 
+        	                            new Vector2D(extendedRightBound, extendedBottomBound));
+        	    instantiatedEntitiesOnScreen = new ConcurrentList<>(newOnScreenEntities);
+
+        	    this.renderScreenTick = 0;
     	    }
         	
             wavesManager.update(deltaTime);
             
         }
+    	this.updateLists();
+    }
+    
+    public void updateLists() {
+    	this.collisionSurfaces.update();
+    	this.instantiatedEntities.update();
+    	this.instantiatedEntitiesOnScreen.update();
+    	this.instantiatedCollectibles.update();
     }
     
     public void instantiatePlayer() {
@@ -178,17 +191,18 @@ public class Game {
 
     public void render(Graphics g) {
     	Graphics2D g2d = (Graphics2D) g;
-    	menus.render(g);
+    	mapm.render(g2d);
     	if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
     		
     		Vector2D cameraPosition = camera.getWorldPosition();
     	    double viewportWidth = camera.getViewport().getX();
     	    double viewportHeight = camera.getViewport().getY();
 
-    	    double extendedLeftBound = cameraPosition.getX() - (viewportWidth / 2);
-    	    double extendedRightBound = cameraPosition.getX() + viewportWidth + (viewportWidth / 2);
-    	    double extendedTopBound = cameraPosition.getY() - (viewportHeight / 2);
-    	    double extendedBottomBound = cameraPosition.getY() + viewportHeight + (viewportHeight / 2);
+    	    double extendedLeftBound = cameraPosition.getX() - viewportWidth;
+    	    double extendedRightBound = cameraPosition.getX() + viewportWidth * 10;
+    	    double extendedTopBound = cameraPosition.getY() - viewportHeight;
+    	    double extendedBottomBound = cameraPosition.getY() + viewportHeight * 10;
+
     		
     		this.getCollisionSurfaces().forEach(surf -> {
             	surf.render(g);
@@ -203,6 +217,7 @@ public class Game {
         	if(p != null) p.render(g);
         	this.getWavesManager().render(g);
         }
+    	menus.render(g2d);
  
 
         this.getGraphicUtils().drawVignette(g2d, this.getWidth(), this.getHeight(), 0, 0, 0, 180);
@@ -217,46 +232,78 @@ public class Game {
     }
     
     public void checkEntityCollisions() {
-        // Loop through all entities and check for collisions
+        // Loop through all entities to check for collisions
         for (int i = 0; i < instantiatedEntities.size(); i++) {
             Entity entityA = instantiatedEntities.get(i);
             for (int j = i + 1; j < instantiatedEntities.size(); j++) {
                 Entity entityB = instantiatedEntities.get(j);
 
                 if (entityA.isCollidingWith(entityB)) {
-                	Entity collider;
-                	Entity entity;
-                	if(entityA.importance > entityB.importance) {
-                		collider = entityB;
-                		entity = entityA;
-                	} else if (entityB.importance > entityA.importance) {
-                		collider = entityA;
-                		entity = entityB;
-                	} else {
-                	    // Handle the case where both entities have the same importance
-                	    continue;
-                	}
-                    EntityCollisionEvent e = new EntityCollisionEvent(
-                        entity,
-                        collider,
-                        new Vector2D(
-                            (entityA.getPosition().getX() + entityB.getPosition().getX()) / 2,
-                            (entityA.getPosition().getY() + entityB.getPosition().getY()) / 2
-                        )
-                    );
-                    if (entityB instanceof Projectile) {
-                        Projectile projectile = (Projectile) entityB;
-                        if (projectile.getSender().getClass().equals(entityA.getClass())) {
-                            continue;
-                        }
-                    }
-                    // Notify the listeners of both entities
-                    System.out.println("Collision with " + entityA.getClass().getSimpleName() + " and " + entityB.getClass().getSimpleName());
-                    this.getEventManager().dispatchEvent(e);
+                    handleEntityCollision(entityA, entityB);
                 }
+            }
+            
+            // Check for collisions with placeables
+            if(this.getPlayer().getActivePlaceables() != null ) {
+	            this.getPlayer().getActivePlaceables().forEach(placeable -> {
+	                if (placeable instanceof Landmine && entityA.isCollidingWith(placeable)) {
+	                    handlePlaceableCollision(entityA, (Landmine) placeable);
+	                }
+	            });
             }
         }
     }
+
+    // Separate method to handle entity-to-entity collision
+    private void handleEntityCollision(Entity entityA, Entity entityB) {
+        Entity collider;
+        Entity entity;
+
+        if (entityA.importance > entityB.importance) {
+            collider = entityB;
+            entity = entityA;
+        } else if (entityB.importance > entityA.importance) {
+            collider = entityA;
+            entity = entityB;
+        } else {
+            // Both entities have the same importance; no action taken
+            return;
+        }
+
+        // Create collision event at midpoint of the two entities
+        Vector2D collisionPoint = new Vector2D(
+            (entityA.getPosition().getX() + entityB.getPosition().getX()) / 2,
+            (entityA.getPosition().getY() + entityB.getPosition().getY()) / 2
+        );
+
+        EntityCollisionEvent e = new EntityCollisionEvent(entity, collider, collisionPoint);
+
+        // Check if `entityB` is a projectile from the same sender class as `entityA`
+        if (entityB instanceof Projectile) {
+            Projectile projectile = (Projectile) entityB;
+            if (projectile.getSender().getClass().equals(entityA.getClass())) {
+                return;
+            }
+        }
+
+        // Dispatch collision event
+        this.getEventManager().dispatchEvent(e);
+    }
+
+    // Separate method to handle entity-to-placeable collision
+    private void handlePlaceableCollision(Entity entity, Landmine landmine) {
+        // Create collision event at midpoint of the entity and landmine
+        Vector2D collisionPoint = new Vector2D(
+            (entity.getPosition().getX() + landmine.getPosition().getX()) / 2,
+            (entity.getPosition().getY() + landmine.getPosition().getY()) / 2
+        );
+
+        EntityCollisionEvent e = new EntityCollisionEvent(landmine, entity, collisionPoint);
+
+        // Dispatch collision event
+        this.getEventManager().dispatchEvent(e);
+    }
+
     
     private void initializeEnemyTypes() {
     	Enemy.addEnemyType(Zombie.class);
@@ -301,7 +348,7 @@ public class Game {
 		return wavesManager;
 	}
 
-	public List<CollisionSurface> getCollisionSurfaces() {
+	public ConcurrentList<CollisionSurface> getCollisionSurfaces() {
 		return collisionSurfaces;
 	}
 

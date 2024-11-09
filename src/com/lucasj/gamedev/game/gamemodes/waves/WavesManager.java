@@ -22,7 +22,7 @@ public class WavesManager {
 	private boolean betweenWaves = true;
 	private long intermissionTimer;
 	private int intermissionTick = 0;
-	private int intermissionLength = 3;
+	private int intermissionLength = 1;
 	
 	private Game game;
 	private WavesEnemySpawner enemySpawner;
@@ -43,7 +43,7 @@ public class WavesManager {
 	
 	public WavesManager(Game game) {
 		this.game = game;
-		spawnRate = 1f;
+		spawnRate = 0.8f;
 	}
 	
 	public void startWaves() {
@@ -51,8 +51,6 @@ public class WavesManager {
 		enemySpawner = new WavesEnemySpawner(game);
 		game.instantiatedEntities.clear();
 		game.instantiatedEntitiesOnScreen.clear();
-		game.toAddEntities.clear();
-		game.toRemoveEntities.clear();
 		game.instantiatedCollectibles.clear();
 		npcManager = new NPCManager(game, game.getPlayer());
 		npcManager.instantiateNPCs();
@@ -72,51 +70,37 @@ public class WavesManager {
 	
 	public void update(double deltaTime) {
 		if(game.isPaused()) return;
-	    int parallelThreshold = 1000;
 
 	    // Update all collision surfaces
 	    game.getCollisionSurfaces().forEach(surf -> surf.update(deltaTime));
 
 	    // Update collectibles
-	    game.instantiatedCollectibles.removeAll(game.toRemoveCollectibles);
-	    game.toRemoveCollectibles.clear();
+	    
 	    game.instantiatedCollectibles.forEach(collectible -> collectible.update(deltaTime));
 
-	    // Add new entities and remove entities marked for removal
-	    game.instantiatedEntities.addAll(game.toAddEntities);
-	    game.instantiatedEntities.removeAll(game.toRemoveEntities);
-	    game.toRemoveEntities.clear();
-	    game.toAddEntities.clear();
-
-	    if (game.instantiatedEntities.isEmpty()) return;
+	    //if (game.instantiatedEntities.isEmpty()) return;
 
 	    // Clear the quadtree and reinsert all entities
 	    game.getQuadtree().clear();
 	    game.instantiatedEntities.forEach(entity -> game.getQuadtree().insert(entity));
 
-	    // Use parallel stream if the number of entities exceeds the threshold
-	    if (game.instantiatedEntities.size() > parallelThreshold) {
-	        game.instantiatedEntities.parallelStream().forEach(entity -> entity.update(deltaTime));
-	    } else {
-	        game.instantiatedEntities.forEach(entity -> {
-	            entity.update(deltaTime);
-	            
-	            // Manage entities on screen
-	            boolean isOutOfBounds = entity.getPosition().getX() < 0 ||
-	                                    entity.getPosition().getX() > game.getWidth() ||
-	                                    entity.getPosition().getY() < 0 ||
-	                                    entity.getPosition().getY() > game.getHeight();
+        game.instantiatedEntities.forEach(entity -> {
+            entity.update(deltaTime);
+            
+            // Manage entities on screen
+            boolean isOutOfBounds = entity.getPosition().getX() < 0 ||
+                                    entity.getPosition().getX() > game.getWidth() ||
+                                    entity.getPosition().getY() < 0 ||
+                                    entity.getPosition().getY() > game.getHeight();
 
-	            if (isOutOfBounds) {
-	                game.instantiatedEntitiesOnScreen.remove(entity);
-	            } else {
-	                game.instantiatedEntitiesOnScreen.add(entity);
-	            }
-	        });
-	    }
+            if (isOutOfBounds) {
+                game.instantiatedEntitiesOnScreen.remove(entity);
+            } else {
+                game.instantiatedEntitiesOnScreen.add(entity);
+            }
+        });
 
 	    // Update particles
-	    game.activeParticles.forEach(ParticleEmitter::update);
 
 	    // Check for entity collisions using quadtree optimization
 	    game.checkEntityCollisions();

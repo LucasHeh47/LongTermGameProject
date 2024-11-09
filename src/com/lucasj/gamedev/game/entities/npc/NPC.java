@@ -65,6 +65,7 @@ public class NPC extends Entity implements MouseClickEventListener{
 	        
 	        // Check collision
 	        if (this.isCollidingWithScreen(mousePos)) {
+	        	game.getWavesManager().getNPCManager().closeAll();
 	            isOpen = true;
 	            System.out.println("NPC clicked!");
 	        }

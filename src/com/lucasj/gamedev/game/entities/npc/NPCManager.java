@@ -10,6 +10,7 @@ public class NPCManager {
 	private Player player;
 	
 	private NPC playerUpgradeNPC;
+	private NPC craftingTable;
 	
 	public NPCManager(Game game, Player player) {
 		this.game = game;
@@ -20,10 +21,20 @@ public class NPCManager {
 	public void instantiateNPCs() {
 		playerUpgradeNPC = new NPC(game, new Vector2D(1000, 1000), 50);
 		playerUpgradeNPC.instantiate();
+		craftingTable = new NPC(game, new Vector2D(1000, 300), 50);
+		craftingTable.instantiate();
 	}
 
 	public NPC getPlayerUpgradeNPC() {
 		return playerUpgradeNPC;
 	}
+
+	public NPC getCraftingTable() {
+		return craftingTable;
+	}
 	
+	public void closeAll() {
+		this.playerUpgradeNPC.close();
+		this.craftingTable.close();
+	}
 }

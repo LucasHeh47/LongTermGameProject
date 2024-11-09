@@ -5,18 +5,17 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.lucasj.gamedev.events.input.KeyboardEventListener;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
+import com.lucasj.gamedev.utils.ConcurrentList;
 
 public class InputHandler implements KeyListener, MouseListener, MouseMotionListener {
 
-	private List<MouseClickEventListener> mouseClickListeners = new ArrayList<>();
-	private List<MouseMotionEventListener> mouseMotionListeners = new ArrayList<>();
-	private List<KeyboardEventListener> keyboardListeners = new ArrayList<>();
+	private ConcurrentList<MouseClickEventListener> mouseClickListeners = new ConcurrentList<>();
+	private ConcurrentList<MouseMotionEventListener> mouseMotionListeners = new ConcurrentList<>();
+	private ConcurrentList<KeyboardEventListener> keyboardListeners = new ConcurrentList<>();
 	
     public void addMouseClickListener(MouseClickEventListener listener) {
         mouseClickListeners.add(listener);
@@ -112,5 +111,17 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
             listener.onMouseMoved(e);
         }
 		
+	}
+
+	public ConcurrentList<MouseClickEventListener> getMouseClickListeners() {
+		return mouseClickListeners;
+	}
+
+	public ConcurrentList<MouseMotionEventListener> getMouseMotionListeners() {
+		return mouseMotionListeners;
+	}
+
+	public ConcurrentList<KeyboardEventListener> getKeyboardListeners() {
+		return keyboardListeners;
 	}
 }
