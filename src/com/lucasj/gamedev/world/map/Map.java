@@ -49,7 +49,6 @@ public class Map {
 
 	    // Get the camera's world position and viewport
 	    Camera camera = game.getCamera();
-	    Debug.log(this, camera.getWorldPosition() == null);
 	    Vector2D cameraWorldPos = camera.getWorldPosition();
 	    Vector2D viewport = camera.getViewport();
 

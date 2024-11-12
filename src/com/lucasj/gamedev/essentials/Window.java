@@ -9,6 +9,7 @@ import java.awt.image.BufferStrategy;
 
 import javax.swing.JFrame;
 
+import com.lucasj.gamedev.game.multiplayer.GameClient;
 import com.lucasj.gamedev.settings.SettingsManager;
 import com.lucasj.gamedev.utils.GraphicUtils;
 
@@ -50,7 +51,7 @@ public class Window extends Canvas implements Runnable {
         frame.setLocationRelativeTo(null);  // Center the window
         frame.setVisible(true);
         
-        game = new Game(inputHandler, gUtils, settings, size);
+        game = new Game(inputHandler, gUtils, settings, size, this);
         windowHandler = new WindowHandler(game, frame);
         
         this.addComponentListener(windowHandler);
@@ -58,6 +59,7 @@ public class Window extends Canvas implements Runnable {
         this.addKeyListener(inputHandler);
         this.addMouseListener(inputHandler);
         this.addMouseMotionListener(inputHandler);
+        
     }
     
     public synchronized void start() {

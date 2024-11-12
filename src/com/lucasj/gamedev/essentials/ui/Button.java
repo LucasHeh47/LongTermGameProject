@@ -9,9 +9,10 @@ import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
-import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
+import com.lucasj.gamedev.events.input.MouseClickEventListener;
+import com.lucasj.gamedev.misc.Debug;
 
-public class Button {
+public class Button implements MouseClickEventListener {
     private String text;
     private int x, y, width, height;
     private Color bgColor, textColor;
@@ -39,6 +40,11 @@ public class Button {
         this.decidingFactor = () -> {
         	return true;
         };
+    }
+    
+    public Button setDecidingFactor(Supplier<Boolean> factor) {
+    	this.decidingFactor = factor;
+    	return this;
     }
 
 	public void render(Graphics2D g2d, Font font) {
@@ -68,7 +74,7 @@ public class Button {
     }
 
     public boolean isClicked(MouseEvent e) {
-    	if(game.getGameState() == this.gameState) {
+    	if(game.getGameState() == this.gameState && this.decidingFactor.get()) {
 	        int mouseX = e.getX();
 	        int mouseY = e.getY();
 	        return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
@@ -80,6 +86,13 @@ public class Button {
         	menu.setActiveTooltip(tooltip);
             onClick.run();
         }
+    }
+    
+    public void updatePositionWithPanel(Panel panel) {
+    	Debug.log(panel.getX() + " " + panel.getY(), this.getX() + " " + this.getY());
+        int newX = panel.getX() + this.getX();
+        int newY = panel.getY() + this.getY();
+        this.setPosition(newX, newY);
     }
 
 	public GameState getGameState() {
@@ -122,5 +135,32 @@ public class Button {
 	public void setPosition(int x, int y) {
 		this.x = x;
 		this.y = y;
+	}
+
+	@Override
+	public void onMouseClicked(MouseEvent e) {
+//		if(gui == null) {
+//			if(this.decidingFactor.get()) {
+//				
+//			}
+//		} else if(gui.getDecider().get()) {
+//			if(this.decidingFactor.get()) {
+//				if(this.isClicked(e)) {
+//					this.click();
+//				}
+//			}
+//		}
+	}
+
+	@Override
+	public void onMousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

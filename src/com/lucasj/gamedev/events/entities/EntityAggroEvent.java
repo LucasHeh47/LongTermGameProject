@@ -3,13 +3,14 @@ package com.lucasj.gamedev.events.entities;
 import com.lucasj.gamedev.events.GameEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.player.Player;
+import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 
 public class EntityAggroEvent implements GameEvent {
 	
 	private Entity entity;
-	private Player player;
+	private PlayerMP player;
 	
-	public EntityAggroEvent(Entity entity, Player player) {
+	public EntityAggroEvent(Entity entity, PlayerMP player) {
 		this.entity = entity;
 		this.player = player;
 	}
@@ -28,7 +29,7 @@ public class EntityAggroEvent implements GameEvent {
 		this.entity = entity;
 	}
 
-	public Player getPlayer() {
+	public PlayerMP getPlayer() {
 		return player;
 	}
 

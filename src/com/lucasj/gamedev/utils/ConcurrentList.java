@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Spliterator;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.IntFunction;
 import java.util.stream.Stream;
@@ -18,14 +19,14 @@ public class ConcurrentList<T> implements Iterable<T>{
 	private java.util.List <T> toRemove;
 	
 	public ConcurrentList() {
-		list = new ArrayList<>();
+		list = new CopyOnWriteArrayList<>();
 		toAdd = new ArrayList<>();
 		toRemove = new ArrayList<>();
 //		allLists.add((ConcurrentList<Object>) this);
 	}
 	
 	public ConcurrentList(List<T> list) {
-		this.list = list;
+		this.list = new CopyOnWriteArrayList<>(list);
 		toAdd = new ArrayList<>();
 		toRemove = new ArrayList<>();
 	}

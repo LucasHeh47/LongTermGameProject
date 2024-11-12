@@ -37,4 +37,8 @@ public class NPCManager {
 		this.playerUpgradeNPC.close();
 		this.craftingTable.close();
 	}
+	
+	public boolean isAnyOpen() {
+		return this.playerUpgradeNPC.isOpen() || this.craftingTable.isOpen();
+	}
 }

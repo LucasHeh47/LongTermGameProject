@@ -7,6 +7,8 @@ import java.awt.event.WindowListener;
 
 import javax.swing.JFrame;
 
+import org.json.JSONException;
+
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
@@ -63,6 +65,7 @@ public class WindowHandler implements ComponentListener, WindowListener{
 	public void windowClosing(WindowEvent arg0) {
 		game.getSettings().save();
 		Player.getGlobalStats().save(game.gameData);
+		game.getSocketClient().getPacketManager().requestLogoffPacket();
 	}
 
 	@Override

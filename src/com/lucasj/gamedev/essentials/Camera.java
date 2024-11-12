@@ -3,7 +3,6 @@ package com.lucasj.gamedev.essentials;
 import java.util.Random;
 
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 
 public class Camera {
 
@@ -34,7 +33,9 @@ public class Camera {
 	}
 	
 	public void update(double deltaTime) {
-		Debug.log(this, shakeTimer);
+		
+		// Move camere movement from player into here
+		
 		if (shakeTimer > 0 && shaking) {
 			shakeTimer -= deltaTime;
 			// Apply shake offset based on the intensity

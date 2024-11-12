@@ -26,6 +26,7 @@ import com.lucasj.gamedev.game.entities.ai.Breadcrumb;
 import com.lucasj.gamedev.game.entities.collectibles.Coin;
 import com.lucasj.gamedev.game.entities.placeables.data.LandmineEnemyDistanceData;
 import com.lucasj.gamedev.game.entities.player.Player;
+import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.physics.CollisionSurface;
@@ -148,7 +149,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	private boolean isPathToPlayerClear = false;
 	protected float damageMultiplier = 1.0f;
 	private int aggroRange = 750;
-	private Player aggrod = null;
+	private PlayerMP aggrod = null;
 	private int attackRange = 25;
 	private float attackRate = 1.0f;
 	private long lastAttack;
@@ -753,7 +754,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
         return this;
     }
 
-	public Player getAggrod() {
+	public PlayerMP getAggrod() {
 		return aggrod;
 	}
 

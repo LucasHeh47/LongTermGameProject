@@ -6,19 +6,20 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.misc.Debug;
 
 public class GUI {
 	
 	private Game game;
 	private Supplier<Boolean> decider;
-	private Supplier<List<Button>> buttons;
+	private List<Button> buttons;
 	private Menus menus;
 	private Panel panel;
 	
 	public GUI(Game game, Menus menus, Supplier<Boolean> decider, Supplier<List<Button>> buttons) {
 		this.game = game;
 		this.decider = decider;
-		this.buttons = buttons;
+		this.buttons = buttons.get();
 		this.menus = menus;
 		menus.addGUI(this);
 	}
@@ -28,8 +29,9 @@ public class GUI {
 		if(decider.get()) {
 			if (panel != null) {
                 panel.render(g2d);
+                
             }
-			for (Button button : buttons.get()) {
+			for (Button button : buttons) {
 				button.render((Graphics2D)g, game.font);
 			}
 		}
@@ -39,7 +41,7 @@ public class GUI {
 		return decider;
 	}
 
-	public Supplier<List<Button>> getButtons() {
+	public List<Button> getButtons() {
 		// TODO Auto-generated method stub
 		return buttons;
 	}
@@ -50,9 +52,9 @@ public class GUI {
 
 	public GUI setPanel(Panel panel) {
 		this.panel = panel;
-		buttons.get().forEach(btn -> {
-			btn.setPosition(panel.getX() + btn.getX(), panel.getY() + btn.getY());
-		});
+		for (Button button : this.getButtons()) {
+			button.updatePositionWithPanel(panel);
+		}
 		return this;
 	}
 

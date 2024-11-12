@@ -13,6 +13,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.json.JSONException;
+
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.ui.Menus;
 import com.lucasj.gamedev.events.EventManager;
@@ -26,6 +28,7 @@ import com.lucasj.gamedev.game.entities.placeables.Landmine;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.projectiles.Projectile;
 import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
+import com.lucasj.gamedev.game.multiplayer.GameClient;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.os.GameData;
@@ -72,9 +75,24 @@ public class Game {
 
     GameData gameData;
     
-    public Game(InputHandler input, GraphicUtils gUtils, SettingsManager settings, Dimension screen) {
+    private Window window;
+    
+    public boolean inParty = false;
+    
+    public String username = "LucasHeh1";
+    
+    private GameClient socketClient;
+    public String authToken;
+    
+    public Game(InputHandler input, GraphicUtils gUtils, SettingsManager settings, Dimension screen, Window window) {
     	gameData = new GameData("projectgame", "playerStats.dat");
     	Player.getGlobalStats().load(gameData);
+    	
+    	socketClient = new GameClient(this, "localhost");
+    	socketClient.start();
+    	socketClient.getPacketManager().requestLoginPacket();
+    	
+    	this.window = window;
     	
     	eventManager = new EventManager();
     	
@@ -126,6 +144,7 @@ public class Game {
     	input.getMouseClickListeners().update();
     	input.getMouseMotionListeners().update();
     	
+    	menus.update();
     	camera.update(deltaTime);
     	
         if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
@@ -158,6 +177,12 @@ public class Game {
             
         }
     	this.updateLists();
+    }
+    
+    public void createParty() {
+    	if(inParty) return;
+    	socketClient.getPacketManager().requestCreatePartyPacket();
+    	inParty = true;
     }
     
     public void updateLists() {
@@ -244,7 +269,7 @@ public class Game {
             }
             
             // Check for collisions with placeables
-            if(this.getPlayer().getActivePlaceables() != null ) {
+            if(this.getPlayer() != null) if(this.getPlayer().getActivePlaceables() != null ) {
 	            this.getPlayer().getActivePlaceables().forEach(placeable -> {
 	                if (placeable instanceof Landmine && entityA.isCollidingWith(placeable)) {
 	                    handlePlaceableCollision(entityA, (Landmine) placeable);
@@ -394,6 +419,14 @@ public class Game {
 
 	public EventManager getEventManager() {
 		return eventManager;
+	}
+
+	public Window getWindow() {
+		return window;
+	}
+
+	public GameClient getSocketClient() {
+		return socketClient;
 	}
 	
 }

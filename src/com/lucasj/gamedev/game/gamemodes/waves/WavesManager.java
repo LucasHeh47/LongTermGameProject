@@ -11,6 +11,7 @@ import com.lucasj.gamedev.events.waves.WaveEndEvent;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.npc.NPCManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.world.particles.ParticleEmitter;
 
 public class WavesManager {
@@ -70,7 +71,7 @@ public class WavesManager {
 	
 	public void update(double deltaTime) {
 		if(game.isPaused()) return;
-
+		
 	    // Update all collision surfaces
 	    game.getCollisionSurfaces().forEach(surf -> surf.update(deltaTime));
 

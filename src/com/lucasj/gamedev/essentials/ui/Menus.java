@@ -15,15 +15,14 @@ import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.PlayerPlaceableManager;
-import com.lucasj.gamedev.game.entities.player.PlayerUpgrades;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
-import com.lucasj.gamedev.world.map.MapManager;
+import com.lucasj.gamedev.utils.ConcurrentList;
 
 public class Menus implements MouseClickEventListener, MouseMotionEventListener {
     
     private Game game;
-    private List<GUI> GUIs;
+    private ConcurrentList<GUI> GUIs;
     
     private Tooltip activeTooltip = null;
     
@@ -32,9 +31,15 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     public Menus(Game game) {
     	mousePos = new Vector2D(0, 0);
     	this.game = game;
-    	this.GUIs = new ArrayList<>();
+    	this.GUIs = new ConcurrentList<>();
     	createGUIs();
     }
+    
+    public void update() {
+    	GUIs.update();
+    }
+    
+    private GUI playerUpgradeMenu;
     
     public void createGUIs() {
     	GUIs.clear();
@@ -60,13 +65,21 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	}, () -> {
     		List<Button> buttons = new ArrayList<>();
     		
-    		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 800), 200, 800, 200,
+    		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 450), (game.getHeight() - 200), 400, 150,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                game.setGameState(GameState.waves);
     	                game.getMapManager().map.generateMap();
     	                game.getWavesManager().startWaves();
     	                game.instantiatePlayer();
+    	                this.createGUIs();
     	            }, null).setBorderRadius(20));
+    		
+    		buttons.add(new Button(game, this, GameState.wavesmenu, "Create Party", (game.getWidth() - 450), 50, 400, 100,
+    	            Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	                game.createParty();
+    	            }, null).setBorderRadius(20).setDecidingFactor(() -> {
+    	            	return !game.inParty;
+    	            }));
     	        
     	    buttons.add(new Button(game, this, GameState.wavesmenu, "Back", (game.getWidth() - 200) / 2, 255, 200, 50,
     	                Color.LIGHT_GRAY, Color.BLACK, () -> {
@@ -84,6 +97,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	buttons.add(new Button(game, this, GameState.waves, "Back to Menu", (game.getWidth() - 225) / 2, 300, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         game.getPlayer().die();
+    	                this.createGUIs();
                         game.setPaused(false);
                     }, null));
             
@@ -98,7 +112,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
             
         // NPCS ------------
         
-        GUI playerUpgradeMenu = new GUI(game, this, () ->{
+        playerUpgradeMenu = new GUI(game, this, () ->{
         	return game.getGameState() == GameState.waves && 
         			game.getWavesManager() != null && 
         			game.getWavesManager().getNPCManager() != null && 
@@ -259,6 +273,8 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 		Graphics2D g2d = (Graphics2D) g;
         Font font = game.font;
         g2d.setFont(font);
+        
+        //if(playerUpgradeMenu != null) Debug.log(this, this.playerUpgradeMenu.getDecider());
 
         // Render buttons
         for (GUI gui : GUIs) {
@@ -306,7 +322,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 	        // Check if the GUI is currently active
 	        if (gui.getDecider().get()) {
 	            // Iterate through the buttons of the active GUI
-	            for (Button button : gui.getButtons().get()) {
+	            for (Button button : gui.getButtons()) {
 	                // Check if the button was clicked
 	                if (button.isClicked(e)) {
 	                    button.click(); // Trigger the button's action
@@ -343,13 +359,14 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 	public void onMouseMoved(MouseEvent e) {
 	    int mouseX = e.getX();
 	    int mouseY = e.getY();
-
+	    
+	    
 	    // Iterate through all GUIs
 	    for (GUI gui : GUIs) {
 	        // Check if the GUI is currently active
 	        if (gui.getDecider().get()) {
 	            // Iterate through the buttons of the active GUI
-	            for (Button button : gui.getButtons().get()) {
+	            for (Button button : gui.getButtons()) {
 	                // Check if the button is active and if the mouse is hovering over it
 	                if (button.getTooltip() != null && button.getTooltip().shouldShow(mouseX, mouseY, button.getX(), button.getY(), button.getWidth(), button.getHeight())) {
 	                    // Position the tooltip near the mouse cursor

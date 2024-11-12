@@ -28,13 +28,14 @@ import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
 import com.lucasj.gamedev.game.entities.placeables.Landmine;
 import com.lucasj.gamedev.game.entities.placeables.Placeable;
 import com.lucasj.gamedev.game.entities.placeables.Turret;
+import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
 import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.utils.ConcurrentList;
 
-public class Player extends Entity implements MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
+public class Player extends Entity implements PlayerMP, MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
 
 	private BufferedImage[][] walking;
 	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right
@@ -203,7 +204,7 @@ public class Player extends Entity implements MouseClickEventListener, MouseMoti
 				(int)(healthBarSize - (healthBarSize * 0.2)));
 	}
 	
-private void renderStaminaBar(Graphics2D g2d) {
+	private void renderStaminaBar(Graphics2D g2d) {
 		
 		int margin = 100;
 		int staminaBarSize = 100;
