@@ -6,20 +6,21 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
-import com.lucasj.gamedev.misc.Debug;
 
 public class GUI {
 	
 	private Game game;
 	private Supplier<Boolean> decider;
-	private List<Button> buttons;
+	private Supplier<List<Button>> buttons;
+	private Supplier<List<Slider>> sliders;
 	private Menus menus;
 	private Panel panel;
 	
-	public GUI(Game game, Menus menus, Supplier<Boolean> decider, Supplier<List<Button>> buttons) {
+	public GUI(Game game, Menus menus, Supplier<Boolean> decider, Supplier<List<Button>> buttons, Supplier<List<Slider>> sliders) {
 		this.game = game;
 		this.decider = decider;
-		this.buttons = buttons.get();
+		this.buttons = buttons;
+		this.sliders = sliders;
 		this.menus = menus;
 		menus.addGUI(this);
 	}
@@ -28,11 +29,14 @@ public class GUI {
         Graphics2D g2d = (Graphics2D) g;
 		if(decider.get()) {
 			if (panel != null) {
-                panel.render(g2d);
-                
+                panel.render(g2d);   
             }
-			for (Button button : buttons) {
-				button.render((Graphics2D)g, game.font);
+			if (sliders != null) for (Slider slider : sliders.get()) {
+				slider.render(g2d);
+			}
+			if(buttons != null) for (Button button : buttons.get()) {
+				if(!button.adjustedPositionWithPanel && panel != null) button.updatePositionWithPanel(panel);
+				button.render((Graphics2D)g);
 			}
 		}
 	}
@@ -41,7 +45,7 @@ public class GUI {
 		return decider;
 	}
 
-	public List<Button> getButtons() {
+	public Supplier<List<Button>> getButtons() {
 		// TODO Auto-generated method stub
 		return buttons;
 	}
@@ -52,10 +56,13 @@ public class GUI {
 
 	public GUI setPanel(Panel panel) {
 		this.panel = panel;
-		for (Button button : this.getButtons()) {
+		for (Button button : buttons.get()) {
 			button.updatePositionWithPanel(panel);
 		}
 		return this;
 	}
 
+	public Supplier<List<Slider>> getSliders() {
+		return sliders;
+	}
 }

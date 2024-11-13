@@ -1,5 +1,6 @@
 package com.lucasj.gamedev.essentials;
 
+import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -105,7 +106,7 @@ public class Window extends Canvas implements Runnable {
         	
         	if (System.currentTimeMillis() - lastCheck >= 1000) {
         		lastCheck = System.currentTimeMillis();
-        		System.out.println("FPS: " + frames);
+        		frame.setTitle(Integer.toString(frames));
         		frames = 0;
         	}
         	
@@ -130,6 +131,7 @@ public class Window extends Canvas implements Runnable {
         Graphics g = bs.getDrawGraphics();
         
         Graphics2D g2d = (Graphics2D) g;
+        g2d.setStroke(new BasicStroke(3));
 
         // 1. Draw the gray background
         g2d.setColor(Color.GRAY);

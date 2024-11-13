@@ -1,7 +1,7 @@
 package com.lucasj.gamedev.essentials.ui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
@@ -12,7 +12,7 @@ import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.misc.Debug;
 
-public class Button implements MouseClickEventListener {
+public class Button extends UIComponent implements MouseClickEventListener {
     private String text;
     private int x, y, width, height;
     private Color bgColor, textColor;
@@ -22,7 +22,10 @@ public class Button implements MouseClickEventListener {
     private Menus menu;
     private Supplier<Boolean> decidingFactor;
     private Game game;
+    public boolean hovering = false;
     private int borderRadius; // New property for border radius
+    
+    public boolean adjustedPositionWithPanel = false;
     
     public Button(Game game, Menus menu, GameState state, String text, int x, int y, int width, int height, Color bgColor, Color textColor, Runnable onClick, Tooltip tooltip) {
         this.text = text;
@@ -47,7 +50,7 @@ public class Button implements MouseClickEventListener {
     	return this;
     }
 
-	public void render(Graphics2D g2d, Font font) {
+	public void render(Graphics2D g2d) {
     	if(!decidingFactor.get()) return;
         g2d.setColor(bgColor);
      // Create a rounded rectangle shape if borderRadius > 0, otherwise a regular rectangle
@@ -56,7 +59,8 @@ public class Button implements MouseClickEventListener {
         } else {
             g2d.fillRect(x, y, width, height);
         }
-
+        hovering = menu.getLastHoveredButton() == this.text;
+        if(hovering) g2d.setStroke(new BasicStroke(6));
         // Draw border
         g2d.setColor(Color.DARK_GRAY);
         if (borderRadius > 0) {
@@ -64,8 +68,9 @@ public class Button implements MouseClickEventListener {
         } else {
             g2d.drawRect(x, y, width, height);
         }
+        g2d.setStroke(new BasicStroke(3));
         
-        g2d.setFont(font);
+        g2d.setFont(game.font);
         g2d.setColor(textColor);
         int textWidth = g2d.getFontMetrics().stringWidth(text);
         int textX = x + (width - textWidth) / 2;
@@ -74,7 +79,7 @@ public class Button implements MouseClickEventListener {
     }
 
     public boolean isClicked(MouseEvent e) {
-    	if(game.getGameState() == this.gameState && this.decidingFactor.get()) {
+    	if((this.getGameState() == null || game.getGameState() == this.gameState) && this.decidingFactor.get()) {
 	        int mouseX = e.getX();
 	        int mouseY = e.getY();
 	        return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
@@ -93,6 +98,7 @@ public class Button implements MouseClickEventListener {
         int newX = panel.getX() + this.getX();
         int newY = panel.getY() + this.getY();
         this.setPosition(newX, newY);
+        this.adjustedPositionWithPanel = true;
     }
 
 	public GameState getGameState() {
@@ -105,6 +111,10 @@ public class Button implements MouseClickEventListener {
 
 	public void setTooltip(Tooltip tooltip) {
 		this.tooltip = tooltip;
+	}
+	
+	public String getText() {
+		return this.text;
 	}
 
 	public int getX() {

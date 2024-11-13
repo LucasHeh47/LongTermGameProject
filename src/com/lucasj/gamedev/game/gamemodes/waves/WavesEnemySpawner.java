@@ -76,7 +76,7 @@ public class WavesEnemySpawner {
         try {
             // Example spawning logic
         	System.out.println("Spawned");
-            Enemy enemy = new Enemy.Builder(game, position, enemyType).setHealth(health).setMovementSpeed(8).setSize(25).setTag(null).build();
+            Enemy enemy = new Enemy.Builder(game, position, enemyType).setHealth(health).setMovementSpeed(6).setSize(25).setTag(null).build();
             enemy.setAggroRange(1500);
             enemy.instantiate();
             System.out.println("Spawned enemy: " + enemyType.getSimpleName());

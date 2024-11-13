@@ -11,9 +11,7 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 public class Skeleton extends Enemy {
 	
 	public static void initializeClass(){
-		System.out.println("Skeleton static block loaded...");
 		registerEnemyType(Skeleton.class, new EnemyWavesData(3, 3));
-		System.out.println("Initialized Skeleton Class");
     }
 
 	public Skeleton(Game game, Vector2D position, int maxHealth, int movementSpeed, int size,

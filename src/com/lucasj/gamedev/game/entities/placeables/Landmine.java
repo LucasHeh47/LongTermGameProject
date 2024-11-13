@@ -3,8 +3,10 @@ package com.lucasj.gamedev.game.entities.placeables;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.util.List;
 
+import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
@@ -16,6 +18,7 @@ import com.lucasj.gamedev.misc.Debug;
 public class Landmine extends Placeable {
 	
 	private int radius = 500;
+	private Image img;
 
 	/**
 	 * 
@@ -27,18 +30,15 @@ public class Landmine extends Placeable {
 	public Landmine(Game game, Player player, Vector2D position,
 			String tag) {
 		super(game, player, position, new Vector2D(), 1, 20, tag);
-		// TODO Auto-generated constructor stub
+		this.size = 60;
+		this.img = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Placeables/landmine.png", new Vector2D(0, 0), new Vector2D(32, 32));
 	}
 	
 	public void render(Graphics g) {
 	    Graphics2D g2d = (Graphics2D) g;
 
-	    g2d.setColor(Color.DARK_GRAY);
-	    g2d.fillRect((int) this.getScreenPosition().getX(), (int) this.getScreenPosition().getY(), this.getSize(), this.getSize());
+	    g2d.drawImage(img, (int) this.getScreenPosition().getX(), (int) this.getScreenPosition().getY(), this.getSize(), this.getSize(), null);
 	    
-
-	    g2d.setColor(Color.red);
-	    g2d.fillOval((int) this.getScreenPosition().getX()+(this.getSize()/2 - this.getSize()/10), (int) this.getScreenPosition().getY()+(this.getSize()/2  - this.getSize()/10), this.getSize()/10, this.getSize()/10);
 	}
 
 	public void onEntityCollision(EntityCollisionEvent e) {
@@ -79,6 +79,11 @@ public class Landmine extends Placeable {
 
 	public int getRadius() {
 		return radius;
+	}
+
+	@Override
+	public Image getImage() {
+		return img;
 	}
 	
 		

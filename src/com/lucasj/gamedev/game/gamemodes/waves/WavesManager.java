@@ -4,10 +4,13 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.waves.WaveEndEvent;
+import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.npc.NPCManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
@@ -44,7 +47,7 @@ public class WavesManager {
 	
 	public WavesManager(Game game) {
 		this.game = game;
-		spawnRate = 0.8f;
+		spawnRate = 1.5f;
 	}
 	
 	public void startWaves() {
@@ -79,26 +82,38 @@ public class WavesManager {
 	    
 	    game.instantiatedCollectibles.forEach(collectible -> collectible.update(deltaTime));
 
-	    //if (game.instantiatedEntities.isEmpty()) return;
+	    //if (game.instantiatedEntities.isEmpty()) return; // why is this here
 
 	    // Clear the quadtree and reinsert all entities
 	    game.getQuadtree().clear();
 	    game.instantiatedEntities.forEach(entity -> game.getQuadtree().insert(entity));
+	    
+        game.instantiatedEntitiesOnScreen.clear();
 
         game.instantiatedEntities.forEach(entity -> {
-            entity.update(deltaTime);
+    		Vector2D cameraPosition = game.getCamera().getWorldPosition();
+    		Vector2D viewport = game.getCamera().getViewport();
+            double leftBound = cameraPosition.getX() - (viewport.getX() / 2);
+            double rightBound = cameraPosition.getX() + viewport.getX() * 1.5;
+            double topBound = cameraPosition.getY() - (viewport.getY() / 2);
+            double bottomBound = cameraPosition.getY() + viewport.getY() * 1.5;
+            
             
             // Manage entities on screen
-            boolean isOutOfBounds = entity.getPosition().getX() < 0 ||
-                                    entity.getPosition().getX() > game.getWidth() ||
-                                    entity.getPosition().getY() < 0 ||
-                                    entity.getPosition().getY() > game.getHeight();
+            boolean isOutOfBounds = entity.getPosition().getX() < leftBound ||
+                                    entity.getPosition().getX() > rightBound ||
+                                    entity.getPosition().getY() < topBound ||
+                                    entity.getPosition().getY() > bottomBound;
+            
 
             if (isOutOfBounds) {
                 game.instantiatedEntitiesOnScreen.remove(entity);
             } else {
                 game.instantiatedEntitiesOnScreen.add(entity);
             }
+            entity.update(deltaTime);
+            
+            
         });
 
 	    // Update particles

@@ -1,20 +1,24 @@
 package com.lucasj.gamedev.essentials.ui;
 
 import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 
-public class Slider implements MouseListener, MouseMotionListener {
+import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.events.input.MouseClickEventListener;
+import com.lucasj.gamedev.events.input.MouseMotionEventListener;
+
+public class Slider extends UIComponent implements MouseClickEventListener, MouseMotionEventListener {
     private int x, y, width, height;
     private int minValue, maxValue;
     private int currentValue;
     private boolean isDragging;
     private boolean userDefined; // True if the slider can be controlled by the user
-
-    public Slider(int x, int y, int width, int height, int minValue, int maxValue, int initialValue, boolean userDefined) {
+    
+    private Game game;
+    
+    public Slider(Game game, int x, int y, int width, int height, int minValue, int maxValue, int initialValue, boolean userDefined) {
         this.x = x;
         this.y = y;
         this.width = width;
@@ -24,10 +28,14 @@ public class Slider implements MouseListener, MouseMotionListener {
         this.currentValue = initialValue;
         this.isDragging = false;
         this.userDefined = userDefined;
+        
+        game.getInput().addMouseMotionListener(this);
+        game.getInput().addMouseClickListener(this);
+        
     }
 
     // Render the slider
-    public void render(Graphics g) {
+    public void render(Graphics2D g) {
         // Draw the slider track
         g.setColor(Color.LIGHT_GRAY);
         g.fillRect(x, y, width, height);
@@ -54,7 +62,7 @@ public class Slider implements MouseListener, MouseMotionListener {
 
     // Handle mouse click events
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void onMousePressed(MouseEvent e) {
         if (userDefined && new Rectangle(x, y, width, height).contains(e.getPoint())) {
             isDragging = true;
             updateValue(e.getX());
@@ -62,14 +70,14 @@ public class Slider implements MouseListener, MouseMotionListener {
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void onMouseReleased(MouseEvent e) {
         if (userDefined) {
             isDragging = false;
         }
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
+    public void onMouseDragged(MouseEvent e) {
         if (isDragging && userDefined) {
             updateValue(e.getX());
         }
@@ -81,13 +89,28 @@ public class Slider implements MouseListener, MouseMotionListener {
         currentValue = minValue + (int) ((relativeX / (double) width) * (maxValue - minValue));
     }
 
-    @Override
-    public void mouseMoved(MouseEvent e) {}
-    @Override
-    public void mouseClicked(MouseEvent e) {}
-    @Override
-    public void mouseEntered(MouseEvent e) {}
-    @Override
-    public void mouseExited(MouseEvent e) {}
+	@Override
+	public void onMouseMoved(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }

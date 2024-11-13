@@ -2,6 +2,7 @@ package com.lucasj.gamedev.game.entities.placeables;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.game.entities.Entity;
@@ -25,20 +26,29 @@ public abstract class Placeable extends Entity {
 	
 	@Override
 	public boolean takeDamage(float dmg) {
+		if(this instanceof Turret) super.takeDamage(dmg);
 		return false;
 	}
 	
 	public void render(Graphics g) {
-		// Health bar
-		g.setColor(Color.black);
-	    g.fillRect((int) (screenPosition.getX() - (size * 0.25)), (int) (screenPosition.getY() - (size * 0.6)),
-	               (int) (size + (size * 0.5)), (int) (size + (size * 0.5)) / 5);
+		// Define the fixed health bar width and height
+		int healthBarWidth = 40;  // Fixed width for all entities
+		int healthBarHeight = 6;  // Fixed height for all entities
 
-	    g.setColor(Color.green);
-	    g.fillRect((int) (screenPosition.getX() - (size * 0.25)), (int) (screenPosition.getY() - (size * 0.6)),
-	               (int) ((size + (size * 0.5)) * ((double) health / maxHealth)),
-	               (int) (size + (size * 0.5)) / 5);
+		// Calculate position based on entity size
+		int healthBarX = (int) (screenPosition.getX() + (size/2) - (healthBarWidth / 2));
+		int healthBarY = (int) (screenPosition.getY() - (size * 0.05));
+
+		// Draw the background of the health bar (black)
+		g.setColor(Color.black);
+		g.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+
+		// Draw the health bar based on the entity's current health (green)
+		g.setColor(Color.green);
+		g.fillRect(healthBarX, healthBarY, (int) (healthBarWidth * ((double) health / maxHealth)), healthBarHeight);
 	}
+	
+	public abstract Image getImage();
 	
 	public void instantiate(Vector2D position) {
 		this.position = position;

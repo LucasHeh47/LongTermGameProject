@@ -11,9 +11,7 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 public class Zombie extends Enemy {
 	
 	public static void initializeClass(){
-		System.out.println("Zombie static block loaded...");
 		registerEnemyType(Zombie.class, new EnemyWavesData(0, 5));
-		System.out.println("Initialized Zombie Class");
     }
 	
 	/**

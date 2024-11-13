@@ -29,6 +29,7 @@ import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.physics.CollisionSurface;
 
 // This file is gonna get messy
@@ -236,6 +237,8 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		if(game.instantiatedEntitiesOnScreen.contains(this)) {
 	        applyFlockingBehavior(deltaTime);
 		    findNearestBreadcrumbToPlayer(deltaTime);
+		} else {
+			Debug.log(this, game.instantiatedEntitiesOnScreen.size());
 		}
 		this.attackPlayer();
 	}

@@ -3,7 +3,9 @@ package com.lucasj.gamedev.game.entities.placeables;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 
+import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.events.player.PlayerAttackEvent;
@@ -12,12 +14,14 @@ import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 
 public class Turret extends Placeable {
 	
 	private long lastTick;
 	
 	private double angle;
+	private Image img;
 	
 	private Enemy nearestEnemy;
 	
@@ -39,6 +43,7 @@ public class Turret extends Placeable {
 	public Turret(Game game, Player player, Vector2D position, int maxHealth, int size, String tag) {
 		super(game, player, position, new Vector2D(), maxHealth, size, tag);
 		lastTick = System.currentTimeMillis();
+		this.img = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Placeables/turret.png", new Vector2D(0, 0), new Vector2D(32, 32));
 	}
 	
 	public void update(double deltaTime) {
@@ -81,6 +86,7 @@ public class Turret extends Placeable {
 	    Vector2D bulletVelocity = bloomedVelocity.multiply(bulletSpeed * 25 * deltaTime);
 
 	    int damage = (int) (10 * player.getPlayerUpgrades().getDamageMultiplier());
+	    game.getAudioPlayer().playSound("GunFire/Turret/turret_shoot.wav", this.position);
 	    Bullet b = new Bullet(game, this, this.position.add(new Vector2D(this.getSize()).divide(3)), bulletVelocity, 10, null, 2, damage);
 	    b.instantiate();
 	    
@@ -101,7 +107,7 @@ public class Turret extends Placeable {
 	    // Draw the light gray circle for the turret base
 	    g2d.setColor(Color.LIGHT_GRAY);
 	    if(player.getPlacingMode()) g2d.setColor(new Color(Color.LIGHT_GRAY.getRed(), Color.LIGHT_GRAY.getGreen(), Color.LIGHT_GRAY.getBlue(), 200));
-	    g2d.fillOval((int) this.getScreenPosition().getX(), (int) this.getScreenPosition().getY(), this.getSize(), this.getSize());
+	    g2d.drawImage(SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Placeables/turret_base.png", new Vector2D(0, 0), new Vector2D(32, 32)), (int) this.getScreenPosition().getX(), (int) this.getScreenPosition().getY(), this.getSize(), this.getSize(), null);
 
 	    // Translate to the center of the circle to set the pivot point for rotation
 	    g2d.translate((int) this.getScreenPosition().getX() + this.getSize() / 2, (int) this.getScreenPosition().getY() + this.getSize() / 2);
@@ -112,10 +118,10 @@ public class Turret extends Placeable {
 	    g2d.rotate(angle-skew);
 
 	    // Draw the dark gray rectangle for the turret barrel
-	    g2d.setColor(Color.DARK_GRAY);
-	    if(player.getPlacingMode()) g2d.setColor(new Color(Color.DARK_GRAY.getRed(), Color.DARK_GRAY.getGreen(), Color.DARK_GRAY.getBlue(), 200));
-	    int rectWidth = 8; // Width of the turret barrel
-	    int rectHeight = 20; // Length of the turret barrel
+	    g2d.setColor(Color.BLACK);
+	    if(player.getPlacingMode()) g2d.setColor(new Color(Color.BLACK.getRed(), Color.BLACK.getGreen(), Color.BLACK.getBlue(), 200));
+	    int rectWidth = 15; // Width of the turret barrel
+	    int rectHeight = 60; // Length of the turret barrel
 	    g2d.fillRect(-rectWidth / 2, -rectHeight, rectWidth, rectHeight);
 
 	    // Reset the transformation to avoid affecting other rendering
@@ -147,6 +153,11 @@ public class Turret extends Placeable {
 	        }
 	    }
 	    this.nearestEnemy = (Enemy) nearestEnemy;
+	}
+
+	@Override
+	public Image getImage() {
+		return this.img;
 	}
 	
 	

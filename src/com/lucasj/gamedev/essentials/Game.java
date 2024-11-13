@@ -13,9 +13,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.json.JSONException;
-
 import com.lucasj.gamedev.Assets.SpriteTools;
+import com.lucasj.gamedev.essentials.audio.AudioPlayer;
 import com.lucasj.gamedev.essentials.ui.Menus;
 import com.lucasj.gamedev.events.EventManager;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
@@ -31,6 +30,7 @@ import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.game.multiplayer.GameClient;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.os.GameData;
 import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.settings.SettingsManager;
@@ -44,7 +44,8 @@ public class Game {
     private InputHandler input;
     public ConcurrentList<Entity> instantiatedEntities;
     public ConcurrentList<Collectible> instantiatedCollectibles;
-    public ConcurrentList<Entity> instantiatedEntitiesOnScreen;
+    public List<Entity> instantiatedEntitiesOnScreen;
+    private Quadtree<Entity> quadtree;
     private Quadtree<Entity> entityQuadtree;
     private EntityCollisionEvent collisionEvent;
     
@@ -56,11 +57,14 @@ public class Game {
     private MapManager mapm;
     private GraphicUtils gUtils;
     private WavesManager wavesManager;
-    private Quadtree quadtree;
     private Camera camera;
     private EventManager eventManager;
     
+    private AudioPlayer audioPlayer;
+    
     public boolean testing = false;
+    
+    public boolean settingsOpen = false;
     
     private short renderScreenTick = 0;
     private short lengthToCheckScreen = 5;
@@ -92,6 +96,8 @@ public class Game {
     	socketClient.start();
     	socketClient.getPacketManager().requestLoginPacket();
     	
+    	audioPlayer = new AudioPlayer(this);
+    	
     	this.window = window;
     	
     	eventManager = new EventManager();
@@ -103,8 +109,6 @@ public class Game {
         paused = false;
         gameState = GameState.mainmenu;
         
-        quadtree = new Quadtree(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
-        
         menus = new Menus(this);
 
         this.input = input;
@@ -113,8 +117,9 @@ public class Game {
         
         camera = new Camera(this, new Vector2D(getWidth(), getHeight()), new Vector2D(0, 0));
         instantiatedEntities = new ConcurrentList<Entity>();
-        instantiatedEntitiesOnScreen = new ConcurrentList<Entity>();
+        instantiatedEntitiesOnScreen = new ArrayList<Entity>();
         entityQuadtree = new Quadtree<>(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
+        quadtree = new Quadtree<>(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
         
         instantiatedCollectibles = new ConcurrentList<Collectible>();
         
@@ -146,32 +151,14 @@ public class Game {
     	
     	menus.update();
     	camera.update(deltaTime);
-    	
+    	audioPlayer.update();
+        
         if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
-        	this.renderScreenTick++;
-        	if (this.renderScreenTick >= this.lengthToCheckScreen) {
-        		Vector2D cameraPosition = camera.getWorldPosition();
-        	    Vector2D viewport = camera.getViewport();
-
-        	    // Define extended bounds in world coordinates
-        	    double extendedLeftBound = cameraPosition.getX() - (viewport.getX() / 2);
-        	    double extendedRightBound = cameraPosition.getX() + viewport.getX() * 1.5;
-        	    double extendedTopBound = cameraPosition.getY() - (viewport.getY() / 2);
-        	    double extendedBottomBound = cameraPosition.getY() + viewport.getY() * 1.5;
-
-        	    // Update quadtree bounds
-        	    this.entityQuadtree.setBounds(new Vector2D(extendedLeftBound, extendedTopBound),
-        	                                  new Vector2D(extendedRightBound, extendedBottomBound));
-
-        	    // Retrieve visible entities
-        	    List<Entity> newOnScreenEntities = new ArrayList<>();
-        	    entityQuadtree.retrieve(newOnScreenEntities, 
-        	                            new Vector2D(extendedLeftBound, extendedTopBound), 
-        	                            new Vector2D(extendedRightBound, extendedBottomBound));
-        	    instantiatedEntitiesOnScreen = new ConcurrentList<>(newOnScreenEntities);
-
-        	    this.renderScreenTick = 0;
-    	    }
+//        	this.renderScreenTick++;
+//        	if (this.renderScreenTick >= this.lengthToCheckScreen) {
+//
+//                renderScreenTick = 0;
+//    	    }
         	
             wavesManager.update(deltaTime);
             
@@ -188,7 +175,6 @@ public class Game {
     public void updateLists() {
     	this.collisionSurfaces.update();
     	this.instantiatedEntities.update();
-    	this.instantiatedEntitiesOnScreen.update();
     	this.instantiatedCollectibles.update();
     }
     
@@ -219,24 +205,17 @@ public class Game {
     	mapm.render(g2d);
     	if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
     		
-    		Vector2D cameraPosition = camera.getWorldPosition();
-    	    double viewportWidth = camera.getViewport().getX();
-    	    double viewportHeight = camera.getViewport().getY();
-
-    	    double extendedLeftBound = cameraPosition.getX() - viewportWidth;
-    	    double extendedRightBound = cameraPosition.getX() + viewportWidth * 10;
-    	    double extendedTopBound = cameraPosition.getY() - viewportHeight;
-    	    double extendedBottomBound = cameraPosition.getY() + viewportHeight * 10;
-
-    		
     		this.getCollisionSurfaces().forEach(surf -> {
             	surf.render(g);
             });
         	this.instantiatedCollectibles.forEach(collectible -> {
             	collectible.render(g);
             });
+
         	this.instantiatedEntitiesOnScreen.forEach(entity -> {
-        		if(!(entity instanceof Player)) entity.render(g);
+        		if(!(entity instanceof Player)) {
+        			entity.render(g);
+        		}
         		
             });
         	if(p != null) p.render(g);
@@ -405,8 +384,12 @@ public class Game {
 		return menus;
 	}
 
-	public Quadtree getQuadtree() {
-		return quadtree;
+	public Quadtree<Entity> getQuadtree() {
+		return this.quadtree;
+	}
+	
+	public Quadtree<Entity> getEntityQuadtree() {
+		return this.entityQuadtree;
 	}
 
 	public boolean isPaused() {
@@ -427,6 +410,10 @@ public class Game {
 
 	public GameClient getSocketClient() {
 		return socketClient;
+	}
+
+	public AudioPlayer getAudioPlayer() {
+		return audioPlayer;
 	}
 	
 }

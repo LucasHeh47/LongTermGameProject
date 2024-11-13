@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.Random;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
@@ -25,9 +26,7 @@ import com.lucasj.gamedev.events.player.PlayerMoveEvent;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
-import com.lucasj.gamedev.game.entities.placeables.Landmine;
 import com.lucasj.gamedev.game.entities.placeables.Placeable;
-import com.lucasj.gamedev.game.entities.placeables.Turret;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
 import com.lucasj.gamedev.game.weapons.Gun;
@@ -67,7 +66,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	private float breathTime = 2.0f;
 	private boolean breathing = false;
 	
-	private float sprintMultiplier = 1.8f;
+	private float sprintMultiplier = 1.5f;
 	private boolean isSprinting;
 	private boolean isReadyToSprint;
 	
@@ -90,13 +89,16 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	private int money = 5000;
 	private int gems = 5;
 	
+	private long lastWalkSound;
+	private float walkSoundCooldown = 0.5f;
+	
 	public Player(Game game, InputHandler input) {
 		super(game);
 		activePlaceables = new ConcurrentList<>();
 		placeableManager = new PlayerPlaceableManager(game, this);
 		this.input = input;
 		this.size = (int) (30*game.getCamera().getScale());
-		this.movementSpeed = 500;
+		this.movementSpeed = 375;
 		this.playerRewarder = new PlayerRewarder(game);
 		importance = 1;
 		crumbManager = new PlayerBreadcrumbManager(game, this, 0.6);
@@ -186,6 +188,16 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    renderHealthBar(g2d);
 	    renderMoney(g2d);
 	    renderStaminaBar(g2d);
+	    renderPlaceable(g2d);
+	}
+	
+	private void renderPlaceable(Graphics2D g2d) {
+		Image frame = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/UI/placeable_frame.png", new Vector2D(0, 0), new Vector2D(32, 32));
+		Image none = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/UI/no_placeable.png", new Vector2D(0, 0), new Vector2D(32, 32));
+		g2d.drawImage(frame, game.getWidth()-228, game.getHeight()-228, 128, 128, null);
+		
+		if(this.getPlaceableManager().getEquippedPlaceable() == null) g2d.drawImage(none, game.getWidth()-228, game.getHeight()-228, 128, 128, null);
+		else g2d.drawImage(this.getPlaceableManager().getEquippedPlaceable().getImage(), game.getWidth()-228, game.getHeight()-228, 128, 128, null);
 	}
 	
 	private void renderHealthBar(Graphics2D g2d) {
@@ -290,7 +302,16 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    this.position = this.position.add(movement);
 	    e.setPositionAfter(this.position.copy());
 	    e.setPositionChange(movement);
-	    if(e.getPositionChange() != new Vector2D(0, 0)) game.getEventManager().dispatchEvent(e);
+	    if(!e.getPositionChange().isZero()) {
+	    	game.getEventManager().dispatchEvent(e);
+	    	float walkSound = this.isSprinting ? this.walkSoundCooldown/sprintMultiplier : this.walkSoundCooldown;
+	    	if((System.currentTimeMillis() - this.lastWalkSound)/1000.0 >= walkSound) {
+	    		Random rand = new Random();
+	    		game.getAudioPlayer().playSound("Walk/grass" + rand.nextInt(2, 6) + ".wav", this.position, .08f);
+	    		this.lastWalkSound = System.currentTimeMillis();
+	    	}
+	    	
+	    }
 
 	    // Calculate camera boundaries and player position relative to the camera
 	    Vector2D newCamPos = this.position.subtract(new Vector2D(game.getWidth() / 2, game.getHeight() / 2));
@@ -344,6 +365,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		int damage = (int) (10 * this.getPlayerUpgrades().getDamageMultiplier());
 		Bullet b = new Bullet(game, this, this.position.add(new Vector2D(this.getSize()).divide(2)), bulletVelocity, 10, null, 2, damage);
 		b.instantiate();
+		game.getAudioPlayer().playMusic("GunFire/gunshot.wav");
 		PlayerAttackEvent e = new PlayerAttackEvent(b, damage);
 		b.setPlayerAttackEvent(e);
 		game.getEventManager().dispatchEvent(e);
@@ -351,7 +373,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	private boolean isClickAnAttack() {
-		if (game.getWavesManager().getNPCManager().getPlayerUpgradeNPC().isOpen()) {
+		if (game.getWavesManager().getNPCManager().isAnyOpen()) {
 			return false;
 		}
 		return true;
@@ -411,7 +433,9 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
         	isReadyToSprint = true;
         }
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-        	game.setPaused(!game.isPaused());
+        	if(game.getWavesManager().getNPCManager().isAnyOpen()) {
+        		game.getWavesManager().getNPCManager().closeAll();
+        	} else game.setPaused(!game.isPaused());
         }
 		if(e.getKeyCode() == KeyEvent.VK_1) {
 			if(this.placeableManager.getEquippedPlaceable() != null) {

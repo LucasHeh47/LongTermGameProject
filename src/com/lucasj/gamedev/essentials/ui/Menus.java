@@ -1,14 +1,19 @@
 package com.lucasj.gamedev.essentials.ui;
 
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
@@ -28,6 +33,9 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     
     private Vector2D mousePos;
     
+    private boolean hoverSoundPlayed = false;
+    private String lastHoveredButton = null;
+    
     public Menus(Game game) {
     	mousePos = new Vector2D(0, 0);
     	this.game = game;
@@ -45,7 +53,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	GUIs.clear();
     	
     	GUI mainMenu = new GUI(game, this, () -> {
-    		return game.getGameState() == GameState.mainmenu;
+    		return game.getGameState() == GameState.mainmenu && game.settingsOpen == false;
     	}, () -> {
     		List<Button> buttons = new ArrayList<>();
     		buttons.add(new Button(game, this, GameState.mainmenu, "Play Waves", (game.getWidth() - 225) / 2, 200, 250, 50,
@@ -53,11 +61,14 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	                game.setGameState(GameState.wavesmenu);
     	                game.getMapManager().map.generateMap();
     	            }, null).setBorderRadius(20));
+    		
+    	    buttons.add(new Button(game, this, GameState.mainmenu, "Settings", (game.getWidth() - 225) / 2, 300, 250, 50,
+    	            Color.LIGHT_GRAY, Color.BLACK, () -> game.settingsOpen = true, null).setBorderRadius(20));
 
-    	    buttons.add(new Button(game, this, GameState.mainmenu, "Exit", (game.getWidth() - 225) / 2, 300, 250, 50,
+    	    buttons.add(new Button(game, this, GameState.mainmenu, "Exit", (game.getWidth() - 225) / 2, 400, 250, 50,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> System.exit(0), null).setBorderRadius(20));
     	    return buttons;
-    	});
+    	}, null);
     	
     
     	GUI wavesMenu = new GUI(game, this, () -> {
@@ -87,18 +98,23 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	                    game.getMapManager().map.generateMap();
     	                }, null).setBorderRadius(20));
     	    return buttons;
-    	});
+    	}, null);
         
         GUI pausedGame = new GUI(game, this, () -> {
-        	return game.getGameState() == GameState.waves && game.isPaused();
+        	return game.getGameState() == GameState.waves && game.isPaused() && !game.settingsOpen;
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Back to Menu", (game.getWidth() - 225) / 2, 300, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Back to Menu", (game.getWidth() - 225) / 2, 400, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         game.getPlayer().die();
     	                this.createGUIs();
                         game.setPaused(false);
+                    }, null));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Settings", (game.getWidth() - 225) / 2, 300, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.settingsOpen = true;
                     }, null));
             
             buttons.add(new Button(game, this, GameState.waves, "Resume Game", (game.getWidth() - 225) / 2, 200, 250, 50,
@@ -106,7 +122,26 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                         game.setPaused(false);
                     }, null));
             return buttons;
+        }, null);
+        
+        
+        GUI settingsMenu = new GUI(game, this, () -> {
+        	return (game.getGameState() == GameState.waves || game.getGameState() == GameState.mainmenu) && game.settingsOpen;
+        }, () -> {
+        	List<Button> buttons = new ArrayList<>();
+        	buttons.add(new Button(game, this, null, "Back", (game.getWidth() - 225) / 2, 400, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	game.settingsOpen = false;
+                    }, null));
+        	return buttons;
+        }, () -> {
+        	List<Slider> sliders = new ArrayList<>();
+        	
+        	sliders.add(new Slider(game, (game.getWidth() - 450), 50, 200, 100, 0, 100, 100, true));
+        	
+        	return sliders;
         });
+        
         
         if(game.getGameState() != GameState.waves) return;
             
@@ -202,10 +237,10 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	buttons.add(new Button(game, this, GameState.waves, "X", 0, 0, 50, 50,
                 Color.LIGHT_GRAY, Color.BLACK, () -> {
                     game.getWavesManager().getNPCManager().getPlayerUpgradeNPC().close();
-                }, null).setBorderRadius(50));
+                }, null));
         	
         	return buttons;
-        }).setPanel(new Panel(
+        }, null).setPanel(new Panel(
         	    (int) ((game.getWidth() - 275) / 1.2),  // x position, based on button alignment
         	    150,                                    // y position, starting above the first button
         	    350,                                    // width to fit buttons with padding
@@ -226,7 +261,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Turret", ((int) ((game.getWidth() - 225) / 1.2)), 300, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Turret",  50, 100, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         game.getPlayer().getPlaceableManager().purchase("turret");
                     }, 
@@ -243,7 +278,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     	return list;
                     })));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Landmine", ((int) ((game.getWidth() - 225) / 1.2)), 375, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Landmine", 50, 175, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         game.getPlayer().getPlaceableManager().purchase("landmine");
                     }, 
@@ -260,13 +295,22 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     	return list;
                     })));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "X", ((int) ((game.getWidth() - 225) / 1.2)), 200, 50, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "X", 0, 0, 50, 50,
                 Color.LIGHT_GRAY, Color.BLACK, () -> {
                     game.getWavesManager().getNPCManager().getCraftingTable().close();
                 }, null));
         	
         	return buttons;
-        });
+        }, null).setPanel(new Panel(
+        	    (int) ((game.getWidth() - 275) / 1.2),  // x position, based on button alignment
+        	    150,                                    // y position, starting above the first button
+        	    350,                                    // width to fit buttons with padding
+        	    800,                                    // height to cover all upgrade buttons
+        	    new Color(50, 50, 50, 180),             // bgColor, semi-transparent dark color
+        	    Color.BLACK,                            // borderColor, black for definition
+        	    20,                                     // borderRadius, for rounded corners
+        	    15                                      // padding for inner spacing
+        	));
     }
 	
 	public void render(Graphics g) {
@@ -322,9 +366,11 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 	        // Check if the GUI is currently active
 	        if (gui.getDecider().get()) {
 	            // Iterate through the buttons of the active GUI
-	            for (Button button : gui.getButtons()) {
+	            for (Button button : gui.getButtons().get()) {
+	            	if(gui.getPanel() != null && !button.adjustedPositionWithPanel) button.updatePositionWithPanel(gui.getPanel());
 	                // Check if the button was clicked
 	                if (button.isClicked(e)) {
+	                	game.getAudioPlayer().playSound("UI/button_click.wav", null);
 	                    button.click(); // Trigger the button's action
 	                    return; // Exit after clicking to avoid multiple activations
 	                }
@@ -359,25 +405,51 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 	public void onMouseMoved(MouseEvent e) {
 	    int mouseX = e.getX();
 	    int mouseY = e.getY();
-	    
-	    
+	    boolean currentlyOverButton = false;
+	    Button hoveredButton = null;
+
 	    // Iterate through all GUIs
 	    for (GUI gui : GUIs) {
 	        // Check if the GUI is currently active
+	    	boolean hasPanel = gui.getPanel() != null;
 	        if (gui.getDecider().get()) {
+	        	List<Button> buttons = gui.getButtons().get();
 	            // Iterate through the buttons of the active GUI
-	            for (Button button : gui.getButtons()) {
-	                // Check if the button is active and if the mouse is hovering over it
-	                if (button.getTooltip() != null && button.getTooltip().shouldShow(mouseX, mouseY, button.getX(), button.getY(), button.getWidth(), button.getHeight())) {
-	                    // Position the tooltip near the mouse cursor
-	                    button.getTooltip().setPosition(mouseX + 15, mouseY + 15);
-	                    // Store the button to render its tooltip later
-	                    activeTooltip = button.getTooltip();
-	                    return; // Exit after finding one tooltip to display
+	            for (Button button : buttons) {
+	            	if(hasPanel && !button.adjustedPositionWithPanel) button.updatePositionWithPanel(gui.getPanel());
+	                // Check if the mouse is hovering over the button
+	                if (mouseX >= button.getX() && mouseX <= button.getX() + button.getWidth()
+	                        && mouseY >= button.getY() && mouseY <= button.getY() + button.getHeight()) {
+	                    
+	                    currentlyOverButton = true;
+	                    hoveredButton = button;
+	                    hoveredButton.hovering = true;
+
+	                    // Play the hover sound only if entering a new button or a different button
+	                    if (!hoverSoundPlayed || lastHoveredButton != button.getText()) {
+	                        game.getAudioPlayer().playMusic("UI/button_hover.wav");
+	                        hoverSoundPlayed = true;
+	                        lastHoveredButton = button.getText();
+	                    }
+
+	                    // Check if the button has a tooltip and position it if needed
+	                    if (button.getTooltip() != null) {
+	                        button.getTooltip().setPosition(mouseX + 15, mouseY + 15);
+	                        activeTooltip = button.getTooltip();
+	                    }
+
+	                    return; // Exit after finding one button to hover over
 	                }
 	            }
 	        }
 	    }
+
+	    // Reset hover sound flag and last hovered button if no button is hovered over
+	    if (!currentlyOverButton) {
+	        hoverSoundPlayed = false;
+	        lastHoveredButton = null;
+	    }
+
 	    activeTooltip = null; // Reset if no button is hovered over
 	}
 
@@ -395,6 +467,10 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 
 	public void setActiveTooltip(Tooltip activeTooltip) {
 		this.activeTooltip = activeTooltip;
+	}
+
+	public String getLastHoveredButton() {
+		return lastHoveredButton;
 	}
 
 	

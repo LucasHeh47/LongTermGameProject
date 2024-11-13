@@ -117,5 +117,9 @@ public class Vector2D {
 	public Vector2D add(int i) {
 		return new Vector2D(this.x + i, this.y + i);
 	}
+	
+	public boolean isZero() {
+		return this.x == 0 && this.y == 0;
+	}
 }
 

@@ -48,7 +48,7 @@ public class Coin extends Collectible {
 	void collect(Player p) {
 		game.instantiatedCollectibles.remove(this);
 		CoinCollectedEvent e = new CoinCollectedEvent(cashAmount, p);
-		System.out.println("CSODSOOSO PICK P");
+		game.getAudioPlayer().playSound("/Collectible/coin.wav", this.position);
 		game.getEventManager().dispatchEvent(e);
 	}
 

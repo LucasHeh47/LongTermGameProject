@@ -7,8 +7,8 @@ import com.lucasj.gamedev.game.entities.placeables.Turret;
 
 public class PlayerPlaceableManager {
 	
-	public static final int turretCost = 0;
-	public static final int landmineCost = 0;
+	public static final int turretCost = 2000;
+	public static final int landmineCost = 500;
 
 	private Placeable equippedPlaceable;
 	
@@ -33,7 +33,7 @@ public class PlayerPlaceableManager {
 		switch (placeable) {
 		case "turret":
 			if(player.removeMoney(turretCost)) {
-				equippedPlaceable = new Turret(game, player, game.getCamera().screenToWorldPosition(player.getMousePosition()), 30, 30, null);
+				equippedPlaceable = new Turret(game, player, game.getCamera().screenToWorldPosition(player.getMousePosition()), 30, 120, null);
 				return true;
 			}
 			return false;
