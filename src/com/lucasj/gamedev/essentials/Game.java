@@ -224,7 +224,7 @@ public class Game {
     	menus.render(g2d);
  
 
-        this.getGraphicUtils().drawVignette(g2d, this.getWidth(), this.getHeight(), 0, 0, 0, 180);
+        //this.getGraphicUtils().drawVignette(g2d, this.getWidth(), this.getHeight(), 0, 0, 0, 160);
     }
     
     private void renderSurface(Graphics g, CollisionSurface surface) {

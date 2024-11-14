@@ -38,7 +38,7 @@ public class WavesManager {
 	private Random rand = new Random();
 	
 	// Base values
-    private final int BASE_HEALTH = 25;
+    private final int BASE_HEALTH = 50;
     private final int BASE_ENEMIES = 7; // default: 7
 
     // Growth rates

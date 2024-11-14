@@ -1,6 +1,7 @@
 package com.lucasj.gamedev.game.entities.player;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.game.weapons.Gun;
 
 public class PlayerUpgrades {
     
@@ -94,6 +95,42 @@ public class PlayerUpgrades {
     		return true;
     	}
     	return false;
+    }
+    
+    public boolean upgradeWeapon() {
+    	Gun weapon = this.player.getPrimaryGun();
+    	int amount = this.getWeaponUpgradeCost();
+		if(player.getMoney() >= amount && amount != -1) {
+			weapon.upgrade();
+			player.removeMoney(amount);
+			return true;
+		}
+		return false;
+    }
+    
+    public int getWeaponUpgradeCost() {
+    	Gun weapon = this.player.getPrimaryGun();
+    	switch(weapon.getTier()) {
+    	
+    	case Common:
+    		return 1500;
+    	case Uncommon:
+    		return 2500;
+    	case Rare:
+    		return 5000;
+    	case Epic:
+    		return 10000;
+    	case Legendary:
+    		return 17500;
+    	case Mythic:
+    		return 25000;
+    	case Godly:
+    		return -1;
+    		
+    	default:
+    		return -1;
+    	
+    	}
     }
     
     // Getters
