@@ -19,8 +19,6 @@ public abstract class AudioClip {
 	}
 	
 	public void update() {
-		FloatControl control = (FloatControl) clip.getControl(Type.MASTER_GAIN);
-		control.setValue(control.getMinimum()); // game settings music or sound volume
 	}
 	
 	protected abstract float getVolume();

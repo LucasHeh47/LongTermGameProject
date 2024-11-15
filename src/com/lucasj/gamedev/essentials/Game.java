@@ -90,6 +90,17 @@ public class Game {
     
     public Game(InputHandler input, GraphicUtils gUtils, SettingsManager settings, Dimension screen, Window window) {
     	gameData = new GameData("projectgame", "playerStats.dat");
+        
+        File fontFile = new File(SpriteTools.assetDirectory + "/DanielLinssen/m6x11.ttf");
+        try {
+            // Load the font file and derive it at a default size
+            font = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(Font.PLAIN, 24f);
+            // Register the font in the GraphicsEnvironment
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            ge.registerFont(font);
+        } catch (FontFormatException | IOException e) {
+            e.printStackTrace();
+        }
     	Player.getGlobalStats().load(gameData);
     	
     	socketClient = new GameClient(this, "localhost");
@@ -109,9 +120,9 @@ public class Game {
         paused = false;
         gameState = GameState.mainmenu;
         
-        menus = new Menus(this);
-
         this.input = input;
+        
+        menus = new Menus(this);
         input.addMouseClickListener(menus);
         input.addMouseMotionListener(menus);
         
@@ -130,17 +141,6 @@ public class Game {
         
         collisionSurfaces = new ConcurrentList<>();
         CollisionSurface surface = new CollisionSurface(this, new Vector2D(300, 400), 100, 500, Color.DARK_GRAY);
-        
-        File fontFile = new File(SpriteTools.assetDirectory + "/DanielLinssen/m6x11.ttf");
-        try {
-            // Load the font file and derive it at a default size
-            font = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(Font.PLAIN, 24f);
-            // Register the font in the GraphicsEnvironment
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            ge.registerFont(font);
-        } catch (FontFormatException | IOException e) {
-            e.printStackTrace();
-        }
         
     }
 

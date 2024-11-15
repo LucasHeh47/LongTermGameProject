@@ -156,6 +156,8 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	private long lastAttack;
 	protected int[] cashDrop = new int[2];
 	private List<Ray> rays = new ArrayList<>();
+	protected boolean isMoving = false;
+	protected float angleToPlayer;
 	
 	private Quadtree quadtree;
 	
@@ -190,13 +192,16 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		if(!isAlive) return;
 		// Health bar
 		g.setColor(Color.black);
-	    g.fillRect((int) (screenPosition.getX() - (size * 0.25)), (int) (screenPosition.getY() - (size * 0.6)),
-	               (int) (size + (size * 0.5)), (int) (size + (size * 0.5)) / 5);
+		int barWidth = (int) (size + (size * 0.075));
+		int barHeight = (int) (size * 0.05);
+		int barX = (int) (screenPosition.getX()+(size/2) - (barWidth / 2)-10);
+		int barY = (int) (screenPosition.getY() - (size * 0.2));
+		g.fillRect(barX, barY, barWidth, barHeight);
 
-	    g.setColor(Color.red);
-	    g.fillRect((int) (screenPosition.getX() - (size * 0.25)), (int) (screenPosition.getY() - (size * 0.6)),
-	               (int) ((size + (size * 0.5)) * ((double) health / maxHealth)),
-	               (int) (size + (size * 0.5)) / 5);
+		// Health portion of the bar
+		g.setColor(Color.red);
+		int healthWidth = (int) (barWidth * ((double) health / maxHealth));
+		g.fillRect(barX, barY, healthWidth, barHeight);
 
 	    Graphics2D g2d = (Graphics2D) g;
 	 // Render the ray if it exists
@@ -234,12 +239,20 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	public void update(double deltaTime) {
 		if(!isAlive) return;
 		super.update(deltaTime);
+		Vector2D oldPos = this.position.copy();
 		if(game.instantiatedEntitiesOnScreen.contains(this)) {
 	        applyFlockingBehavior(deltaTime);
 		    findNearestBreadcrumbToPlayer(deltaTime);
 		} else {
 			Debug.log(this, game.instantiatedEntitiesOnScreen.size());
 		}
+		this.isMoving = (this.position != oldPos);
+		
+		float dx = (float) ((game.getPlayer().getPosition().getX() + game.getPlayer().getSize()/2) - this.getPosition().getX());
+		float dy = (float) ((game.getPlayer().getPosition().getY() + game.getPlayer().getSize()/2) - this.getPosition().getY());
+
+		this.angleToPlayer = (float) (Math.atan2(dy, dx)+Math.PI/2);
+		
 		this.attackPlayer();
 	}
 	

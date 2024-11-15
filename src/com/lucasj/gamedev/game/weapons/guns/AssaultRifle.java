@@ -20,6 +20,7 @@ public class AssaultRifle extends Gun {
 				3, // Reload speed
 				true, // Automatic
 				0.23f, // Bloom
+				"GunFire/AR/gunshot.wav",
 				SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Guns/AR_AK_47.png", new Vector2D(0, 0), new Vector2D(128, 64)));
 	}
 

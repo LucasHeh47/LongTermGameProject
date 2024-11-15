@@ -138,7 +138,9 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         }, () -> {
         	List<Slider> sliders = new ArrayList<>();
         	
-        	sliders.add(new Slider(game, (game.getWidth() - 450), 50, 200, 100, 0, 100, 100, true));
+        	sliders.add(new Slider(game, (game.getWidth() - 600), (int) (game.getHeight() - (game.getHeight() * (0.75))), 200, 25, 0, 100, "master_volume", true));
+        	sliders.add(new Slider(game, (game.getWidth() - 600), (int) (game.getHeight() - (game.getHeight() * (0.5))), 200, 25, 0, 100, "sound_volume", true));
+        	sliders.add(new Slider(game, (game.getWidth() - 600), (int) (game.getHeight() - (game.getHeight() * (0.25))), 200, 25, 0, 100, "music_volume", true));
         	
         	return sliders;
         });
@@ -452,7 +454,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 
 	                    // Play the hover sound only if entering a new button or a different button
 	                    if (!hoverSoundPlayed || lastHoveredButton != button.getText()) {
-	                        game.getAudioPlayer().playMusic("UI/button_hover.wav");
+	                        game.getAudioPlayer().playSound("UI/button_hover.wav", null);
 	                        hoverSoundPlayed = true;
 	                        lastHoveredButton = button.getText();
 	                    }

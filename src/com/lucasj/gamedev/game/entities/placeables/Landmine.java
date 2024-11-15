@@ -54,7 +54,7 @@ public class Landmine extends Placeable {
 	    Debug.log(this, "Collision");
 	    
 	    List<LandmineEnemyDistanceData> enemiesHit = Enemy.getEntitiesInLandmineRadius(game, position.add(this.size / 2), radius);
-	    
+	    game.getAudioPlayer().playSound("Landmine/landmine.wav", this.position);
 	    enemiesHit.forEach(data -> {
 	        if (data.getEntity() instanceof Enemy) {
 	            Enemy enemy = (Enemy) data.getEntity();

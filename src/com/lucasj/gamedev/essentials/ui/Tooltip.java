@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.misc.Debug;
 
 public class Tooltip {
     private String text;
@@ -115,7 +116,7 @@ public class Tooltip {
         }
 
         // Calculate the final box dimensions
-        int boxWidth = Math.max(textWidth, 400) + padding * 2;
+        int boxWidth = subText != "" ? Math.max(textWidth, 400) + padding * 2 : Math.min(textWidth, 400) + padding * 2;
         int boxHeight = textHeight + (subText.isEmpty() ? 0 : subTextHeight) + padding * 2;
 
         // Draw the background box with padding

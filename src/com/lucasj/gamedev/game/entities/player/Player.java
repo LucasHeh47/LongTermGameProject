@@ -441,7 +441,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		this.primaryGun.useRound();
 		if(!this.primaryGun.isAutomatic()) this.playerAttacking = false;
 		b.instantiate();
-		game.getAudioPlayer().playMusic("GunFire/gunshot.wav");
+		game.getAudioPlayer().playSound(primaryGun.getGunFireSound(), b.getPosition());
 		PlayerAttackEvent e = new PlayerAttackEvent(b, damage);
 		b.setPlayerAttackEvent(e);
 		game.getEventManager().dispatchEvent(e);
@@ -503,10 +503,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
         if(e.getKeyCode() == KeyEvent.VK_D) {
         	WASD[3] = true;
         	currentWalkingImage = 4;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_E) {
-    		this.primaryGun.upgrade();
-    		Debug.log(this, this.primaryGun.getTier());
         }
         if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
         	isReadyToSprint = true;

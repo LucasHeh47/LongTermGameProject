@@ -11,7 +11,7 @@ public class MusicClip extends AudioClip {
 	public MusicClip(Clip clip, Game game, float sound) {
 		super(clip, game, sound);
 		FloatControl control = (FloatControl) clip.getControl(Type.MASTER_GAIN);
-		control.setValue(getVolume() * sound);
+		control.setValue(getVolume() * sound * (game.getSettings().getIntSetting("music_volume")/100) * (game.getSettings().getIntSetting("master_volume")/100));
 		clip.start();
 	}
 

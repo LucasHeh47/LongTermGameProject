@@ -23,12 +23,14 @@ public abstract class Gun {
 	
 	protected Image UIImage;
 	
+	protected String gunFireSound;
+	
 	protected Tier tier = Tier.Common;
 	
 	protected boolean isReloading = false;
 	protected long reloadStartTime;
 	
-	public Gun(Game game, Player p, float damage, float projectileSpeed, float fireRate, int clipSize, float range, GunType gunType, float reloadSpeed, boolean isAutomatic, float bloom, Image ui) {
+	public Gun(Game game, Player p, float damage, float projectileSpeed, float fireRate, int clipSize, float range, GunType gunType, float reloadSpeed, boolean isAutomatic, float bloom, String fireSoundDir, Image ui) {
 		this.game = game;
 		this.p = p;
         this.damage = damage;
@@ -42,6 +44,7 @@ public abstract class Gun {
         this.isAutomatic = isAutomatic;
         this.UIImage = ui;
         this.bloom = bloom;
+        this.gunFireSound = fireSoundDir;
     }
 	
 	public void fire() {
@@ -126,6 +129,10 @@ public abstract class Gun {
 
 	public Image getUIImage() {
 		return UIImage;
+	}
+
+	public String getGunFireSound() {
+		return gunFireSound;
 	}
 	
 }

@@ -20,6 +20,7 @@ public class Sniper extends Gun {
 				3, // Reload speed
 				false, // Automatic
 				0.1f, // Bloom
+				"GunFire/Sniper/gunshot.wav",
 				SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Guns/Sniper.png", new Vector2D(0, 0), new Vector2D(128, 64)));
 		this.pierce = 2;
 	}

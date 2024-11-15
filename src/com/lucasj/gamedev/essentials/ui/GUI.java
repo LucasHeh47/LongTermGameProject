@@ -2,6 +2,7 @@ package com.lucasj.gamedev.essentials.ui;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -12,7 +13,7 @@ public class GUI {
 	private Game game;
 	private Supplier<Boolean> decider;
 	private Supplier<List<Button>> buttons;
-	private Supplier<List<Slider>> sliders;
+	private List<Slider> sliders;
 	private Menus menus;
 	private Panel panel;
 	
@@ -20,7 +21,7 @@ public class GUI {
 		this.game = game;
 		this.decider = decider;
 		this.buttons = buttons;
-		this.sliders = sliders;
+		if(sliders != null) this.sliders = sliders.get();
 		this.menus = menus;
 		menus.addGUI(this);
 	}
@@ -31,7 +32,7 @@ public class GUI {
 			if (panel != null) {
                 panel.render(g2d);   
             }
-			if (sliders != null) for (Slider slider : sliders.get()) {
+			if (sliders != null) for (Slider slider : sliders) {
 				slider.render(g2d);
 			}
 			if(buttons != null) for (Button button : buttons.get()) {
@@ -62,7 +63,7 @@ public class GUI {
 		return this;
 	}
 
-	public Supplier<List<Slider>> getSliders() {
+	public List<Slider> getSliders() {
 		return sliders;
 	}
 }
