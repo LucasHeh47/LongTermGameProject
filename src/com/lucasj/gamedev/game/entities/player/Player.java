@@ -31,8 +31,8 @@ import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
 import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
+import com.lucasj.gamedev.game.weapons.guns.SMG;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.utils.ConcurrentList;
 
 public class Player extends Entity implements PlayerMP, MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
@@ -88,7 +88,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	private PlayerRewarder playerRewarder;
 	
 	private int money = 5000000;
-	private int gems = 2000000;
+	private int gems = 0;
 	
 	private long lastWalkSound;
 	private float walkSoundCooldown = 0.5f;

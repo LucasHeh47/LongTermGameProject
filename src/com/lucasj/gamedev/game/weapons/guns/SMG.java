@@ -7,21 +7,21 @@ import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.game.weapons.GunType;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
-public class AssaultRifle extends Gun {
+public class SMG extends Gun {
 
-	public AssaultRifle(Game game, Player p) {
+	public SMG(Game game, Player p) {
 		super(game, p, 
-				25, // Base damage
-				40, // Projectile speed
-				0.1f, // Fire rate
-				30, // Clip size
-				3, // range (seconds
+				13, // Base damage
+				25, // Projectile speed
+				0.25f, // Fire rate
+				20, // Clip size
+				1.5f, // range (seconds
 				GunType.AR, // Type
-				3, // Reload speed
+				2.5f, // Reload speed
 				true, // Automatic
-				0.23f, // Bloom
-				"GunFire/AR/gunshot.wav",
-				SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Guns/AR_AK_47.png", new Vector2D(0, 0), new Vector2D(128, 64)));
+				0.33f, // Bloom
+				"GunFire/SMG/gunshot.wav",
+				SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Guns/SMG.png", new Vector2D(0, 0), new Vector2D(128, 64)));
 	}
 
 }

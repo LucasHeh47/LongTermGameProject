@@ -19,7 +19,7 @@ import com.lucasj.gamedev.world.particles.ParticleEmitter;
 
 public class WavesManager {
 
-	private int wave = 0;
+	private int wave = 25;
 	private int enemiesKilledThisWave;
 	private int enemiesThisWave;
 	private int enemiesSpawnedThisWave;
@@ -47,7 +47,7 @@ public class WavesManager {
 	
 	public WavesManager(Game game) {
 		this.game = game;
-		spawnRate = 1.5f;
+		spawnRate = 0.1f;
 	}
 	
 	public void startWaves() {
@@ -139,7 +139,7 @@ public class WavesManager {
 	    }
 
 	    // Check if the wave should transition to the next
-	    if (enemiesKilledThisWave == enemiesThisWave) {
+	    if (enemiesKilledThisWave >= enemiesThisWave) {
 	        WaveEndEvent e = new WaveEndEvent(wave);
 	        this.game.getEventManager().dispatchEvent(e);
 	        newWave();
