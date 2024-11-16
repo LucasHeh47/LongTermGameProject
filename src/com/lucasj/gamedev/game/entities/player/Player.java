@@ -31,7 +31,7 @@ import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
 import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
-import com.lucasj.gamedev.game.weapons.guns.SMG;
+import com.lucasj.gamedev.game.weapons.guns.Shotgun;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.utils.ConcurrentList;
 
@@ -412,35 +412,55 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private void attack(double deltaTime) {
 		if(!isClickAnAttack() || this.primaryGun.isReloading()) return;
-		float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
-		float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
 		
 		// Implement the guns fire() method
 		game.getCamera().shake(1, 50);
+		if(this.primaryGun instanceof Shotgun) {
+			float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
+			float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
+			
+			for (int i = -4; i < 5; i++) {
+				
+				// Skew bullet angle
+				Vector2D vel = new Vector2D(dx, dy).normalize();
+				vel = new Vector2D(vel.getX(), vel.getY());
+				
+				double bloomX = (Math.random() - 0.5) * this.getPrimaryGun().getBloom(); // Random deviation between -0.375 and 0.375
+			    double bloomY = (Math.random() - 0.5) * this.getPrimaryGun().getBloom();
 		
-		Vector2D vel = new Vector2D(dx, dy).normalize();
-		
-
-	    // Apply bloom by introducing random deviations to the velocity
-	    double bloomX = (Math.random() - 0.5) * this.getPrimaryGun().getBloom(); // Random deviation between -0.375 and 0.375
-	    double bloomY = (Math.random() - 0.5) * this.getPrimaryGun().getBloom();
-
-	    // Add the bloom to the normalized direction
-	    Vector2D bloomedVelocity = new Vector2D(vel.getX() + bloomX, vel.getY() + bloomY).normalize();
-		
-		Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed()*25*deltaTime);
-		
-		int damage = (int) ((10 + this.primaryGun.getDamage()) * this.getPlayerUpgrades().getDamageMultiplier());
-		Bullet b = new Bullet(game, this, this.position, 
-				bulletVelocity, 
-				10, 
-				null, 
-				2, 
-				damage);
-		b.setPierce(this.getPrimaryGun().getPierce());
-		this.primaryGun.useRound();
-		if(!this.primaryGun.isAutomatic()) this.playerAttacking = false;
-		b.instantiate();
+			    Vector2D bloomedVelocity = new Vector2D(vel.getX() + bloomX, vel.getY() + bloomY).normalize();
+				
+				Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed()*25*deltaTime);
+				
+			    
+			}
+			
+		} else {
+			float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
+			float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
+			Vector2D vel = new Vector2D(dx, dy).normalize();
+			
+		    // Apply bloom by introducing random deviations to the velocity
+		    double bloomX = (Math.random() - 0.5) * this.getPrimaryGun().getBloom(); // Random deviation between -0.375 and 0.375
+		    double bloomY = (Math.random() - 0.5) * this.getPrimaryGun().getBloom();
+	
+		    // Add the bloom to the normalized direction
+		    Vector2D bloomedVelocity = new Vector2D(vel.getX() + bloomX, vel.getY() + bloomY).normalize();
+			
+			Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed()*25*deltaTime);
+			
+			int damage = (int) ((10 + this.primaryGun.getDamage()) * this.getPlayerUpgrades().getDamageMultiplier());
+			Bullet b = new Bullet(game, this, this.position, 
+					bulletVelocity, 
+					10, 
+					null, 
+					2, 
+					damage);
+			b.setPierce(this.getPrimaryGun().getPierce());
+			this.primaryGun.useRound();
+			if(!this.primaryGun.isAutomatic()) this.playerAttacking = false;
+			b.instantiate();
+		}
 		game.getAudioPlayer().playSound(primaryGun.getGunFireSound(), b.getPosition());
 		PlayerAttackEvent e = new PlayerAttackEvent(b, damage);
 		b.setPlayerAttackEvent(e);
