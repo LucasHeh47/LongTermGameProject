@@ -20,7 +20,6 @@ import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.events.input.KeyboardEventListener;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
-import com.lucasj.gamedev.events.player.PlayerAttackEvent;
 import com.lucasj.gamedev.events.player.PlayerDamageTakenEvent;
 import com.lucasj.gamedev.events.player.PlayerMoveEvent;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
@@ -33,6 +32,7 @@ import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
 import com.lucasj.gamedev.game.weapons.guns.Shotgun;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.utils.ConcurrentList;
 
 public class Player extends Entity implements PlayerMP, MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
@@ -108,7 +108,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		input.addMouseClickListener(this);
 		input.addMouseMotionListener(this);
 		
-		this.primaryGun = new AssaultRifle(game, this);
+		this.primaryGun = new Shotgun(game, this);
 		
 		walking = new BufferedImage[4][4];
 		for(int i = 0; i < 4; i++) {
@@ -127,6 +127,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		crumbCache.updateDistances(new ArrayList<>(crumbManager.activeBreadcrumbs));
 		this.primaryGun.update();
 		move(deltaTime);
+		
 		if(playerAttacking && (System.currentTimeMillis() - lastAttack)/1000.0 > primaryGun.getFireRate()) attack(deltaTime);
 		crumbManager.update(deltaTime);
 		float checkAnimationSpeed = animationSpeed;
@@ -324,7 +325,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    if (WASD[3]) { // D - Move right
 	        camPosUpdate.addX(1);
 	    }
-
+	    
 	    camPosUpdate = camPosUpdate.normalize();
 	    if (camPosUpdate.distanceTo(Vector2D.zero()) != 0) {
 	        isMoving = true;
@@ -417,23 +418,53 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		game.getCamera().shake(1, 50);
 		if(this.primaryGun instanceof Shotgun) {
 			float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
-			float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
-			
-			for (int i = -4; i < 5; i++) {
-				
-				// Skew bullet angle
-				Vector2D vel = new Vector2D(dx, dy).normalize();
-				vel = new Vector2D(vel.getX(), vel.getY());
-				
-				double bloomX = (Math.random() - 0.5) * this.getPrimaryGun().getBloom(); // Random deviation between -0.375 and 0.375
-			    double bloomY = (Math.random() - 0.5) * this.getPrimaryGun().getBloom();
-		
-			    Vector2D bloomedVelocity = new Vector2D(vel.getX() + bloomX, vel.getY() + bloomY).normalize();
-				
-				Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed()*25*deltaTime);
-				
-			    
-			}
+		    float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
+
+		    Vector2D baseVelocity = new Vector2D(dx, dy).normalize();
+
+		    for (int i = -2; i <= 2; i++) {
+		        // Calculate the angle offset for each bullet
+		        double angleOffset = Math.toRadians(5 * i); // 5 degrees for each step
+		        double cos = Math.cos(angleOffset);
+		        double sin = Math.sin(angleOffset);
+
+		        // Apply rotation to the base velocity
+		        Vector2D rotatedVelocity = new Vector2D(
+		            baseVelocity.getX() * cos - baseVelocity.getY() * sin,
+		            baseVelocity.getX() * sin + baseVelocity.getY() * cos
+		        ).normalize();
+
+		        // Apply bloom to the rotated velocity
+		        double bloomX = (Math.random() - 0.5) * this.primaryGun.getBloom(); // Random deviation for bloom
+		        double bloomY = (Math.random() - 0.5) * this.primaryGun.getBloom();
+		        Vector2D bloomedVelocity = new Vector2D(
+		            rotatedVelocity.getX() + bloomX,
+		            rotatedVelocity.getY() + bloomY
+		        ).normalize();
+
+		        // Calculate the final bullet velocity
+		        Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed() * 25 * deltaTime);
+
+		        // Create and instantiate the bullet
+		        int damage = (int) ((10 + this.primaryGun.getDamage()) * this.getPlayerUpgrades().getDamageMultiplier());
+		        Bullet b = new Bullet(
+		            game, 
+		            this, 
+		            this.position, 
+		            bulletVelocity, 
+		            10, 
+		            null, 
+		            this.getPrimaryGun().getRange(), 
+		            damage
+		        );
+		        b.setPierce(this.getPrimaryGun().getPierce());
+		        b.instantiate();
+		    }
+	        this.primaryGun.useRound();
+
+		    if (!this.primaryGun.isAutomatic()) {
+		        this.playerAttacking = false;
+		    }
 			
 		} else {
 			float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
@@ -454,17 +485,17 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 					bulletVelocity, 
 					10, 
 					null, 
-					2, 
+		            this.getPrimaryGun().getRange(), 
 					damage);
 			b.setPierce(this.getPrimaryGun().getPierce());
 			this.primaryGun.useRound();
 			if(!this.primaryGun.isAutomatic()) this.playerAttacking = false;
 			b.instantiate();
 		}
-		game.getAudioPlayer().playSound(primaryGun.getGunFireSound(), b.getPosition());
-		PlayerAttackEvent e = new PlayerAttackEvent(b, damage);
-		b.setPlayerAttackEvent(e);
-		game.getEventManager().dispatchEvent(e);
+		game.getAudioPlayer().playSound(primaryGun.getGunFireSound(), this.getPosition());
+//		PlayerAttackEvent e = new PlayerAttackEvent(b, damage);
+//		b.setPlayerAttackEvent(e);
+		//game.getEventManager().dispatchEvent(e);
 		lastAttack = System.currentTimeMillis();
 	}
 	

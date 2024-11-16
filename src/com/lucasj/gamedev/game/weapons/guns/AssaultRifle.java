@@ -13,9 +13,9 @@ public class AssaultRifle extends Gun {
 		super(game, p, 
 				25, // Base damage
 				40, // Projectile speed
-				0.1f, // Fire rate
+				0.5f, // Fire rate
 				30, // Clip size
-				3, // range (seconds
+				1f, // range (seconds
 				GunType.AR, // Type
 				3, // Reload speed
 				true, // Automatic

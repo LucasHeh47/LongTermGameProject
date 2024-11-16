@@ -15,7 +15,7 @@ public class Sniper extends Gun {
 				100, // Projectile speed
 				3f, // Fire rate
 				1, // Clip size
-				4, // range (seconds
+				3, // range (seconds
 				GunType.AR, // Type
 				3, // Reload speed
 				false, // Automatic

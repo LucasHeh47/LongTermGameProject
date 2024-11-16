@@ -13,14 +13,16 @@ public class GUI {
 	private Game game;
 	private Supplier<Boolean> decider;
 	private Supplier<List<Button>> buttons;
+	private List<Label> labels;
 	private List<Slider> sliders;
 	private Menus menus;
 	private Panel panel;
 	
-	public GUI(Game game, Menus menus, Supplier<Boolean> decider, Supplier<List<Button>> buttons, Supplier<List<Slider>> sliders) {
+	public GUI(Game game, Menus menus, Supplier<Boolean> decider, Supplier<List<Button>> buttons, Supplier<List<Slider>> sliders, Supplier<List<Label>> labels) {
 		this.game = game;
 		this.decider = decider;
 		this.buttons = buttons;
+		if(labels != null) this.labels = labels.get();
 		if(sliders != null) this.sliders = sliders.get();
 		this.menus = menus;
 		menus.addGUI(this);
@@ -34,6 +36,9 @@ public class GUI {
             }
 			if (sliders != null) for (Slider slider : sliders) {
 				slider.render(g2d);
+			}
+			if (labels != null) for (Label label : labels) {
+				label.render(g2d);
 			}
 			if(buttons != null) for (Button button : buttons.get()) {
 				if(!button.adjustedPositionWithPanel && panel != null) button.updatePositionWithPanel(panel);

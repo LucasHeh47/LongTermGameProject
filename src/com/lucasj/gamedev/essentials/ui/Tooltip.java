@@ -66,7 +66,7 @@ public class Tooltip {
         this.textColor = textColor;
         this.game = game;
         this.font = game.font;
-        this.requirements = requirements.get();
+        if(requirements != null) this.requirements = requirements.get();
         this.finalSubText = buildFinalSubText();
     }
     

@@ -15,7 +15,7 @@ public class SMG extends Gun {
 				25, // Projectile speed
 				0.25f, // Fire rate
 				20, // Clip size
-				1.5f, // range (seconds
+				0.8f, // range (seconds
 				GunType.AR, // Type
 				2.5f, // Reload speed
 				true, // Automatic

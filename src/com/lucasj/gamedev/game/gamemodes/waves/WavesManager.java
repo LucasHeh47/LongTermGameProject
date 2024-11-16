@@ -19,7 +19,7 @@ import com.lucasj.gamedev.world.particles.ParticleEmitter;
 
 public class WavesManager {
 
-	private int wave = 25;
+	private int wave = 0;
 	private int enemiesKilledThisWave;
 	private int enemiesThisWave;
 	private int enemiesSpawnedThisWave;
@@ -30,6 +30,8 @@ public class WavesManager {
 	
 	private Game game;
 	private WavesEnemySpawner enemySpawner;
+	
+	private boolean hasGameStarted = false;
 	
 	private NPCManager npcManager;
 	
@@ -51,6 +53,7 @@ public class WavesManager {
 	}
 	
 	public void startWaves() {
+		this.hasGameStarted = true;
 		wave = 0;
 		enemySpawner = new WavesEnemySpawner(game);
 		game.instantiatedEntities.clear();
@@ -58,7 +61,6 @@ public class WavesManager {
 		game.instantiatedCollectibles.clear();
 		npcManager = new NPCManager(game, game.getPlayer());
 		npcManager.instantiateNPCs();
-		newWave();
 	}
 	
 	public void newWave() {
@@ -73,8 +75,9 @@ public class WavesManager {
 	}
 	
 	public void update(double deltaTime) {
+		if(!hasGameStarted) return;
 		if(game.isPaused()) return;
-		
+		game.getPlayer().update(deltaTime);
 	    // Update all collision surfaces
 	    game.getCollisionSurfaces().forEach(surf -> surf.update(deltaTime));
 
@@ -197,6 +200,14 @@ public class WavesManager {
 
 	public NPCManager getNPCManager() {
 		return npcManager;
+	}
+
+	public boolean hasGameStarted() {
+		return hasGameStarted;
+	}
+
+	public void setHasGameStarted(boolean hasGameStarted) {
+		this.hasGameStarted = hasGameStarted;
 	}
 
 }

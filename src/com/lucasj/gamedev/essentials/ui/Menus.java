@@ -1,19 +1,14 @@
 package com.lucasj.gamedev.essentials.ui;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
@@ -21,6 +16,10 @@ import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.PlayerPlaceableManager;
 import com.lucasj.gamedev.game.weapons.Tier;
+import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
+import com.lucasj.gamedev.game.weapons.guns.SMG;
+import com.lucasj.gamedev.game.weapons.guns.Shotgun;
+import com.lucasj.gamedev.game.weapons.guns.Sniper;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.utils.ConcurrentList;
@@ -61,6 +60,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                game.setGameState(GameState.wavesmenu);
     	                game.getMapManager().map.generateMap();
+    	                game.getWavesManager().setHasGameStarted(false);
     	            }, null).setBorderRadius(20));
     		
     	    buttons.add(new Button(game, this, GameState.mainmenu, "Settings", (game.getWidth() - 225) / 2, 300, 250, 50,
@@ -69,7 +69,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	    buttons.add(new Button(game, this, GameState.mainmenu, "Exit", (game.getWidth() - 225) / 2, 400, 250, 50,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> System.exit(0), null).setBorderRadius(20));
     	    return buttons;
-    	}, null);
+    	}, null, null);
     	
     
     	GUI wavesMenu = new GUI(game, this, () -> {
@@ -81,7 +81,6 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                game.setGameState(GameState.waves);
     	                game.getMapManager().map.generateMap();
-    	                game.getWavesManager().startWaves();
     	                game.instantiatePlayer();
     	                this.createGUIs();
     	            }, null).setBorderRadius(20));
@@ -99,7 +98,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	                    game.getMapManager().map.generateMap();
     	                }, null).setBorderRadius(20));
     	    return buttons;
-    	}, null);
+    	}, null, null);
         
         GUI pausedGame = new GUI(game, this, () -> {
         	return game.getGameState() == GameState.waves && game.isPaused() && !game.settingsOpen;
@@ -123,7 +122,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                         game.setPaused(false);
                     }, null));
             return buttons;
-        }, null);
+        }, null, null);
         
         
         GUI settingsMenu = new GUI(game, this, () -> {
@@ -143,10 +142,51 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	sliders.add(new Slider(game, (game.getWidth() - 600), (int) (game.getHeight() - (game.getHeight() * (0.25))), 200, 25, 0, 100, "music_volume", true));
         	
         	return sliders;
-        });
+        }, null);
         
         
         if(game.getGameState() != GameState.waves) return;
+        
+        GUI selectAClassMenu = new GUI(game, this, () -> {
+        	return game.getGameState() == GameState.waves && !game.getWavesManager().hasGameStarted();
+        }, () -> {
+        	List<Button> buttons = new ArrayList<>();
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Commando", this.game.getWidth()/3 - 250, this.game.getHeight()/5 + (this.game.getHeight()/4), 500, 150,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.getWavesManager().startWaves();
+                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
+                    }, 
+                    new Tooltip(game, "Assault Rifle", "{GREEN}- Good Control{NL}- Good Damage {NL}{YELLOW}- Medium Range{NL}{YELLOW}- Medium Fire Rate",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, null)).setBorderRadius(10));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Vanguard", this.game.getWidth()/3 - 250, this.game.getHeight()/3 + (this.game.getHeight()/4), 500, 150,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.getWavesManager().startWaves();
+                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+                    }, 
+                    new Tooltip(game, "SMG", "{GREEN}- Fast Fire Rate{NL}{YELLOW}- Medium Control{NL}{RED}- Close Range{NL}- Low Damage",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, null)).setBorderRadius(10));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Breaker", (int) (this.game.getWidth()/1.5) - 250, this.game.getHeight()/3 + (this.game.getHeight()/4), 500, 150,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.getWavesManager().startWaves();
+                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+                    }, 
+                    new Tooltip(game, "Shotgun", "{GREEN}- Shoots Pellets{NL}- Medium-High Damage{NL}{YELLOW}- Area Damage{NL}{RED}- Close Range{NL}{RED}- Medium-Slow Fire Rate{NL}{RED}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, null)).setBorderRadius(10));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Rifleman", (int) (this.game.getWidth()/1.5) - 250, this.game.getHeight()/5 + (this.game.getHeight()/4), 500, 150,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        game.getWavesManager().startWaves();
+                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+                    }, 
+                    new Tooltip(game, "Sniper", "{GREEN}- High Damage{NL}{GREEN}- Long Range{NL}{GREEN}- Pierces through enemies{NL}{RED}- Slow Fire Rate{NL}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, null)).setBorderRadius(10));
+        	
+        	return buttons;
+        }, null, () -> {
+        	List<Label> labels = new ArrayList<>();
+        	labels.add(new Label(game, this, GameState.waves, "Select Your Class", 10, true, this.game.getWidth()/2, this.game.getHeight()/6, 156, Color.black));
+        	labels.add(new Label(game, this, GameState.waves, "[!] Can change later in game for a price", 50, true, this.game.getWidth()/2, this.game.getHeight()/3, 16, Color.DARK_GRAY));
+        	return labels;
+        });
             
         // NPCS ------------
         
@@ -267,7 +307,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                 }, null));
         	
         	return buttons;
-        }, null).setPanel(new Panel(
+        }, null, null).setPanel(new Panel(
         	    (int) ((game.getWidth() - 275) / 1.2),  // x position, based on button alignment
         	    150,                                    // y position, starting above the first button
         	    350,                                    // width to fit buttons with padding
@@ -328,7 +368,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                 }, null));
         	
         	return buttons;
-        }, null).setPanel(new Panel(
+        }, null, null).setPanel(new Panel(
         	    (int) ((game.getWidth() - 275) / 1.2),  // x position, based on button alignment
         	    150,                                    // y position, starting above the first button
         	    350,                                    // width to fit buttons with padding
