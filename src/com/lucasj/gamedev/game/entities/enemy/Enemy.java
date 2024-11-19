@@ -139,9 +139,9 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	abstract void setCashDrop();
 	abstract void setDamageMultiplier();
 	
-	private static final double SEPARATION_RADIUS = 50; // Distance to keep between enemies
-    private static final double ALIGNMENT_RADIUS = 100.0; // Distance within which to align with others
-    private static final double COHESION_RADIUS = 100.0; // Distance within which to group together
+	private static final double SEPARATION_RADIUS = 150; // Distance to keep between enemies
+    private static final double ALIGNMENT_RADIUS = 800.0; // Distance within which to align with others
+    private static final double COHESION_RADIUS = 400.0; // Distance within which to group together
     private final double MAX_FORCE = this.movementSpeed; // Max steering force applied to enemies
 	
 	private static final Map<Class<? extends Enemy>, EnemyWavesData> wavesDataMap = new HashMap<>();
@@ -172,6 +172,8 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		lastAttack = System.currentTimeMillis();
 		this.setCashDrop();
 		this.setDamageMultiplier();
+		this.setHealthMultiplier();
+		this.setMovementSpeedMultiplier();
 	}
 	
 	private class Ray {
@@ -255,6 +257,9 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		
 		this.attackPlayer();
 	}
+	
+	public abstract void setHealthMultiplier();
+	public abstract void setMovementSpeedMultiplier();
 	
 	public void entityDeath() {
 		Random rand = new Random();

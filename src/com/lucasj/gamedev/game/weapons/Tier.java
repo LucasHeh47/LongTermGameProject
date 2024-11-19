@@ -124,5 +124,18 @@ public enum Tier {
         }
     }
 	
+	public int MissionFrenzyDividend() {
+		switch (this) {
+        case Common: return 1;
+        case Uncommon: return 1;
+        case Rare: return 2;
+        case Epic: return 3;
+        case Legendary: return 7;
+        case Mythic: return 10;
+        case Divine: return 15;
+        case Ethereal: return 20;
+        default: return 10;
+		}
+	}
 	
 }

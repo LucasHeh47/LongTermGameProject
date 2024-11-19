@@ -3,6 +3,7 @@ package com.lucasj.gamedev.game.weapons;
 import java.awt.Image;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.events.weapons.WeaponTierUpgradeEvent;
 import com.lucasj.gamedev.game.entities.player.Player;
 
 public abstract class Gun {
@@ -63,6 +64,8 @@ public abstract class Gun {
 	
 	public void upgrade() {
 		this.tier = this.tier.upgrade();
+		WeaponTierUpgradeEvent e = new WeaponTierUpgradeEvent(game.getPlayer(), this.tier);
+		game.getEventManager().dispatchEvent(e);
 	}
 	
 	public Tier getNextTier() {

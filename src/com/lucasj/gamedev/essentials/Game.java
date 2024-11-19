@@ -20,8 +20,10 @@ import com.lucasj.gamedev.events.EventManager;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.collectibles.Collectible;
+import com.lucasj.gamedev.game.entities.enemy.Beast;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.enemy.Skeleton;
+import com.lucasj.gamedev.game.entities.enemy.Slime;
 import com.lucasj.gamedev.game.entities.enemy.Zombie;
 import com.lucasj.gamedev.game.entities.placeables.Landmine;
 import com.lucasj.gamedev.game.entities.player.Player;
@@ -30,7 +32,6 @@ import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.game.multiplayer.GameClient;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.os.GameData;
 import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.settings.SettingsManager;
@@ -189,6 +190,8 @@ public class Game {
     	System.out.println("Initialzing enemy types...");
     	this.referenceEnemy(Zombie.class);
     	this.referenceEnemy(Skeleton.class);
+    	this.referenceEnemy(Slime.class);
+    	this.referenceEnemy(Beast.class);
     }
     
     public void referenceEnemy(Class<? extends Enemy> enemy) {

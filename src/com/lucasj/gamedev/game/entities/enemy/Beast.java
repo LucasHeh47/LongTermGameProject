@@ -12,24 +12,24 @@ import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
-public class Skeleton extends Enemy {
+public class Beast extends Enemy {
 	
 	public static void initializeClass(){
-		registerEnemyType(Skeleton.class, new EnemyWavesData(3, 10));
+		registerEnemyType(Beast.class, new EnemyWavesData(12, 3));
     }
 	private BufferedImage[][] walking;
 	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right
-	private float animationSpeed = 0.1f;
+	private float animationSpeed = 0.075f;
 	private int animationTick = 1;
 	private long lastAnimationUpdate;
 
-	public Skeleton(Game game, Vector2D position, int maxHealth, int movementSpeed, int size,
+	public Beast(Game game, Vector2D position, int maxHealth, int movementSpeed, int size,
 			String tag) {
 		super(game, position, new Vector2D(0, 0), maxHealth, movementSpeed, size, tag);
 		walking = new BufferedImage[4][4];
 		for(int i = 0; i < 4; i++) {
 			for (int j = 0; j<4; j++) {
-				walking[i][j] = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Enemies/Skeleton/Walk.png", new Vector2D(i*16, j*16), new Vector2D(16, 16));
+				walking[i][j] = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Enemies/Beast/Beast.png", new Vector2D(i*16, j*16), new Vector2D(16, 16));
 			}
 		}
 	}
@@ -114,8 +114,8 @@ public class Skeleton extends Enemy {
 
 	@Override
 	void setCashDrop() {
-		this.cashDrop[0] = 30;
-		this.cashDrop[1] = 55;
+		this.cashDrop[0] = 250;
+		this.cashDrop[1] = 500;
 	}
 
 	@Override
@@ -126,18 +126,18 @@ public class Skeleton extends Enemy {
 
 	@Override
 	void setDamageMultiplier() {
-		this.damageMultiplier = 1.3f;
+		this.damageMultiplier = 5f;
 	}
 
 	@Override
 	public void setHealthMultiplier() {
-		this.maxHealth = this.maxHealth * 1.2f;
+		this.maxHealth = this.maxHealth * 5;
 		this.health = maxHealth;
 	}
 
 	@Override
 	public void setMovementSpeedMultiplier() {
-		this.movementSpeed = (int) (this.movementSpeed * 1.2f);
+		this.movementSpeed = (int) (this.movementSpeed * 1.5f);
 		
 	}
 

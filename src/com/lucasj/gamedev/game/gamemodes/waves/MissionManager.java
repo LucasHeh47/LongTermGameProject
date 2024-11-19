@@ -13,13 +13,15 @@ import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDamagedEventListener;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEventListener;
+import com.lucasj.gamedev.events.weapons.WeaponTierUpgradeEvent;
+import com.lucasj.gamedev.events.weapons.WeaponTierUpgradeEventListener;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.gamemodes.waves.missions.Mission;
 import com.lucasj.gamedev.game.gamemodes.waves.missions.Missions;
 import com.lucasj.gamedev.misc.Debug;
 
-public class MissionManager implements EntityDeathEventListener, CoinCollectedEventListener, EntityDamagedEventListener {
+public class MissionManager implements EntityDeathEventListener, CoinCollectedEventListener, EntityDamagedEventListener, WeaponTierUpgradeEventListener {
 	
 	private Game game;
 	private WavesManager waves;
@@ -31,6 +33,7 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		game.getEventManager().addListener(this, EntityDeathEvent.class);
 		game.getEventManager().addListener(this, CoinCollectedEvent.class);
 		game.getEventManager().addListener(this, EntityDamagedEvent.class);
+		game.getEventManager().addListener(this, WeaponTierUpgradeEvent.class);
 		
 	}
 	
@@ -40,7 +43,7 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 				Mission.activeMission = null;
 			}
 			if(Mission.activeMission.getBroadcast() != null && Mission.activeMission.getBroadcast().finished) {
-				if(Mission.activeMission.getName().equals("Invulnerable")) {
+				if(Mission.activeMission.getName().equals("Invulnerable") || Mission.activeMission.getName().equals("Frenzy")) {
 					Mission.activeMission.reward();
 					Mission.activeMission = null;
 				}
@@ -105,10 +108,24 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 	public void onEntityDamaged(EntityDamagedEvent e) {
 		if(Mission.activeMission == null) return;
 		
+		if(e.getEntity() instanceof Enemy) {
+			if(Mission.activeMission.getName().equals("Frenzy")) {
+				((Missions.Frenzy) Mission.activeMission).increment(e.getDamage());
+			}
+		}
+		
 		if(e.getEntity() instanceof Player) {
 			if(Mission.activeMission.getName().equals("Invulnerable")) {
 				((Missions.Invulnerable) Mission.activeMission).fail();
 			}
+		}
+	}
+
+	@Override
+	public void onWeaponTierUpgrade(WeaponTierUpgradeEvent e) {
+		if(Mission.activeMission == null) return;
+		if(Mission.activeMission.getName().equals("Frenzy")) {
+			((Missions.Frenzy) Mission.activeMission).setDividend();
 		}
 	}
 

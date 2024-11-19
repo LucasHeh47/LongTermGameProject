@@ -78,7 +78,7 @@ public class Missions {
 		private boolean damaged = false;
 	
 		public Invulnerable(Game game) {
-			super(game, "Invulnerable", "{LIGHT_GRAY}Do Not Take Damage for {GOLD}" + 30 + " {LIGHT_GRAY}Seconds.", "$5000", 30);
+			super(game, "Invulnerable", "{LIGHT_GRAY}Do Not Take Damage for {GOLD}" + 10 + " {LIGHT_GRAY}Seconds.", "$5000", 10);
 		}
 		
 		public void update(double deltaTime) {
@@ -101,5 +101,42 @@ public class Missions {
 			Mission.activeMission = null;
 		}
 
+	}
+	
+	public static class Frenzy extends Mission {
+		
+		private float damage = 0;
+		private int dividend = 100;
+	
+		public Frenzy(Game game) {
+			super(game, "Frenzy", "{LIGHT_GRAY}Earn Cash For Every {X} {LIGHT_GRAY}Damage Dealt in 30 Seconds.", "$0", 30);
+			dividend = game.getPlayer().getPrimaryGun().getTier().MissionFrenzyDividend();
+		}
+		
+		public void update(double deltaTime) {
+			this.rewards = "$" + (int) damage;
+			this.descriptionToDisplay = this.description.replaceAll("\\{X\\}", "{RED}" + dividend);
+			
+			super.update(deltaTime);
+		}
+
+		@Override
+		public boolean isAccomplished() {
+			return this.getBroadcast().finished;
+		}
+
+		@Override
+		public void reward() {
+			game.getPlayer().addMoney((int) damage);
+		}
+		
+		public void setDividend() {
+			dividend = game.getPlayer().getPrimaryGun().getTier().MissionFrenzyDividend();
+		}
+		
+		public void increment(float num) {
+			damage += num/dividend;
+		}
+		
 	}
 }

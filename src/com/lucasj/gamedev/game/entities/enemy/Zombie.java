@@ -23,7 +23,7 @@ public class Zombie extends Enemy {
 	private long lastAnimationUpdate;
 	
 	public static void initializeClass(){
-		registerEnemyType(Zombie.class, new EnemyWavesData(0, 5));
+		registerEnemyType(Zombie.class, new EnemyWavesData(0, 15));
     }
 	
 	/**
@@ -140,6 +140,16 @@ public class Zombie extends Enemy {
 	@Override
 	void setDamageMultiplier() {
 		this.damageMultiplier = 1.0f;
+	}
+
+	@Override
+	public void setHealthMultiplier() {
+		return;
+	}
+
+	@Override
+	public void setMovementSpeedMultiplier() {
+		return;
 	}
 
 }
