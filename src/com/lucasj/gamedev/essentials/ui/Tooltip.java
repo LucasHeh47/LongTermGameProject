@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.game.weapons.Tier;
 import com.lucasj.gamedev.misc.Debug;
 
 public class Tooltip {
@@ -175,6 +176,14 @@ public class Tooltip {
         colorMap.put("YELLOW", Color.YELLOW);
         colorMap.put("WHITE", Color.WHITE);
         colorMap.put("BLACK", Color.BLACK);
+        colorMap.put("COMMON", GameColors.GUN_COLORS(Tier.Common));
+        colorMap.put("UNCOMMON", GameColors.GUN_COLORS(Tier.Uncommon));
+        colorMap.put("RARE", GameColors.GUN_COLORS(Tier.Rare));
+        colorMap.put("EPIC", GameColors.GUN_COLORS(Tier.Epic));
+        colorMap.put("LEGENDARY", GameColors.GUN_COLORS(Tier.Legendary));
+        colorMap.put("MYTHIC", GameColors.GUN_COLORS(Tier.Mythic));
+        colorMap.put("DIVINE", GameColors.GUN_COLORS(Tier.Divine));
+        colorMap.put("ETHEREAL", GameColors.GUN_COLORS(Tier.Ethereal));
         // Add more colors as needed
         return colorMap;
     }

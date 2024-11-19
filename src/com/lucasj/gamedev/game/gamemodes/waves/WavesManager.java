@@ -31,6 +31,8 @@ public class WavesManager {
 	private Game game;
 	private WavesEnemySpawner enemySpawner;
 	
+	private MissionManager missionManager;
+	
 	private boolean hasGameStarted = false;
 	
 	private NPCManager npcManager;
@@ -49,6 +51,7 @@ public class WavesManager {
 	
 	public WavesManager(Game game) {
 		this.game = game;
+		this.missionManager = new MissionManager(game, this);
 		spawnRate = 0.1f;
 	}
 	
@@ -147,6 +150,8 @@ public class WavesManager {
 	        this.game.getEventManager().dispatchEvent(e);
 	        newWave();
 	    }
+	    
+	    this.missionManager.update(deltaTime);
 	}
 	
 	public void render(Graphics g) {
@@ -177,6 +182,8 @@ public class WavesManager {
                 .count();
 
 	    g2d.drawString("Active: " + enemyCount, 520, game.getHeight() - 40);
+	    
+	    this.missionManager.render(g2d);
 	}
 	
 	public void killedEnemy() {
@@ -208,6 +215,10 @@ public class WavesManager {
 
 	public void setHasGameStarted(boolean hasGameStarted) {
 		this.hasGameStarted = hasGameStarted;
+	}
+
+	public MissionManager getMissionManager() {
+		return missionManager;
 	}
 
 }

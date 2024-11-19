@@ -6,14 +6,18 @@ import java.awt.image.BufferedImage;
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEvent;
+import com.lucasj.gamedev.events.entities.EntityAggroEvent;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 
 public class Coin extends Collectible {
 
 	private BufferedImage[] coinImages;
 	private int currentFrame = 0;
 	private int cashAmount;
+	private float timeAlive;
+	private long timeStarted;
 	
 	public Coin(Game game, Vector2D position, int cashAmount) {
 		super(game, position, new Vector2D(Math.max(cashAmount, 75)));
@@ -23,12 +27,18 @@ public class Coin extends Collectible {
 		for(int i = 0; i < 4; i++) {
 			coinImages[i] = SpriteTools.getSprite(SpriteTools.assetPackDirectory + "Items/Treasure/Coin2.png", new Vector2D(i*10, 0), new Vector2D(10, 10));
 		}
-		
 	}
 	
 	public void update(double deltaTime) {
 		super.update(deltaTime);
-		
+		timeAlive += deltaTime;
+		Vector2D direction = game.getPlayer().getPosition().subtract(this.position).normalize();
+	    Vector2D velocity = direction.multiply(100 * deltaTime * (timeAlive*10));
+	    
+	    // Update position based on velocity
+	    Vector2D newPosition = this.position.add(velocity);
+	    this.position = newPosition;
+	    
 		if((System.currentTimeMillis() - this.lastAnimationTick)/1000.0 > this.animationTick) {
 			currentFrame += 1;
 			if(currentFrame >= coinImages.length) currentFrame = 0;

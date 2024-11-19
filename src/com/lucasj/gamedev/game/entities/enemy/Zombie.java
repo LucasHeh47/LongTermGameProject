@@ -15,8 +15,8 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 
 public class Zombie extends Enemy {
-	
-	private BufferedImage[] images;
+
+	private BufferedImage[][] walking;
 	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right
 	private float animationSpeed = 0.1f;
 	private int animationTick = 1;
@@ -37,18 +37,45 @@ public class Zombie extends Enemy {
 	 */
 	public Zombie(Game game, Vector2D position, int maxHealth, int movementSpeed, int size, String tag) {
 		super(game, position, new Vector2D(0, 0), maxHealth, movementSpeed, size, tag);
-		images = new BufferedImage[5];
-		for(int i = 0; i < 5; i++) {
-			Debug.log(this, "Art/Enemies/Zombie/zombie" + i+1 + ".png");
-			images[i] = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Enemies/Zombie/zombie" + (i+1) + ".png", new Vector2D(0, 0), new Vector2D(32, 32));
+		
+		walking = new BufferedImage[4][4];
+		for(int i = 0; i < 4; i++) {
+			for (int j = 0; j<4; j++) {
+				walking[i][j] = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Enemies/Zombie/zombie.png", new Vector2D(i*16, j*16), new Vector2D(16, 16));
+			}
 		}
 	}
 	
 	public void update(double deltaTime) {
 		super.update(deltaTime);
-		if((System.currentTimeMillis() - lastAnimationUpdate)/1000.0 > animationSpeed) {
+		
+		Vector2D playerPos = game.getPlayer().getPosition();
+	    Vector2D zombiePos = this.position;
+
+	    Vector2D direction = playerPos.subtract(zombiePos);
+
+	    // Determine the direction based on the angle of the direction vector
+	    if (Math.abs(direction.getX()) > Math.abs(direction.getY())) {
+	        // Horizontal movement
+	        if (direction.getX() > 0) {
+	            currentWalkingImage = 4; // Moving right
+	        } else {
+	            currentWalkingImage = 3; // Moving left
+	        }
+	    } else {
+	        // Vertical movement
+	        if (direction.getY() > 0) {
+	            currentWalkingImage = 1; // Moving down
+	        } else {
+	            currentWalkingImage = 2; // Moving up
+	        }
+	    }
+		
+		
+		float checkAnimationSpeed = animationSpeed;
+		if((System.currentTimeMillis() - lastAnimationUpdate)/1000.0 > checkAnimationSpeed) {
 			animationTick++;
-			if (animationTick > 5) {
+			if (animationTick > 4) {
 			    animationTick = 1; // Reset to first frame if it exceeds available frames
 			}
 			lastAnimationUpdate = System.currentTimeMillis();
@@ -59,24 +86,12 @@ public class Zombie extends Enemy {
 	public void render(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
 		
-		Image img = images[animationTick-1];
+		Image img = walking[currentWalkingImage-1][animationTick-1];
+	    
+	    int x = (int) this.getScreenPosition().getX();
+	    int y = (int) this.getScreenPosition().getY();
 		
-		int imageWidth = img.getWidth(null);
-	    int imageHeight = img.getHeight(null);
-	    
-	    double x = this.getScreenPosition().getX();
-	    double y = this.getScreenPosition().getY();
-
-	    AffineTransform transform = new AffineTransform();
-	    transform.translate(x - imageWidth / 2.0, y - imageHeight / 2.0);
-	    
-	    double scaleX = size / (double) imageWidth;
-	    double scaleY = size / (double) imageHeight;
-	    transform.scale(scaleX, scaleY);
-	    
-	    transform.rotate(this.angleToPlayer, imageWidth / 2.0, imageHeight / 2.0);
-		
-		g2d.drawImage(img, transform, null);
+		g2d.drawImage(img, x, y, this.size, this.size, null);
 		super.render(g);
 	}
 

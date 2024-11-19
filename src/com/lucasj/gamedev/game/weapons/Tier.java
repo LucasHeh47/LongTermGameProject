@@ -7,12 +7,17 @@ public enum Tier {
 	Epic(4),
 	Legendary(5),
 	Mythic(6),
-	Godly(7);
+	Divine(7),
+	Ethereal(8);
 	
 	private int tier;
 
 	Tier(int i) {
 		this.tier = i;
+	}
+	
+	public static Tier lastTier() {
+		return Ethereal;
 	}
 	
 	public float getDamageMultiplier() {
@@ -24,7 +29,8 @@ public enum Tier {
 	        case Epic: return 4.0f;
 	        case Legendary: return 5.0f;
 	        case Mythic: return 7.5f;
-	        case Godly: return 10.0f;
+	        case Divine: return 9.0f;
+	        case Ethereal: return 10.0f;
 	        default: return 1.0f;
 		}
 	}
@@ -38,7 +44,8 @@ public enum Tier {
 	        case Epic: return 0.6f;
 	        case Legendary: return 0.5f;
 	        case Mythic: return 0.35f;
-	        case Godly: return 0.25f;
+	        case Divine: return 0.3f;
+	        case Ethereal: return 0.25f;
 	        default: return 1.0f;
 		}
 	}
@@ -52,7 +59,8 @@ public enum Tier {
 	        case Epic: return 0.75f;
 	        case Legendary: return 0.6f;
 	        case Mythic: return 0.55f;
-	        case Godly: return 0.5f;
+	        case Divine: return 0.5f;
+	        case Ethereal: return 0.43f;
 	        default: return 1.0f;
 		}
 	}
@@ -66,7 +74,8 @@ public enum Tier {
 	        case Epic: return 1.35f;
 	        case Legendary: return 1.45f;
 	        case Mythic: return 1.6f;
-	        case Godly: return 1.8f;
+	        case Divine: return 1.8f;
+	        case Ethereal: return 2.0f;
 	        default: return 1.0f;
 		}
 	}
@@ -80,7 +89,8 @@ public enum Tier {
 	        case Epic: return 0.76f;
 	        case Legendary: return 0.6f;
 	        case Mythic: return 0.4f;
-	        case Godly: return 0.2f;
+	        case Divine: return 0.25f;
+	        case Ethereal: return 0.2f;
 	        default: return 1.0f;
 		}
 	}
@@ -94,7 +104,8 @@ public enum Tier {
 	        case Epic: return 2.5f;
 	        case Legendary: return 3f;
 	        case Mythic: return 5f;
-	        case Godly: return 10f;
+	        case Divine: return 10f;
+	        case Ethereal: return 15f;
 	        default: return 1.0f;
 		}
 	}
@@ -106,8 +117,9 @@ public enum Tier {
             case Rare: return Epic;
             case Epic: return Legendary;
             case Legendary: return Mythic;
-            case Mythic: return Godly;
-            case Godly: return Godly; // Max tier
+            case Mythic: return Divine;
+            case Divine: return Ethereal; // Max tier
+	        case Ethereal: return Ethereal;
             default: return this;
         }
     }

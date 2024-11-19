@@ -139,7 +139,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	abstract void setCashDrop();
 	abstract void setDamageMultiplier();
 	
-	private static final double SEPARATION_RADIUS = 20; // Distance to keep between enemies
+	private static final double SEPARATION_RADIUS = 50; // Distance to keep between enemies
     private static final double ALIGNMENT_RADIUS = 100.0; // Distance within which to align with others
     private static final double COHESION_RADIUS = 100.0; // Distance within which to group together
     private final double MAX_FORCE = this.movementSpeed; // Max steering force applied to enemies
@@ -194,7 +194,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		g.setColor(Color.black);
 		int barWidth = (int) (size + (size * 0.075));
 		int barHeight = (int) (size * 0.05);
-		int barX = (int) (screenPosition.getX()+(size/2) - (barWidth / 2)-10);
+		int barX = (int) (screenPosition.getX()+(size/2) - (barWidth / 2));
 		int barY = (int) (screenPosition.getY() - (size * 0.2));
 		g.fillRect(barX, barY, barWidth, barHeight);
 

@@ -33,8 +33,6 @@ public class SoundClip extends AudioClip {
 
         // Combine volumes (distanceVolume is already a dB value)
         float combinedVolume = distanceVolume + masterVolumeDb + soundVolumeDb;
-
-        Debug.log(this, combinedVolume);
         
         // Clamp combined volume between -80 dB (minimum) and 0 dB (maximum)
         combinedVolume = Math.max(-80f, Math.min(combinedVolume, 0f));

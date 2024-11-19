@@ -2,8 +2,12 @@ package com.lucasj.gamedev.game.entities.enemy;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 
+import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.mathutils.Vector2D;
@@ -13,17 +17,69 @@ public class Skeleton extends Enemy {
 	public static void initializeClass(){
 		registerEnemyType(Skeleton.class, new EnemyWavesData(3, 3));
     }
+	private BufferedImage[][] walking;
+	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right
+	private float animationSpeed = 0.1f;
+	private int animationTick = 1;
+	private long lastAnimationUpdate;
 
 	public Skeleton(Game game, Vector2D position, int maxHealth, int movementSpeed, int size,
 			String tag) {
 		super(game, position, new Vector2D(0, 0), maxHealth, movementSpeed, size, tag);
-		// TODO Auto-generated constructor stub
+		walking = new BufferedImage[4][4];
+		for(int i = 0; i < 4; i++) {
+			for (int j = 0; j<4; j++) {
+				walking[i][j] = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Enemies/Skeleton/Walk.png", new Vector2D(i*16, j*16), new Vector2D(16, 16));
+			}
+		}
+	}
+	
+	public void update(double deltaTime) {
+		super.update(deltaTime);
+		
+		Vector2D playerPos = game.getPlayer().getPosition();
+	    Vector2D skeltetonPos = this.position;
+
+	    Vector2D direction = playerPos.subtract(skeltetonPos);
+
+	    // Determine the direction based on the angle of the direction vector
+	    if (Math.abs(direction.getX()) > Math.abs(direction.getY())) {
+	        // Horizontal movement
+	        if (direction.getX() > 0) {
+	            currentWalkingImage = 4; // Moving right
+	        } else {
+	            currentWalkingImage = 3; // Moving left
+	        }
+	    } else {
+	        // Vertical movement
+	        if (direction.getY() > 0) {
+	            currentWalkingImage = 1; // Moving down
+	        } else {
+	            currentWalkingImage = 2; // Moving up
+	        }
+	    }
+		
+		
+		float checkAnimationSpeed = animationSpeed;
+		if((System.currentTimeMillis() - lastAnimationUpdate)/1000.0 > checkAnimationSpeed) {
+			animationTick++;
+			if (animationTick > 4) {
+			    animationTick = 1; // Reset to first frame if it exceeds available frames
+			}
+			lastAnimationUpdate = System.currentTimeMillis();
+		}
+		if(!isMoving) animationTick = 1;
 	}
 	
 	public void render(Graphics g) {
-		g.setColor(Color.gray);
-		g.fillRect((int)screenPosition.getX(), (int) screenPosition.getY(), 
-				size, size);
+		Graphics2D g2d = (Graphics2D) g;
+		
+		Image img = walking[currentWalkingImage-1][animationTick-1];
+	    
+	    int x = (int) this.getScreenPosition().getX();
+	    int y = (int) this.getScreenPosition().getY();
+		
+		g2d.drawImage(img, x, y, this.size, this.size, null);
 		super.render(g);
 	}
 

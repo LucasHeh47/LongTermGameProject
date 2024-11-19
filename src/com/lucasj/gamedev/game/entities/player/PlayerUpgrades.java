@@ -124,7 +124,9 @@ public class PlayerUpgrades {
     		return 17500;
     	case Mythic:
     		return 25000;
-    	case Godly:
+    	case Divine:
+    		return 50000;
+    	case Ethereal:
     		return -1;
     		
     	default:

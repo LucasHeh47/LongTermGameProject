@@ -32,7 +32,6 @@ import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
 import com.lucasj.gamedev.game.weapons.guns.Shotgun;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.utils.ConcurrentList;
 
 public class Player extends Entity implements PlayerMP, MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
@@ -87,7 +86,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private PlayerRewarder playerRewarder;
 	
-	private int money = 5000000;
+	private int money = 500;
 	private int gems = 0;
 	
 	private long lastWalkSound;
@@ -108,7 +107,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		input.addMouseClickListener(this);
 		input.addMouseMotionListener(this);
 		
-		this.primaryGun = new Shotgun(game, this);
+		this.primaryGun = new AssaultRifle(game, this);
 		
 		walking = new BufferedImage[4][4];
 		for(int i = 0; i < 4; i++) {
@@ -146,13 +145,11 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		this.activePlaceables.forEach(placeable -> {
 			placeable.update(deltaTime);
 		});
-		
 	}
 
 	@Override
 	public void render(Graphics g) {
 		Graphics2D g2d = (Graphics2D) g;
-		
 
 		this.activePlaceables.forEach(placeable -> {
 			placeable.render(g);
@@ -235,8 +232,11 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		case Mythic:
 			color = new Color(255, 230, 101);
 			break;
-		case Godly:
+		case Divine:
 			color = new Color(200, 73, 73);
+			break;
+		case Ethereal:
+			color = new Color(48, 210, 255);
 			break;
 		}
 		
@@ -248,7 +248,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 		g2d.setColor(color);
 		g2d.fillRect(128, game.getHeight()-228, 128, 128);
-        game.getGraphicUtils().drawVignette(g2d, 128, game.getHeight()-228, 128, 128, r, g, b, 160);
+        game.getGraphicUtils().drawVignette(g2d, 128, game.getHeight()-228, 128, 128, r, g, b, 120);
 		g2d.drawImage(frame, 128, game.getHeight()-228, 128, 128, null);
 		g2d.drawImage(this.primaryGun.getUIImage(), 128, game.getHeight()-228+32, 128, 64, null);
 	}
@@ -562,6 +562,9 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
         	if(game.getWavesManager().getNPCManager().isAnyOpen()) {
         		game.getWavesManager().getNPCManager().closeAll();
         	} else game.setPaused(!game.isPaused());
+        }
+        if(e.getKeyCode() == KeyEvent.VK_E) {
+        	game.getWavesManager().getMissionManager().startMission();
         }
 		if(e.getKeyCode() == KeyEvent.VK_1) {
 			if(this.placeableManager.getEquippedPlaceable() != null) {

@@ -68,6 +68,10 @@ public class Panel {
     public void setPadding(int padding) {
         this.padding = padding;
     }
+    
+    public int getWidth() {
+    	return width;
+    }
 
     // Getters for padding to use in positioning buttons within the panel
     public int getPadding() {

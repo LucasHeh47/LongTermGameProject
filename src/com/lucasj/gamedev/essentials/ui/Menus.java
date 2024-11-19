@@ -280,12 +280,16 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	String gunUpgradeCost = "$" + game.getPlayer().getPlayerUpgrades().getWeaponUpgradeCost();
         	if(gunUpgradeCost.equals("$-1")) gunUpgradeCost = "Weapon Maxed Out";
         	
-        	String gunUpgradeDesc = game.getPlayer().getPrimaryGun().getTier().toString() + " > " + game.getPlayer().getPrimaryGun().getNextTier().toString();
-        	if(game.getPlayer().getPrimaryGun().getTier() == Tier.Godly) gunUpgradeDesc = " ";
+        	String gunUpgradeDesc = 
+        			"{" + game.getPlayer().getPrimaryGun().getTier().toString().toUpperCase() + "}" + game.getPlayer().getPrimaryGun().getTier().toString() + 
+        			"{WHITE} >> " + 
+        			"{" + game.getPlayer().getPrimaryGun().getNextTier().toString().toUpperCase() + "}" + game.getPlayer().getPrimaryGun().getNextTier().toString();
+        	
+        	if(game.getPlayer().getPrimaryGun().getTier() == Tier.lastTier()) gunUpgradeDesc = " ";
         	
         	buttons.add(new Button(game, this, GameState.waves, "Gun Tier", 50, 500, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
-                    	if(game.getPlayer().getPrimaryGun().getTier() != Tier.Godly) game.getPlayer().getPlayerUpgrades().upgradeWeapon();
+                    	if(game.getPlayer().getPrimaryGun().getTier() != Tier.lastTier()) game.getPlayer().getPlayerUpgrades().upgradeWeapon();
                     }, 
                     new Tooltip(game, gunUpgradeCost, gunUpgradeDesc,(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
                     	List<Supplier<String>> list = new ArrayList<>();
@@ -294,8 +298,8 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     		return hasMoney ? "" : "{RED}(!) Not Enough Money!";
                     	});
                     	list.add(() -> {
-                    		boolean weaponMaxedOut = game.getPlayer().getPrimaryGun().getTier() == Tier.Godly;
-                    		return weaponMaxedOut ?  "{RED} Weapon Maxed Out!" : "{GREEN}Current Tier: " + game.getPlayer().getPrimaryGun().getTier().toString();
+                    		boolean weaponMaxedOut = game.getPlayer().getPrimaryGun().getTier() == Tier.lastTier();
+                    		return weaponMaxedOut ?  "{RED} Weapon Maxed Out!" : "{WHITE}Current Tier: {" + game.getPlayer().getPrimaryGun().getTier().toString().toUpperCase() + "} " + game.getPlayer().getPrimaryGun().getTier().toString();
                     	});
                     	return list;
                     })
