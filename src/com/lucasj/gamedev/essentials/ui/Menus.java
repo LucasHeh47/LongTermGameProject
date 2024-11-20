@@ -148,43 +148,110 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         if(game.getGameState() != GameState.waves) return;
         
         GUI selectAClassMenu = new GUI(game, this, () -> {
-        	return game.getGameState() == GameState.waves && !game.getWavesManager().hasGameStarted();
+        	return game.getGameState() == GameState.waves && (!game.getWavesManager().hasGameStarted() || game.getPlayer().isPickingSecondary());
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
         	buttons.add(new Button(game, this, GameState.waves, "Commando", this.game.getWidth()/3 - 250, this.game.getHeight()/5 + (this.game.getHeight()/4), 500, 150,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
-                        game.getWavesManager().startWaves();
-                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
+                    	if(game.getWavesManager().hasGameStarted()) {
+                    		if(!(game.getPlayer().getPrimaryGun() instanceof AssaultRifle)) {
+                    			game.getPlayer().setSecondaryGun(new AssaultRifle(game, game.getPlayer()));
+                    			game.getPlayer().setPickingSecondary(false);
+                    		}
+                    	} else {
+	                        game.getWavesManager().startWaves();
+	                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
+                    	}
                     }, 
-                    new Tooltip(game, "Assault Rifle", "{GREEN}- Good Control{NL}- Good Damage {NL}{YELLOW}- Medium Range{NL}{YELLOW}- Medium Fire Rate",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, null)).setBorderRadius(10));
+                    new Tooltip(game, "Assault Rifle", "{GREEN}- Good Control{NL}- Good Damage {NL}{YELLOW}- Medium Range{NL}{YELLOW}- Medium Fire Rate",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	if(!game.getWavesManager().hasGameStarted()) return null;
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	
+                    	list.add(() -> {
+                    		boolean hasGun = (game.getPlayer().getPrimaryGun() instanceof AssaultRifle);
+                    		return hasGun ? "{RED}(!) Already Equipped" : "";
+                    	});
+                    	
+                    	return list;
+                    })).setBorderRadius(10));
         	
         	buttons.add(new Button(game, this, GameState.waves, "Vanguard", this.game.getWidth()/3 - 250, this.game.getHeight()/3 + (this.game.getHeight()/4), 500, 150,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
-                        game.getWavesManager().startWaves();
-                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+                    	if(game.getWavesManager().hasGameStarted()) {
+                    		if(!(game.getPlayer().getPrimaryGun() instanceof SMG)) {
+                    			game.getPlayer().setSecondaryGun(new SMG(game, game.getPlayer()));
+                    			game.getPlayer().setPickingSecondary(false);
+                    		}
+                    	} else {
+	                        game.getWavesManager().startWaves();
+	                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+                    	}
                     }, 
-                    new Tooltip(game, "SMG", "{GREEN}- Fast Fire Rate{NL}{YELLOW}- Medium Control{NL}{RED}- Close Range{NL}- Low Damage",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, null)).setBorderRadius(10));
+                    new Tooltip(game, "SMG", "{GREEN}- Fast Fire Rate{NL}{YELLOW}- Medium Control{NL}{RED}- Close Range{NL}- Low Damage",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	if(!game.getWavesManager().hasGameStarted()) return null;
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	
+                    	list.add(() -> {
+                    		boolean hasGun = (game.getPlayer().getPrimaryGun() instanceof SMG);
+                    		return hasGun ? "{RED}(!) Already Equipped" : "";
+                    	});
+                    	
+                    	return list;
+                    })).setBorderRadius(10));
         	
         	buttons.add(new Button(game, this, GameState.waves, "Breaker", (int) (this.game.getWidth()/1.5) - 250, this.game.getHeight()/3 + (this.game.getHeight()/4), 500, 150,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
-                        game.getWavesManager().startWaves();
-                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+                    	if(game.getWavesManager().hasGameStarted()) {
+                    		if(!(game.getPlayer().getPrimaryGun() instanceof Shotgun)) {
+                    			game.getPlayer().setSecondaryGun(new Shotgun(game, game.getPlayer()));
+                    			game.getPlayer().setPickingSecondary(false);
+                    		}
+                    	} else {
+	                        game.getWavesManager().startWaves();
+	                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+                    	}
                     }, 
-                    new Tooltip(game, "Shotgun", "{GREEN}- Shoots Pellets{NL}- Medium-High Damage{NL}{YELLOW}- Area Damage{NL}{RED}- Close Range{NL}{RED}- Medium-Slow Fire Rate{NL}{RED}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, null)).setBorderRadius(10));
+                    new Tooltip(game, "Shotgun", "{GREEN}- Shoots Pellets{NL}- Medium-High Damage{NL}{YELLOW}- Area Damage{NL}{RED}- Close Range{NL}{RED}- Medium-Slow Fire Rate{NL}{RED}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	if(!game.getWavesManager().hasGameStarted()) return null;
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	
+                    	list.add(() -> {
+                    		boolean hasGun = (game.getPlayer().getPrimaryGun() instanceof Shotgun);
+                    		return hasGun ? "{RED}(!) Already Equipped" : "";
+                    	});
+                    	
+                    	return list;
+                    })).setBorderRadius(10));
         	
         	buttons.add(new Button(game, this, GameState.waves, "Rifleman", (int) (this.game.getWidth()/1.5) - 250, this.game.getHeight()/5 + (this.game.getHeight()/4), 500, 150,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
-                        game.getWavesManager().startWaves();
-                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+                    	if(game.getWavesManager().hasGameStarted()) {
+                    		if(!(game.getPlayer().getPrimaryGun() instanceof Sniper)) {
+                    			game.getPlayer().setSecondaryGun(new Sniper(game, game.getPlayer()));
+                    			game.getPlayer().setPickingSecondary(false);
+                    		}
+                    	} else {
+	                        game.getWavesManager().startWaves();
+	                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+                    	}
                     }, 
-                    new Tooltip(game, "Sniper", "{GREEN}- High Damage{NL}{GREEN}- Long Range{NL}{GREEN}- Pierces through enemies{NL}{RED}- Slow Fire Rate{NL}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, null)).setBorderRadius(10));
+                    new Tooltip(game, "Sniper", "{GREEN}- High Damage{NL}{GREEN}- Long Range{NL}{GREEN}- Pierces through enemies{NL}{RED}- Slow Fire Rate{NL}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	if(!game.getWavesManager().hasGameStarted()) return null;
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	
+                    	list.add(() -> {
+                    		boolean hasGun = (game.getPlayer().getPrimaryGun() instanceof Sniper);
+                    		return hasGun ? "{RED}(!) Already Equipped" : "";
+                    	});
+                    	
+                    	return list;
+                    })).setBorderRadius(10));
         	
         	return buttons;
         }, null, () -> {
         	List<Label> labels = new ArrayList<>();
         	labels.add(new Label(game, this, GameState.waves, "Select Your Class", 10, true, this.game.getWidth()/2, this.game.getHeight()/6, 156, Color.black));
-        	labels.add(new Label(game, this, GameState.waves, "[!] Can change later in game for a price", 50, true, this.game.getWidth()/2, this.game.getHeight()/3, 16, Color.DARK_GRAY));
         	return labels;
         });
             
@@ -225,7 +292,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                 	List<Supplier<String>> list = new ArrayList<>();
                 	list.add(() -> {
                 		boolean hasRegen = game.getPlayer().getPlayerUpgrades().hasHealthRegen();
-                		return hasRegen ? "" : "{RED}(!) Health Regen Not Unlocked";
+                		return hasRegen ? "" : "{YELLOW}(!) Health Regen Not Unlocked";
                 	});
                 	list.add(() -> {
                 		boolean hasGems = game.getPlayer().getGems() >= game.getPlayer().getPlayerUpgrades().getCost("health");
@@ -272,34 +339,6 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     	list.add(() -> {
                     		boolean hasGems = game.getPlayer().getGems() >= game.getPlayer().getPlayerUpgrades().getCost("movement");
                     		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
-                    	});
-                    	return list;
-                    })
-                    ));
-        	
-        	String gunUpgradeCost = "$" + game.getPlayer().getPlayerUpgrades().getWeaponUpgradeCost();
-        	if(gunUpgradeCost.equals("$-1")) gunUpgradeCost = "Weapon Maxed Out";
-        	
-        	String gunUpgradeDesc = 
-        			"{" + game.getPlayer().getPrimaryGun().getTier().toString().toUpperCase() + "}" + game.getPlayer().getPrimaryGun().getTier().toString() + 
-        			"{WHITE} >> " + 
-        			"{" + game.getPlayer().getPrimaryGun().getNextTier().toString().toUpperCase() + "}" + game.getPlayer().getPrimaryGun().getNextTier().toString();
-        	
-        	if(game.getPlayer().getPrimaryGun().getTier() == Tier.lastTier()) gunUpgradeDesc = " ";
-        	
-        	buttons.add(new Button(game, this, GameState.waves, "Gun Tier", 50, 500, 250, 50,
-                    Color.LIGHT_GRAY, Color.BLACK, () -> {
-                    	if(game.getPlayer().getPrimaryGun().getTier() != Tier.lastTier()) game.getPlayer().getPlayerUpgrades().upgradeWeapon();
-                    }, 
-                    new Tooltip(game, gunUpgradeCost, gunUpgradeDesc,(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
-                    	List<Supplier<String>> list = new ArrayList<>();
-                    	list.add(() -> {
-                    		boolean hasMoney = game.getPlayer().getMoney() >= game.getPlayer().getPlayerUpgrades().getWeaponUpgradeCost();
-                    		return hasMoney ? "" : "{RED}(!) Not Enough Money!";
-                    	});
-                    	list.add(() -> {
-                    		boolean weaponMaxedOut = game.getPlayer().getPrimaryGun().getTier() == Tier.lastTier();
-                    		return weaponMaxedOut ?  "{RED} Weapon Maxed Out!" : "{WHITE}Current Tier: {" + game.getPlayer().getPrimaryGun().getTier().toString().toUpperCase() + "} " + game.getPlayer().getPrimaryGun().getTier().toString();
                     	});
                     	return list;
                     })
@@ -382,6 +421,80 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	    20,                                     // borderRadius, for rounded corners
         	    15                                      // padding for inner spacing
         	));
+        
+        GUI gunsmithMenu = new GUI(game, this, () ->{
+        	return game.getGameState() == GameState.waves && 
+        			game.getWavesManager() != null && 
+        			game.getWavesManager().getNPCManager() != null && 
+        			game.getWavesManager().getNPCManager().getGunsmith() != null &&
+        			game.getWavesManager().getNPCManager().getGunsmith().isOpen();
+        			
+        }, () -> {
+        	List<Button> buttons = new ArrayList<>();
+        	
+        	String gunUpgradeCost = "$" + game.getPlayer().getPlayerUpgrades().getWeaponUpgradeCost();
+        	if(gunUpgradeCost.equals("$-1")) gunUpgradeCost = "Weapon Maxed Out";
+        	
+        	String gunUpgradeDesc = 
+        			"{" + game.getPlayer().getPrimaryGun().getTier().toString().toUpperCase() + "}" + game.getPlayer().getPrimaryGun().getTier().toString() + 
+        			"{WHITE} >> " + 
+        			"{" + game.getPlayer().getPrimaryGun().getNextTier().toString().toUpperCase() + "}" + game.getPlayer().getPrimaryGun().getNextTier().toString();
+        	
+        	if(game.getPlayer().getPrimaryGun().getTier() == Tier.lastTier()) gunUpgradeDesc = " ";
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Gun Tier", 50, 500, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	if(game.getPlayer().getPrimaryGun().getTier() != Tier.lastTier()) game.getPlayer().getPlayerUpgrades().upgradeWeapon();
+                    }, 
+                    new Tooltip(game, gunUpgradeCost, gunUpgradeDesc,(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasMoney = game.getPlayer().getMoney() >= game.getPlayer().getPlayerUpgrades().getWeaponUpgradeCost();
+                    		return hasMoney ? "" : "{RED}(!) Not Enough Money!";
+                    	});
+                    	list.add(() -> {
+                    		boolean weaponMaxedOut = game.getPlayer().getPrimaryGun().getTier() == Tier.lastTier();
+                    		return weaponMaxedOut ?  "{RED} Weapon Maxed Out!" : "{WHITE}Current Tier: {" + game.getPlayer().getPrimaryGun().getTier().toString().toUpperCase() + "} " + game.getPlayer().getPrimaryGun().getTier().toString();
+                    	});
+                    	return list;
+                    })
+                    ));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Secondary Class", 50, 175, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	game.getWavesManager().getNPCManager().closeAll();
+                        game.getPlayer().getPlayerUpgrades().unlockSecondClass();
+                    }, 
+                    new Tooltip(game, "Select a Secondary Weapon", " ",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasEnough = game.getPlayer().getMoney() >= 50000;
+                    		return hasEnough ? "{GREEN}- $50,000" : "{RED}- $50,000";
+                    	});
+                    	list.add(() -> {
+                    		boolean hasEnough = game.getPlayer().getGems() >= 10;
+                    		return hasEnough ? "{GREEN}- 10 Gems" : "{RED}- 10 Gems";
+                    	});
+                    	return list;
+                    })));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "X", 0, 0, 50, 50,
+                Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    game.getWavesManager().getNPCManager().getGunsmith().close();
+                }, null));
+        	
+        	return buttons;
+        }, null, null).setPanel(new Panel(
+        	    (int) ((game.getWidth() - 275) / 1.2),  // x position, based on button alignment
+        	    150,                                    // y position, starting above the first button
+        	    350,                                    // width to fit buttons with padding
+        	    800,                                    // height to cover all upgrade buttons
+        	    new Color(50, 50, 50, 180),             // bgColor, semi-transparent dark color
+        	    Color.BLACK,                            // borderColor, black for definition
+        	    20,                                     // borderRadius, for rounded corners
+        	    15                                      // padding for inner spacing
+        	));
+        
     }
 	
 	public void render(Graphics g) {

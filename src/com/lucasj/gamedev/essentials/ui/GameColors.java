@@ -9,6 +9,7 @@ public class GameColors {
 	public static enum colors {
 		
 		RED(Color.RED),
+		LIGHT_RED(new Color(255, 140, 140)),
 		BLUE(Color.BLUE),
 		GREEN(Color.GREEN),
 		YELLOW(Color.YELLOW),

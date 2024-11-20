@@ -13,6 +13,7 @@ import com.lucasj.gamedev.events.waves.WaveEndEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.npc.NPCManager;
+import com.lucasj.gamedev.game.gamemodes.waves.missions.Mission;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.world.particles.ParticleEmitter;
@@ -58,6 +59,9 @@ public class WavesManager {
 	public void startWaves() {
 		this.hasGameStarted = true;
 		wave = 0;
+		this.enemiesKilledThisWave = 0;
+		this.enemiesSpawnedThisWave = 0;
+		Mission.activeMission = null;
 		enemySpawner = new WavesEnemySpawner(game);
 		game.instantiatedEntities.clear();
 		game.instantiatedEntitiesOnScreen.clear();

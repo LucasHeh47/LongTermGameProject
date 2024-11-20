@@ -1,6 +1,8 @@
 package com.lucasj.gamedev.game.entities;
 
+import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEventListener;
@@ -142,7 +144,21 @@ public abstract class Entity implements EntityCollisionEventListener {
 		screenPosition = game.getCamera().worldToScreenPosition(position);
 	}
 	
-	public abstract void render(Graphics g);
+	public void render(Graphics g) {
+		 Graphics2D g2d = (Graphics2D) g; // Cast to Graphics2D for better rendering control
+
+	    // Set the shadow color with transparency
+	    g2d.setColor(new Color(56, 56, 56, 120));
+
+	    // Calculate shadow size and position based on entity size and position
+	    int shadowWidth = (int) (this.size * 0.8); // Shadow slightly smaller than entity size
+	    int shadowHeight = (int) (this.size * 0.2); // Flattened shadow
+	    int shadowX = (int) this.screenPosition.getX() + (this.size - shadowWidth) / 2; // Centered under entity
+	    int shadowY = (int) (this.screenPosition.getY() + this.size * 0.9); // Slightly below the entity
+
+	    // Draw the shadow
+	    g2d.fillOval(shadowX, shadowY, shadowWidth, shadowHeight);
+	}
 	public abstract void entityDeath();
 	
 	public final void die() {

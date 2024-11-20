@@ -97,6 +97,19 @@ public class PlayerUpgrades {
     	return false;
     }
     
+    public boolean unlockSecondClass() {
+    	if(player.getSecondaryGun() != null) return false;
+    	
+    	if(player.getMoney() >= 50000 && player.getGems() >= 10) {
+    		player.removeGem(10);
+    		player.removeMoney(50000);
+        	player.setPickingSecondary(true);
+        	return true;
+    	}
+    	return false;
+    	
+    }
+    
     public boolean upgradeWeapon() {
     	Gun weapon = this.player.getPrimaryGun();
     	int amount = this.getWeaponUpgradeCost();

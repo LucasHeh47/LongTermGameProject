@@ -23,7 +23,12 @@ public class GUI {
 		this.decider = decider;
 		this.buttons = buttons;
 		if(labels != null) this.labels = labels.get();
-		if(sliders != null) this.sliders = sliders.get();
+		if(sliders != null) {
+			this.sliders = sliders.get();
+			this.sliders.forEach(slider -> {
+				slider.setDecidingFactor(decider);
+			});
+		}
 		this.menus = menus;
 		menus.addGUI(this);
 	}

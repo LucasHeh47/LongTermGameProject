@@ -16,6 +16,7 @@ import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.essentials.InputHandler;
+import com.lucasj.gamedev.essentials.ui.GameColors.colors;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.events.input.KeyboardEventListener;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
@@ -23,6 +24,7 @@ import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.events.player.PlayerDamageTakenEvent;
 import com.lucasj.gamedev.events.player.PlayerMoveEvent;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
+import com.lucasj.gamedev.events.weapons.SwapWeaponEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
 import com.lucasj.gamedev.game.entities.placeables.Placeable;
@@ -32,6 +34,7 @@ import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
 import com.lucasj.gamedev.game.weapons.guns.Shotgun;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.utils.ConcurrentList;
 
 public class Player extends Entity implements PlayerMP, MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
@@ -59,7 +62,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	private long lastTimeHurt;
 	private float timeToRegen = 2.5f;
 	
-	private float staminaUseRate = 0.25f;
+	private float staminaUseRate = 0.35f;
 	private float stamina = 100;
 	private int maxStamina = 100;
 	private long timeStaminaRanOut;
@@ -71,6 +74,9 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	private boolean isReadyToSprint;
 	
 	private Gun primaryGun;
+	
+	private boolean pickingSecondary = false;
+	private Gun secondaryGun;
 	
 	private PlayerUpgrades playerUpgrades;
 	
@@ -86,18 +92,23 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private PlayerRewarder playerRewarder;
 	
-	private int money = 500;
-	private int gems = 0;
+	private int money = 500000;
+	private int gems = 10;
 	
 	private long lastWalkSound;
 	private float walkSoundCooldown = 0.5f;
+	
+	private float healthUnderlayDelay = 1;
+	private float healthUnderlayRate = 0.35f;
+	private float healthUnderlayLength;
 	
 	public Player(Game game, InputHandler input) {
 		super(game);
 		activePlaceables = new ConcurrentList<>();
 		placeableManager = new PlayerPlaceableManager(game, this);
 		this.input = input;
-		this.size = (int) (30*game.getCamera().getScale());
+		this.size = (int) (64);
+		this.healthUnderlayLength = this.health;
 		this.movementSpeed = 350;
 		this.playerRewarder = new PlayerRewarder(game);
 		importance = 1;
@@ -127,6 +138,11 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		this.primaryGun.update();
 		move(deltaTime);
 		
+		if((System.currentTimeMillis() - this.lastTimeHurt)/1000.0 >= this.healthUnderlayDelay) {
+			this.healthUnderlayLength -= this.healthUnderlayRate;
+			if(this.healthUnderlayLength <= this.health) this.healthUnderlayLength = this.health;
+		}
+		
 		if(playerAttacking && (System.currentTimeMillis() - lastAttack)/1000.0 > primaryGun.getFireRate()) attack(deltaTime);
 		crumbManager.update(deltaTime);
 		float checkAnimationSpeed = animationSpeed;
@@ -149,6 +165,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	@Override
 	public void render(Graphics g) {
+		super.render(g);
 		Graphics2D g2d = (Graphics2D) g;
 
 		this.activePlaceables.forEach(placeable -> {
@@ -185,7 +202,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    // Draw the transformed image
 //	    g2d.drawImage(img, transform, null);
 	    
-	    g2d.drawImage(img, (int) this.screenPosition.getX() - this.getSize(), (int) this.screenPosition.getY() - this.getSize(), 64, 64, null);
+	    g2d.drawImage(img, (int) this.screenPosition.getX(), (int) this.screenPosition.getY(), size, size, null);
         
 	    renderHealthBar(g2d);
 	    renderMoney(g2d);
@@ -251,6 +268,50 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
         game.getGraphicUtils().drawVignette(g2d, 128, game.getHeight()-228, 128, 128, r, g, b, 120);
 		g2d.drawImage(frame, 128, game.getHeight()-228, 128, 128, null);
 		g2d.drawImage(this.primaryGun.getUIImage(), 128, game.getHeight()-228+32, 128, 64, null);
+		
+		if(this.secondaryGun != null) {
+			frame = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/UI/frame.png", new Vector2D(0, 0), new Vector2D(32, 32));
+			color = new Color(0, 0, 0);
+			
+			switch (this.secondaryGun.getTier()) {
+			case Common:
+				color = new Color(166, 166, 166);
+				break;
+			case Uncommon:
+				color = new Color(17, 221, 0);
+				break;
+			case Rare:
+				color = new Color(39, 86, 255);
+				break;
+			case Epic:
+				color = new Color(128, 0, 255);
+				break;
+			case Legendary:
+				color = new Color(255, 67, 0);
+				break;
+			case Mythic:
+				color = new Color(255, 230, 101);
+				break;
+			case Divine:
+				color = new Color(200, 73, 73);
+				break;
+			case Ethereal:
+				color = new Color(48, 210, 255);
+				break;
+			}
+			
+			vignette = color.darker();
+			
+			r = vignette.getRed();
+			g = vignette.getGreen();
+			b = vignette.getBlue();
+
+			g2d.setColor(color);
+			g2d.fillRect(260, game.getHeight()-164, 64, 64);
+	        game.getGraphicUtils().drawVignette(g2d, 260, game.getHeight()-164, 64, 64, r, g, b, 120);
+			g2d.drawImage(frame, 260, game.getHeight()-164, 64, 64, null);
+			g2d.drawImage(this.secondaryGun.getUIImage(), 260, game.getHeight()-164+16, 64, 32, null);
+		}
 	}
 	
 	private void renderHealthBar(Graphics2D g2d) {
@@ -263,6 +324,12 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		
 		g2d.setColor(Color.black);
 		g2d.fillRect(x, game.getHeight()-(margin*2), healthBarLength * healthBarSize, healthBarSize);
+
+		g2d.setColor(colors.LIGHT_RED.getValue());
+		g2d.fillRect((int)(x + (healthBarSize*0.1))
+				, (int) (game.getHeight() - margin*2 + margin*0.1), 
+				(int) (((healthBarSize * healthBarLength) - (margin*0.2)) * ((double) this.healthUnderlayLength/maxHealth)), 
+				(int)(healthBarSize - (healthBarSize * 0.2)));
 
 		g2d.setColor(Color.red);
 		g2d.fillRect((int)(x + (healthBarSize*0.1))
@@ -411,6 +478,17 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		playerRotation = (float) Math.atan2(dy, dx);
 	}
 	
+	public void swapWeapons() {
+		if(this.secondaryGun == null) return;
+		Gun gun = this.primaryGun;
+		this.primaryGun = this.secondaryGun;
+		this.secondaryGun = gun;
+		
+		SwapWeaponEvent e = new SwapWeaponEvent(this.primaryGun, this.secondaryGun);
+		game.getEventManager().dispatchEvent(e);
+		
+	}
+	
 	private void attack(double deltaTime) {
 		if(!isClickAnAttack() || this.primaryGun.isReloading()) return;
 		
@@ -500,7 +578,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	private boolean isClickAnAttack() {
-		if (game.getWavesManager().getNPCManager().isAnyOpen()) {
+		if (game.getWavesManager().getNPCManager() == null || game.getWavesManager().getNPCManager().isAnyOpen()) {
 			return false;
 		}
 		return true;
@@ -541,19 +619,15 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	public void keyPressed(KeyEvent e) {
 		if(e.getKeyCode() == KeyEvent.VK_W) {
         	WASD[0] = true;
-        	currentWalkingImage = 2;
         }
         if(e.getKeyCode() == KeyEvent.VK_A) {
         	WASD[1] = true;
-        	currentWalkingImage = 3;
         }
         if(e.getKeyCode() == KeyEvent.VK_S) {
         	WASD[2] = true;
-        	currentWalkingImage = 1;
         }
         if(e.getKeyCode() == KeyEvent.VK_D) {
         	WASD[3] = true;
-        	currentWalkingImage = 4;
         }
         if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
         	isReadyToSprint = true;
@@ -562,6 +636,9 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
         	if(game.getWavesManager().getNPCManager().isAnyOpen()) {
         		game.getWavesManager().getNPCManager().closeAll();
         	} else game.setPaused(!game.isPaused());
+        }
+        if(e.getKeyCode() == KeyEvent.VK_Q) {
+        	this.swapWeapons();
         }
         if(e.getKeyCode() == KeyEvent.VK_E) {
         	game.getWavesManager().getMissionManager().startMission();
@@ -614,20 +691,26 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	@Override
 	public void onMouseDragged(MouseEvent e) {
-		mousePosition = new Vector2D(e.getX(), e.getY());
-		float dx = (float) (mousePosition.getX() - this.getPosition().getX());
-		float dy = (float) (mousePosition.getY() - this.getPosition().getY());
-
-		playerRotation = (float) Math.atan2(dy, dx);
+		this.onMouseMoved(e);
 	}
 
 	@Override
 	public void onMouseMoved(MouseEvent e) {
 		mousePosition = new Vector2D(e.getX(), e.getY());
-		float dx = (float) (mousePosition.getX() - this.getPosition().getX());
-		float dy = (float) (mousePosition.getY() - this.getPosition().getY());
-
+		float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
+		float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
 		playerRotation = (float) Math.atan2(dy, dx);
+		if(this.isClickAnAttack()) {
+			Vector2D direction = new Vector2D(dx, dy).normalize();
+			Debug.log(this, direction);
+			if (Math.abs(direction.getX()) > Math.abs(direction.getY())) {
+		        // Horizontal movement
+		        currentWalkingImage = (direction.getX() > 0) ? 4 : 3; // Right: 4, Left: 3
+		    } else {
+		        // Vertical movement
+		        currentWalkingImage = (direction.getY() > 0) ? 1 : 2; // Down: 1, Up: 2
+		    }
+		}
 	}
 	
 	public void addXp(float num) {
@@ -722,6 +805,22 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	public void setPlacingMode(boolean placingMode) {
 		this.placingMode = placingMode;
+	}
+
+	public Gun getSecondaryGun() {
+		return secondaryGun;
+	}
+
+	public void setSecondaryGun(Gun secondaryGun) {
+		this.secondaryGun = secondaryGun;
+	}
+
+	public boolean isPickingSecondary() {
+		return pickingSecondary;
+	}
+
+	public void setPickingSecondary(boolean pickingSecondary) {
+		this.pickingSecondary = pickingSecondary;
 	}
 	
 }

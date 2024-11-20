@@ -13,6 +13,8 @@ import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDamagedEventListener;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEventListener;
+import com.lucasj.gamedev.events.weapons.SwapWeaponEvent;
+import com.lucasj.gamedev.events.weapons.SwapWeaponEventListener;
 import com.lucasj.gamedev.events.weapons.WeaponTierUpgradeEvent;
 import com.lucasj.gamedev.events.weapons.WeaponTierUpgradeEventListener;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
@@ -21,7 +23,7 @@ import com.lucasj.gamedev.game.gamemodes.waves.missions.Mission;
 import com.lucasj.gamedev.game.gamemodes.waves.missions.Missions;
 import com.lucasj.gamedev.misc.Debug;
 
-public class MissionManager implements EntityDeathEventListener, CoinCollectedEventListener, EntityDamagedEventListener, WeaponTierUpgradeEventListener {
+public class MissionManager implements EntityDeathEventListener, CoinCollectedEventListener, EntityDamagedEventListener, WeaponTierUpgradeEventListener, SwapWeaponEventListener {
 	
 	private Game game;
 	private WavesManager waves;
@@ -34,6 +36,7 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		game.getEventManager().addListener(this, CoinCollectedEvent.class);
 		game.getEventManager().addListener(this, EntityDamagedEvent.class);
 		game.getEventManager().addListener(this, WeaponTierUpgradeEvent.class);
+		game.getEventManager().addListener(this, SwapWeaponEvent.class);
 		
 	}
 	
@@ -123,6 +126,15 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 
 	@Override
 	public void onWeaponTierUpgrade(WeaponTierUpgradeEvent e) {
+		if(Mission.activeMission == null) return;
+		if(Mission.activeMission.getName().equals("Frenzy")) {
+			((Missions.Frenzy) Mission.activeMission).setDividend();
+		}
+	}
+
+	@Override
+	public void onSwapWeapon(SwapWeaponEvent e) {
+		Debug.log(this, "SWAP");
 		if(Mission.activeMission == null) return;
 		if(Mission.activeMission.getName().equals("Frenzy")) {
 			((Missions.Frenzy) Mission.activeMission).setDividend();

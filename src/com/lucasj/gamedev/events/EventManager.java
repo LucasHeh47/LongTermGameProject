@@ -20,6 +20,8 @@ import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEventListener;
 import com.lucasj.gamedev.events.waves.WaveEndEvent;
 import com.lucasj.gamedev.events.waves.WaveEndEventListener;
+import com.lucasj.gamedev.events.weapons.SwapWeaponEvent;
+import com.lucasj.gamedev.events.weapons.SwapWeaponEventListener;
 import com.lucasj.gamedev.events.weapons.WeaponTierUpgradeEvent;
 import com.lucasj.gamedev.events.weapons.WeaponTierUpgradeEventListener;
 import com.lucasj.gamedev.misc.Debug;
@@ -116,6 +118,15 @@ public class EventManager {
                 listeners.forEach(listener -> {
                     if (listener instanceof WeaponTierUpgradeEventListener) {
                         ((WeaponTierUpgradeEventListener) listener).onWeaponTierUpgrade((WeaponTierUpgradeEvent) e);
+                    }
+                });
+            }
+    	} else if (e instanceof SwapWeaponEvent) {
+    		List<Object> listeners = eventMap.get(WeaponTierUpgradeEvent.class);
+            if (listeners != null) {
+                listeners.forEach(listener -> {
+                    if (listener instanceof SwapWeaponEventListener) {
+                        ((SwapWeaponEventListener) listener).onSwapWeapon((SwapWeaponEvent) e);
                     }
                 });
             }

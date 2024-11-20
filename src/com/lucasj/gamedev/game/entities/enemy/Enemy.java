@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.GameColors.colors;
 import com.lucasj.gamedev.events.entities.EntityAggroEvent;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
@@ -158,6 +159,11 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	private List<Ray> rays = new ArrayList<>();
 	protected boolean isMoving = false;
 	protected float angleToPlayer;
+	private long lastTimeHurt;
+	
+	private float healthUnderlayDelay = 0.5f;
+	private float healthUnderlayRate = 0.8f;
+	private float healthUnderlayLength;
 	
 	private Quadtree quadtree;
 	
@@ -192,6 +198,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	 */
 	public void render(Graphics g) {
 		if(!isAlive) return;
+		super.render(g);
 		// Health bar
 		g.setColor(Color.black);
 		int barWidth = (int) (size + (size * 0.075));
@@ -201,8 +208,13 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		g.fillRect(barX, barY, barWidth, barHeight);
 
 		// Health portion of the bar
+		g.setColor(colors.LIGHT_RED.getValue());
+		int healthWidth = (int) (barWidth * ((double) this.healthUnderlayLength / maxHealth));
+		g.fillRect(barX, barY, healthWidth, barHeight);
+
+		// Health portion of the bar
 		g.setColor(Color.red);
-		int healthWidth = (int) (barWidth * ((double) health / maxHealth));
+		healthWidth = (int) (barWidth * ((double) health / maxHealth));
 		g.fillRect(barX, barY, healthWidth, barHeight);
 
 	    Graphics2D g2d = (Graphics2D) g;
@@ -234,6 +246,11 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	    }
 	}
 	
+	public boolean takeDamage(float damage) {
+		this.lastTimeHurt = System.currentTimeMillis();
+		return super.takeDamage(damage);
+	}
+	
 	
 	/**
 	 * Do not Override
@@ -254,6 +271,11 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		float dy = (float) ((game.getPlayer().getPosition().getY() + game.getPlayer().getSize()/2) - this.getPosition().getY());
 
 		this.angleToPlayer = (float) (Math.atan2(dy, dx)+Math.PI/2);
+		
+		if((System.currentTimeMillis() - this.lastTimeHurt)/1000.0 >= this.healthUnderlayDelay) {
+			this.healthUnderlayLength -= this.healthUnderlayRate;
+			if(this.healthUnderlayLength <= this.health) this.healthUnderlayLength = this.health;
+		}
 		
 		this.attackPlayer();
 	}

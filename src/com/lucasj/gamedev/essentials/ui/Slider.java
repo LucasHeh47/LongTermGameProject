@@ -4,11 +4,11 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
-import com.lucasj.gamedev.misc.Debug;
 
 public class Slider extends UIComponent implements MouseClickEventListener, MouseMotionEventListener {
     private int x, y, width, height;
@@ -20,7 +20,7 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
     private Game game;
     private Tooltip tooltip;
     private int mouseX, mouseY;
-    
+    private Supplier<Boolean> decidingFactor;
 
     public Slider(Game game, int x, int y, int width, int height, int minValue, int maxValue, String setting, boolean userDefined) {
     	this.game = game;
@@ -124,7 +124,7 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
         Rectangle sliderBounds = new Rectangle(x, y, width, height);
         int handleX = x + (int) ((currentValue - minValue) / (double) (maxValue - minValue) * (width - 10));
         Rectangle handleBounds = new Rectangle(handleX, y, 10, height);
-        if (userDefined && (sliderBounds.contains(e.getPoint()) || handleBounds.contains(e.getPoint()))) {
+        if (userDefined && (sliderBounds.contains(e.getPoint()) || handleBounds.contains(e.getPoint())) && this.decidingFactor.get()) {
             isDragging = true;
             updateValue(e.getX());
         }
@@ -150,7 +150,7 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
     private void updateValue(int mouseX) {
         int relativeX = Math.max(0, Math.min(mouseX - x, width)); // Clamp relative position
         currentValue = minValue + (int) ((relativeX / (double) width) * (maxValue - minValue));
-        Debug.log(this, "new value: " + currentValue);
+        game.getAudioPlayer().playSound("UI/button_hover.wav", null);
         game.getSettings().setIntSetting(setting, currentValue);
     }
 
@@ -177,6 +177,10 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
 	public void onMouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void setDecidingFactor(Supplier<Boolean> decidingFactor) {
+		this.decidingFactor = decidingFactor;
 	}
 
 }

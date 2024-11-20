@@ -11,6 +11,7 @@ public class NPCManager {
 	
 	private NPC playerUpgradeNPC;
 	private NPC craftingTable;
+	private NPC gunsmith;
 	
 	public NPCManager(Game game, Player player) {
 		this.game = game;
@@ -23,6 +24,8 @@ public class NPCManager {
 		playerUpgradeNPC.instantiate();
 		craftingTable = new NPC(game, new Vector2D(1000, 300), 50);
 		craftingTable.instantiate();
+		gunsmith = new NPC(game, new Vector2D(1500, 300), 50);
+		gunsmith.instantiate();
 	}
 
 	public NPC getPlayerUpgradeNPC() {
@@ -36,9 +39,14 @@ public class NPCManager {
 	public void closeAll() {
 		this.playerUpgradeNPC.close();
 		this.craftingTable.close();
+		this.gunsmith.close();
 	}
 	
 	public boolean isAnyOpen() {
-		return this.playerUpgradeNPC.isOpen() || this.craftingTable.isOpen();
+		return this.playerUpgradeNPC.isOpen() || this.craftingTable.isOpen() || gunsmith.isOpen();
+	}
+
+	public NPC getGunsmith() {
+		return gunsmith;
 	}
 }
