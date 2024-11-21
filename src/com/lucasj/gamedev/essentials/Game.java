@@ -30,6 +30,7 @@ import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.projectiles.Projectile;
 import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.game.multiplayer.GameClient;
+import com.lucasj.gamedev.game.multiplayer.Party;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.os.GameData;
@@ -82,9 +83,8 @@ public class Game {
     
     private Window window;
     
-    public boolean inParty = false;
-    
     public String username = "LucasHeh1";
+    public Party party;
     
     private GameClient socketClient;
     public String authToken;
@@ -142,6 +142,8 @@ public class Game {
         
         collisionSurfaces = new ConcurrentList<>();
         CollisionSurface surface = new CollisionSurface(this, new Vector2D(300, 400), 100, 500, Color.DARK_GRAY);
+    	
+    	this.instantiatePlayer();
         
     }
 
@@ -168,9 +170,13 @@ public class Game {
     }
     
     public void createParty() {
-    	if(inParty) return;
+    	if(party != null) return;
     	socketClient.getPacketManager().requestCreatePartyPacket();
-    	inParty = true;
+    }
+    
+    public void joinParty(String username) {
+    	if(party != null) return;
+    	socketClient.getPacketManager().requestJoinPartyPacket(username);
     }
     
     public void updateLists() {

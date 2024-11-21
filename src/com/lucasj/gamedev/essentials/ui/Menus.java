@@ -79,9 +79,10 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     		
     		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 450), (game.getHeight() - 200), 400, 150,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	            	
     	                game.setGameState(GameState.waves);
     	                game.getMapManager().map.generateMap();
-    	                game.instantiatePlayer();
+    	                //game.instantiatePlayer();
     	                this.createGUIs();
     	            }, null).setBorderRadius(20));
     		
@@ -89,7 +90,14 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                game.createParty();
     	            }, null).setBorderRadius(20).setDecidingFactor(() -> {
-    	            	return !game.inParty;
+    	            	return game.party == null;
+    	            }));
+    		
+    		buttons.add(new Button(game, this, GameState.wavesmenu, "Join Party", (game.getWidth() - 450), 200, 400, 100,
+    	            Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	                game.joinParty("LucasHeh1");
+    	            }, null).setBorderRadius(20).setDecidingFactor(() -> {
+    	            	return game.party == null;
     	            }));
     	        
     	    buttons.add(new Button(game, this, GameState.wavesmenu, "Back", (game.getWidth() - 200) / 2, 255, 200, 50,

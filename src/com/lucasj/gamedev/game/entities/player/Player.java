@@ -106,8 +106,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private MiniMap minimap;
 	
-	// Testing
-	private OnlinePlayer player2;
 	
 	public Player(Game game, InputHandler input) {
 		super(game);
@@ -126,8 +124,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		input.addMouseClickListener(this);
 		input.addMouseMotionListener(this);
 		
-		player2 = new OnlinePlayer(game, Color.green, "LucasHeh", new Vector2D(1000, 500));
-		
 		this.primaryGun = new AssaultRifle(game, this);
 		
 		
@@ -142,6 +138,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	@Override
 	public void update(double deltaTime) {
+		if(!game.getWavesManager().hasGameStarted()) return;
 		this.activePlaceables.update();
 		this.screenPosition = new Vector2D(game.getWidth()/2, game.getHeight()/2);
 		isMoving = false;
@@ -173,11 +170,11 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 			placeable.update(deltaTime);
 		});
 		if(minimap != null) minimap.update(deltaTime);
-	    if(player2 != null) player2.update(deltaTime);
 	}
 
 	@Override
 	public void render(Graphics g) {
+		if(!game.getWavesManager().hasGameStarted()) return;
 		super.render(g);
 		Graphics2D g2d = (Graphics2D) g;
 
@@ -225,7 +222,12 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    renderAmmo(g2d);
 	    
 	    if(minimap != null) minimap.render(g2d);
-	    if(player2 != null) player2.render(g2d);
+	    
+	    
+	    if(game.party != null) {
+	    	
+	    }
+	    
 	}
 	
 	private void renderAmmo(Graphics2D g2d) {
@@ -452,7 +454,11 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    		this.lastWalkSound = System.currentTimeMillis();
 	    	}
 	    	
-	    }
+	    	
+	    	if(game.party != null) {
+	    		game.getSocketClient().getPacketManager().playerPositionPacket(position);
+	    	}
+		}
 
 	    // Calculate camera boundaries and player position relative to the camera
 	    Vector2D newCamPos = this.position.subtract(new Vector2D(game.getWidth() / 2, game.getHeight() / 2));
@@ -648,22 +654,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
         if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
         	isReadyToSprint = true;
         }
-        if(e.getKeyCode() == KeyEvent.VK_UP) {
-        	this.player2.setPosition(new Vector2D(this.player2.getPosition().getX(), this.player2.getPosition().getY()-50));
-        	this.player2.setCurrentWalkingImage(2);
-        }
-        if(e.getKeyCode() == KeyEvent.VK_DOWN) {
-        	this.player2.setPosition(new Vector2D(this.player2.getPosition().getX(), this.player2.getPosition().getY()+50));
-        	this.player2.setCurrentWalkingImage(1);
-        }
-        if(e.getKeyCode() == KeyEvent.VK_LEFT) {
-        	this.player2.setPosition(new Vector2D(this.player2.getPosition().getX()-50, this.player2.getPosition().getY()));
-        	this.player2.setCurrentWalkingImage(3);
-        }
-        if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
-        	this.player2.setPosition(new Vector2D(this.player2.getPosition().getX()+50, this.player2.getPosition().getY()));
-        	this.player2.setCurrentWalkingImage(4);
-        }
+        
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
         	if(game.getWavesManager().getNPCManager().isAnyOpen()) {
         		game.getWavesManager().getNPCManager().closeAll();
@@ -853,6 +844,16 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	public void setPickingSecondary(boolean pickingSecondary) {
 		this.pickingSecondary = pickingSecondary;
+	}
+
+	@Override
+	public String getUsername() {
+		return game.username;
+	}
+
+	@Override
+	public Player getPlayer() {
+		return this;
 	}
 	
 }

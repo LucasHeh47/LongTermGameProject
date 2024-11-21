@@ -54,7 +54,7 @@ public class PacketManager {
         JSONObject basePacket = new JSONObject();
         try {
 			basePacket.put("username", this.client.getUsername());
-	        basePacket.put("auth_token", this.client.getUsername());
+	        basePacket.put("auth_token", this.client.getAuthToken());
 	        basePacket.put("packet_type", "logging_off");
 
 			client.sendData(basePacket.toString().getBytes());
@@ -77,12 +77,38 @@ public class PacketManager {
 		}
 	}
 	
+	public void requestJoinPartyPacket(String username) {
+		try {
+			JSONObject json = getBasePacket("join_party");
+			
+			json.getJSONObject("data").put("join_party", username);
+			
+			client.sendData(json.toString().getBytes());
+			
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void partyGoingIntoGamePacket(Vector2D position) {
+		try {
+			JSONObject json = this.getBasePacket("host_to_clients");
+			
+			json.getJSONObject("data").put("ingame", true);
+			
+			client.sendData(json.toString().getBytes());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
 	public void playerPositionPacket(Vector2D position) {
 		try {
-			JSONObject json = this.getBasePacket("player position");
+			JSONObject json = this.getBasePacket("host_to_clients");
 			
 			json.getJSONObject("data").put("player_position", new JSONObject());
-			
+
+			json.getJSONObject("player_position").put("username", client.getUsername());
 			json.getJSONObject("player_position").put("x", position.getX());
 			json.getJSONObject("player_position").put("y", position.getY());
 			
