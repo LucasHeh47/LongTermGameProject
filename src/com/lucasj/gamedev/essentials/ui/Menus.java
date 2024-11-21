@@ -174,8 +174,10 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     		} else {
                     			if(game.party.getHost().getUsername().equals(game.username) ) {
                     				game.getPlayer().setPickingClass(false);
+    		                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
                     			} else {
                     				game.getSocketClient().getPacketManager().playerPickedClass();
+    		                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
                     			}
                     		}
                     	}
@@ -200,8 +202,18 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     			game.getPlayer().setPickingSecondary(false);
                     		}
                     	} else {
-	                        game.getWavesManager().startWaves();
-	                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+                    		if(game.party == null) {
+		                        game.getWavesManager().startWaves();
+		                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+                    		} else {
+                    			if(game.party.getHost().getUsername().equals(game.username) ) {
+                    				game.getPlayer().setPickingClass(false);
+    		                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+                    			} else {
+    		                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+                    				game.getSocketClient().getPacketManager().playerPickedClass();
+                    			}
+                    		}
                     	}
                     }, 
                     new Tooltip(game, "SMG", "{GREEN}- Fast Fire Rate{NL}{YELLOW}- Medium Control{NL}{RED}- Close Range{NL}- Low Damage",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
@@ -224,8 +236,18 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     			game.getPlayer().setPickingSecondary(false);
                     		}
                     	} else {
-	                        game.getWavesManager().startWaves();
-	                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+                    		if(game.party == null) {
+		                        game.getWavesManager().startWaves();
+		                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+                    		} else {
+                    			if(game.party.getHost().getUsername().equals(game.username) ) {
+                    				game.getPlayer().setPickingClass(false);
+    		                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+                    			} else {
+                    				game.getSocketClient().getPacketManager().playerPickedClass();
+    		                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+                    			}
+                    		}
                     	}
                     }, 
                     new Tooltip(game, "Shotgun", "{GREEN}- Shoots Pellets{NL}- Medium-High Damage{NL}{YELLOW}- Area Damage{NL}{RED}- Close Range{NL}{RED}- Medium-Slow Fire Rate{NL}{RED}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
@@ -248,8 +270,18 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     			game.getPlayer().setPickingSecondary(false);
                     		}
                     	} else {
-	                        game.getWavesManager().startWaves();
-	                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+                    		if(game.party == null) {
+		                        game.getWavesManager().startWaves();
+		                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+                    		} else {
+                    			if(game.party.getHost().getUsername().equals(game.username) ) {
+                    				game.getPlayer().setPickingClass(false);
+    		                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+                    			} else {
+                    				game.getSocketClient().getPacketManager().playerPickedClass();
+    		                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+                    			}
+                    		}
                     	}
                     }, 
                     new Tooltip(game, "Sniper", "{GREEN}- High Damage{NL}{GREEN}- Long Range{NL}{GREEN}- Pierces through enemies{NL}{RED}- Slow Fire Rate{NL}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
