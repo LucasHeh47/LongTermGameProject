@@ -121,5 +121,13 @@ public class Vector2D {
 	public boolean isZero() {
 		return this.x == 0 && this.y == 0;
 	}
+
+	public Vector2D multiply(Vector2D scalar) {
+		return new Vector2D(this.x * scalar.x, this.y * scalar.y);
+	}
+	
+	public Vector2D divide(Vector2D dividend) {
+		return new Vector2D(this.x / dividend.x, this.y / dividend.y);
+	}
 }
 

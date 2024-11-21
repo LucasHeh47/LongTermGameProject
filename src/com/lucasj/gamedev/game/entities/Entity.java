@@ -41,6 +41,16 @@ public abstract class Entity implements EntityCollisionEventListener {
 		
 	}
 
+	/***
+	 * 
+	 * @param game
+	 * @param position
+	 * @param velocity
+	 * @param maxHealth
+	 * @param movementSpeed
+	 * @param size
+	 * @param tag
+	 */
 	public Entity(Game game, Vector2D position, Vector2D velocity, int maxHealth, int movementSpeed, int size, String tag) {
 		this.game = game;
 		this.position = position;

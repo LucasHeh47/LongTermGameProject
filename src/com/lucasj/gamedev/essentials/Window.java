@@ -113,10 +113,6 @@ public class Window extends Canvas implements Runnable {
         }
     }
 
-
-
-
-
     private void update(double deltaTime) {
     	game.update(deltaTime);
     }

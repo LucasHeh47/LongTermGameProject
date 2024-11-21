@@ -28,6 +28,7 @@ import com.lucasj.gamedev.events.weapons.SwapWeaponEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
 import com.lucasj.gamedev.game.entities.placeables.Placeable;
+import com.lucasj.gamedev.game.entities.player.multiplayer.OnlinePlayer;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
 import com.lucasj.gamedev.game.weapons.Gun;
@@ -36,6 +37,7 @@ import com.lucasj.gamedev.game.weapons.guns.Shotgun;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.utils.ConcurrentList;
+import com.lucasj.gamedev.world.map.MiniMap;
 
 public class Player extends Entity implements PlayerMP, MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener{
 
@@ -92,8 +94,8 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private PlayerRewarder playerRewarder;
 	
-	private int money = 500000;
-	private int gems = 10;
+	private int money = 50000000;
+	private int gems = 0;
 	
 	private long lastWalkSound;
 	private float walkSoundCooldown = 0.5f;
@@ -102,8 +104,14 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	private float healthUnderlayRate = 0.35f;
 	private float healthUnderlayLength;
 	
+	private MiniMap minimap;
+	
+	// Testing
+	private OnlinePlayer player2;
+	
 	public Player(Game game, InputHandler input) {
 		super(game);
+		minimap = new MiniMap(game);
 		activePlaceables = new ConcurrentList<>();
 		placeableManager = new PlayerPlaceableManager(game, this);
 		this.input = input;
@@ -118,7 +126,10 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		input.addMouseClickListener(this);
 		input.addMouseMotionListener(this);
 		
+		player2 = new OnlinePlayer(game, Color.green, "LucasHeh", new Vector2D(1000, 500));
+		
 		this.primaryGun = new AssaultRifle(game, this);
+		
 		
 		walking = new BufferedImage[4][4];
 		for(int i = 0; i < 4; i++) {
@@ -161,6 +172,8 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		this.activePlaceables.forEach(placeable -> {
 			placeable.update(deltaTime);
 		});
+		if(minimap != null) minimap.update(deltaTime);
+	    if(player2 != null) player2.update(deltaTime);
 	}
 
 	@Override
@@ -210,6 +223,9 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    renderPlaceable(g2d);
 	    renderEquippedGun(g2d);
 	    renderAmmo(g2d);
+	    
+	    if(minimap != null) minimap.render(g2d);
+	    if(player2 != null) player2.render(g2d);
 	}
 	
 	private void renderAmmo(Graphics2D g2d) {
@@ -631,6 +647,22 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
         }
         if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
         	isReadyToSprint = true;
+        }
+        if(e.getKeyCode() == KeyEvent.VK_UP) {
+        	this.player2.setPosition(new Vector2D(this.player2.getPosition().getX(), this.player2.getPosition().getY()-50));
+        	this.player2.setCurrentWalkingImage(2);
+        }
+        if(e.getKeyCode() == KeyEvent.VK_DOWN) {
+        	this.player2.setPosition(new Vector2D(this.player2.getPosition().getX(), this.player2.getPosition().getY()+50));
+        	this.player2.setCurrentWalkingImage(1);
+        }
+        if(e.getKeyCode() == KeyEvent.VK_LEFT) {
+        	this.player2.setPosition(new Vector2D(this.player2.getPosition().getX()-50, this.player2.getPosition().getY()));
+        	this.player2.setCurrentWalkingImage(3);
+        }
+        if(e.getKeyCode() == KeyEvent.VK_RIGHT) {
+        	this.player2.setPosition(new Vector2D(this.player2.getPosition().getX()+50, this.player2.getPosition().getY()));
+        	this.player2.setCurrentWalkingImage(4);
         }
         if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
         	if(game.getWavesManager().getNPCManager().isAnyOpen()) {

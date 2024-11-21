@@ -14,12 +14,15 @@ public class MapManager {
 	public Map map;
 	
 	private Tile[] grass;
+	
+	private Vector2D worldSize;
 
 	private static final String assetPackDirectory = System.getProperty("user.dir") + "/src/com/lucasj/gamedev/Assets/Ninja Adventure - Asset Pack/";
 	
 	public MapManager(Game game) {
 		this.game = game;
-		map = new Map(game, this, 100, 50);
+		worldSize = new Vector2D(50, 50);
+		map = new Map(game, this, (int) (worldSize.getX()), (int) (worldSize.getY()));
 		
 		grass = new Tile[5];
 		grass[0] = new Tile(assetPackDirectory + "Backgrounds/Tilesets/TilesetFloor.png", new Vector2D(64, 192), new Vector2D(16, 16));
@@ -42,6 +45,10 @@ public class MapManager {
 	
 	public Tile[] getGrass() {
 		return grass;
+	}
+
+	public Vector2D getWorldSize() {
+		return new Vector2D(worldSize.getX()*tileSize, worldSize.getY()*tileSize);
 	}
 
 }
