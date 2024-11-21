@@ -114,9 +114,9 @@ public class PacketManager {
 	        playerPosition.put("y", position.getY());
 	        
 	        JSONObject playerHealth = new JSONObject();
-	        playerPosition.put("username", client.getUsername());
-	        playerPosition.put("current", health);
-	        playerPosition.put("max", maxHealth);
+	        playerHealth.put("username", client.getUsername());
+	        playerHealth.put("current", health);
+	        playerHealth.put("max", maxHealth);
 
 	        // Add player_position to data
 	        json.getJSONObject("data").put("player_position", playerPosition);
