@@ -104,7 +104,7 @@ public class Game {
         }
     	Player.getGlobalStats().load(gameData);
     	
-    	socketClient = new GameClient(this, "localhost");
+    	socketClient = new GameClient(this, "lucas-j.com");
     	socketClient.start();
     	socketClient.getPacketManager().requestLoginPacket();
     	

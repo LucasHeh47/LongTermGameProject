@@ -44,7 +44,7 @@ public class WavesManager {
 	
 	// Base values
     private final int BASE_HEALTH = 50;
-    private final int BASE_ENEMIES = 7; // default: 7
+    private final int BASE_ENEMIES = 0; // default: 7
 
     // Growth rates
     private final double HEALTH_GROWTH_RATE = 0.15;
@@ -71,7 +71,6 @@ public class WavesManager {
 	}
 	
 	public void newWave() {
-		System.out.println("Starting wave");
 		wave++;
 		intermissionTimer = System.currentTimeMillis();
 		enemySpawner.calculateSpawnableEnemies();
@@ -140,7 +139,6 @@ public class WavesManager {
 	        if (intermissionTick == intermissionLength) {
 	            betweenWaves = false;
 	            intermissionTick = 0;
-	            System.out.println("Wave " + wave + " started");
 	        }
 	    } else if (enemiesSpawnedThisWave < enemiesThisWave && (System.currentTimeMillis() - lastSpawn) / 1000.0 > spawnRate) {
 	        enemySpawner.spawnEnemy(getEnemyHealth(wave), new Vector2D(rand.nextInt(game.getWidth()), rand.nextInt(game.getHeight())));
@@ -192,7 +190,6 @@ public class WavesManager {
 	
 	public void killedEnemy() {
 		enemiesKilledThisWave++;
-		System.out.println("Killed " + enemiesKilledThisWave + "/" + enemiesThisWave);
 	}
 	
 	public int getEnemyHealth(int wave) {

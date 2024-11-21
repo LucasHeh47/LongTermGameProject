@@ -81,6 +81,11 @@ public class GameClient extends Thread {
             	game.party = new Party(game);
             	game.party.setHost(game.getPlayer());
             }
+            
+            if(response.has("join_success")) {
+            	game.party = new Party(game);
+            	game.party.setHost(new OnlinePlayer(game, null, response.getString("join_success"), new Vector2D(0, 0)));
+            }
 
             // Update auth_token if provided
             if (response.has("auth_token")) {

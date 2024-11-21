@@ -140,7 +140,7 @@ class GameServer(threading.Thread):
 
         host_player.party.add_player(player)
         print(f"Player {player.username} joined the party hosted by {host_player.username}")
-        self.send_data({"status": "join_success"}, address)
+        self.send_data({"status": {"join_success": host_player.username}}, address)
 
     def handle_party_going_into_game(self, packet, address):
         auth_token = packet.get("auth_token")
