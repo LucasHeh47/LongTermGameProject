@@ -163,11 +163,11 @@ public class GameClient extends Thread {
 
             
             if (data.has("player_health")) {
-                JSONObject position = data.getJSONObject("player_position");
-                float health = (float) position.optDouble("health", 0);
-                float maxHealth = (float) position.optDouble("max", 0);
+                JSONObject healthObject = data.getJSONObject("player_health");
+                float health = (float) healthObject.optDouble("health", 0);
+                float maxHealth = (float) healthObject.optDouble("max", 0);
                 
-                game.party.updatePlayerHealth(position.getString("username"), 
+                game.party.updatePlayerHealth(healthObject.getString("username"), 
                 								health,
                 								maxHealth);
                 
