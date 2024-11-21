@@ -112,9 +112,25 @@ public class OnlinePlayer extends Entity implements PlayerMP {
 	public void setColor(Color color) {
 		this.color = color;
 	}
+	
+	public Entity setPosition(Vector2D pos) {
+		this.position = pos;
+		return this;
+	}
 
 	@Override
 	public OnlinePlayer getPlayer() {
+		return this;
+	}
+
+	@Override
+	public void setWalkingImage(int num) {
+		this.currentWalkingImage = num;
+	}
+
+	@Override
+	public Entity setMaxHealth(float num) {
+		this.setMaxHealth(num);
 		return this;
 	}
 	

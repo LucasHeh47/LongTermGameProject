@@ -1,12 +1,15 @@
 package com.lucasj.gamedev.game.multiplayer;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.game.entities.player.multiplayer.OnlinePlayer;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 
 public class Party {
 
@@ -21,6 +24,7 @@ public class Party {
 	
 	public Party(Game game) {
 		this.game = game;
+		players = new ArrayList<>();
 	}
 
 	public List<PlayerMP> getPlayers() {
@@ -43,6 +47,26 @@ public class Party {
 		return false;
 	}
 	
+	public void update(double deltaTime) {
+		if(host != game.getPlayer()) ((OnlinePlayer) host).update(deltaTime);
+		players.forEach(player -> {
+			if(player != game.getPlayer()) {
+				Debug.log(this, "updating " + player.getUsername());
+				((OnlinePlayer) player).update(deltaTime);
+			}
+		});
+	}
+	
+	public void render(Graphics2D g2d) {
+		if(host != game.getPlayer()) ((OnlinePlayer) host).render(g2d);
+		players.forEach(player -> {
+			if(player != game.getPlayer()) {
+				Debug.log(this, "rendering " + player.getUsername());
+				((OnlinePlayer) player).render(g2d);
+			}
+		});
+	}
+	
 	public Color getColor(PlayerMP player) {
         if (player.equals(host)) {
             return Color.BLUE; // Host is blue
@@ -60,6 +84,34 @@ public class Party {
                 return Color.GRAY; // Default fallback color
         }
     }
+	
+	public void updatePlayerPosition(String username, Vector2D position, int walkingImage) {
+		if(host.getUsername().equals(username)) {
+			host.setPosition(position);
+			host.setWalkingImage(walkingImage);
+		} else {
+			for(PlayerMP p : this.getPlayers()) {
+				if(!p.getUsername().equals(game.username)) {
+					p.setPosition(position);
+					p.setWalkingImage(walkingImage);
+				}
+			}
+		}
+	}
+	
+	public void updatePlayerHealth(String username, float health, float maxHealth) {
+		if(host.getUsername().equals(username)) {
+			host.setHealth(health);
+			host.setMaxHealth(maxHealth);
+		} else {
+			for(PlayerMP p : this.getPlayers()) {
+				if(!p.getUsername().equals(game.username)) {
+					p.setHealth(health);
+					p.setMaxHealth(maxHealth);
+				}
+			}
+		}
+	}
 	
 	public void addPlayer(PlayerMP player) {
 		players.add(player);

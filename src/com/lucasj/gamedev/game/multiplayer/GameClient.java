@@ -74,20 +74,27 @@ public class GameClient extends Thread {
                     handleResponseAsHost(response);
                     break;
                 default:
-                    Debug.log(this, "Unknown packet type: " + packetType);
                     break;
             }
             
-            if(response.has("status")) {
-            	if(response.get("status").equals("party_created")) {
-	            	Debug.log(this, "Party created");
-	            	game.party = new Party(game);
-	            	game.party.setHost(game.getPlayer());
-            	}
-            	if(response.get("status").equals("join_success")) {
-	            	game.party = new Party(game);
-	            	game.party.setHost(new OnlinePlayer(game, null, response.getString("join_success"), new Vector2D(0, 0)));
-            	}
+            if (response.has("status")) {
+                JSONObject status = response.optJSONObject("status");
+                if (status != null) {
+                    if (status.has("party_created")) {
+                        Debug.log(this, "Party created");
+                        game.party = new Party(game);
+                        game.party.setHost(game.getPlayer());
+                    }
+
+                    if (status.has("join_success")) {
+                        game.party = new Party(game);
+                        Debug.log(this, game.party == null);
+                        String hostUsername = status.getString("join_success");
+                        Debug.log(this, "Host: " + hostUsername);
+                        OnlinePlayer host = new OnlinePlayer(game, null, hostUsername, new Vector2D(0, 0));
+                        game.party.setHost(host);
+                    }
+                }
             }
 
             // Update auth_token if provided
@@ -99,6 +106,7 @@ public class GameClient extends Thread {
 
         } catch (JSONException e) {
             Debug.log(this, "Invalid JSON response: " + message);
+            e.printStackTrace();
         }
     }
 
@@ -109,7 +117,7 @@ public class GameClient extends Thread {
             Debug.log(this, "Processing forwarded packet data: " + data.toString());
             // Example: Update player positions
             
-            if(data.has("ingame") && data.get("ingame").equals("true")) {
+            if(data.has("ingame")) {
                 game.setGameState(GameState.waves);
                 game.getMapManager().map.generateMap();
                 //game.instantiatePlayer();
@@ -120,17 +128,21 @@ public class GameClient extends Thread {
                 JSONObject position = data.getJSONObject("player_position");
                 double x = position.optDouble("x", 0);
                 double y = position.optDouble("y", 0);
-                Debug.log(this, "Updated player position: (" + x + ", " + y + ")");
                 
-                game.party.getPlayers().forEach(player -> {
-                	try {
-						if(player.getUsername().equals(position.get("username"))) {
-							((OnlinePlayer) player).setPosition(new Vector2D(x, y));
-						}
-					} catch (JSONException e) {
-						e.printStackTrace();
-					}
-                });
+                game.party.updatePlayerPosition(position.getString("username"), 
+                								new Vector2D(x, y),
+                								position.getInt("walking_image"));
+                
+            }
+            
+            if (data.has("player_health")) {
+                JSONObject position = data.getJSONObject("player_position");
+                float health = (float) position.optDouble("health", 0);
+                float maxHealth = (float) position.optDouble("max", 0);
+                
+                game.party.updatePlayerHealth(position.getString("username"), 
+                								health,
+                								maxHealth);
                 
             }
         }

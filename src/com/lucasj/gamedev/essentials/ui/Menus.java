@@ -95,7 +95,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     		
     		buttons.add(new Button(game, this, GameState.wavesmenu, "Join Party", (game.getWidth() - 450), 200, 400, 100,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
-    	                game.joinParty("LucasHeh1");
+    	                game.joinParty("LucasHeh2");
     	            }, null).setBorderRadius(20).setDecidingFactor(() -> {
     	            	return game.party == null;
     	            }));

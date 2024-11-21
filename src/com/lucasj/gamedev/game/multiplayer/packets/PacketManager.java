@@ -102,25 +102,29 @@ public class PacketManager {
 		}
 	}
 	
-	public void playerPositionPacket(Vector2D position) {
+	public void playerInfoPacket(float health, float maxHealth, Vector2D position, int walkingImage) {
 		try {
 			JSONObject json = this.getBasePacket("host_to_clients");
 			
 			// Create player_position object
 	        JSONObject playerPosition = new JSONObject();
 	        playerPosition.put("username", client.getUsername());
+	        playerPosition.put("walking_image", walkingImage);
 	        playerPosition.put("x", position.getX());
 	        playerPosition.put("y", position.getY());
+	        
+	        JSONObject playerHealth = new JSONObject();
+	        playerPosition.put("username", client.getUsername());
+	        playerPosition.put("current", health);
+	        playerPosition.put("max", maxHealth);
 
 	        // Add player_position to data
 	        json.getJSONObject("data").put("player_position", playerPosition);
+	        json.getJSONObject("data").put("player_health", playerHealth);
 			
 			client.sendData(json.toString().getBytes());
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
 	}
-	/*
-	 * Make request packets and send here, redo server code to make this acceptable and just overall make server code better
-	 */
 }

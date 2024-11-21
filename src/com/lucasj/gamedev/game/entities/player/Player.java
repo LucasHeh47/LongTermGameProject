@@ -170,6 +170,20 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 			placeable.update(deltaTime);
 		});
 		if(minimap != null) minimap.update(deltaTime);
+		
+		
+
+    	if(game.party != null) {
+    		game.getSocketClient().getPacketManager().playerInfoPacket(health, maxHealth, position, this.currentWalkingImage);
+    		Debug.log(this, "Packet Sent");
+    	} else {
+    		Debug.log(this, "Not in party");
+    	}
+		
+		
+	    if(game.party != null) {
+	    	game.party.update(deltaTime);
+	    }
 	}
 
 	@Override
@@ -225,7 +239,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    
 	    
 	    if(game.party != null) {
-	    	
+	    	game.party.render(g2d);
 	    }
 	    
 	}
@@ -452,14 +466,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    		Random rand = new Random();
 	    		game.getAudioPlayer().playSound("Walk/grass" + rand.nextInt(2, 6) + ".wav", this.position, .08f);
 	    		this.lastWalkSound = System.currentTimeMillis();
-	    	}
-	    	
-	    	
-	    	if(game.party != null) {
-	    		game.getSocketClient().getPacketManager().playerPositionPacket(position);
-	    		Debug.log(this, "Packet Sent");
-	    	} else {
-	    		Debug.log(this, "Not in party");
 	    	}
 		}
 
@@ -728,7 +734,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		playerRotation = (float) Math.atan2(dy, dx);
 		if(this.isClickAnAttack()) {
 			Vector2D direction = new Vector2D(dx, dy).normalize();
-			Debug.log(this, direction);
 			if (Math.abs(direction.getX()) > Math.abs(direction.getY())) {
 		        // Horizontal movement
 		        currentWalkingImage = (direction.getX() > 0) ? 4 : 3; // Right: 4, Left: 3
@@ -857,6 +862,15 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	@Override
 	public Player getPlayer() {
 		return this;
+	}
+
+	public void setWalkingImage(int num) {
+		this.currentWalkingImage = num;
+	}
+
+	@Override
+	public Entity setMaxHealth(float num) {
+		return null;
 	}
 	
 }
