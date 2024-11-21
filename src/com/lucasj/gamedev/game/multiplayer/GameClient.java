@@ -11,6 +11,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.game.entities.player.multiplayer.OnlinePlayer;
 import com.lucasj.gamedev.game.multiplayer.packets.PacketManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
@@ -107,6 +108,14 @@ public class GameClient extends Thread {
         if (data != null) {
             Debug.log(this, "Processing forwarded packet data: " + data.toString());
             // Example: Update player positions
+            
+            if(data.has("ingame") && data.get("ingame").equals("true")) {
+                game.setGameState(GameState.waves);
+                game.getMapManager().map.generateMap();
+                //game.instantiatePlayer();
+                game.getMenus().createGUIs();
+            }
+            
             if (data.has("player_position")) {
                 JSONObject position = data.getJSONObject("player_position");
                 double x = position.optDouble("x", 0);

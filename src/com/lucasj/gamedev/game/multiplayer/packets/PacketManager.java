@@ -90,7 +90,7 @@ public class PacketManager {
 		}
 	}
 	
-	public void partyGoingIntoGamePacket(Vector2D position) {
+	public void partyGoingIntoGamePacket() {
 		try {
 			JSONObject json = this.getBasePacket("host_to_clients");
 			

@@ -118,7 +118,7 @@ class GameServer(threading.Thread):
         # Forward the packet to all other party members
         for member in party.players:
             if member != player:  # Don't send to the sender
-                self.send_data(packet, member.address)
+                self.send_data(packet, member.ip_address)
 
         print(f"Forwarded packet from {player.username} to party members")
 

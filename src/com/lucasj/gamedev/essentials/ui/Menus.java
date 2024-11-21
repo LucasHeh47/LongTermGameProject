@@ -79,7 +79,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     		
     		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 450), (game.getHeight() - 200), 400, 150,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
-    	            	
+    	            	if(game.party != null && game.party.getHost().getUsername().equals(game.username)) game.getSocketClient().getPacketManager().partyGoingIntoGamePacket();
     	                game.setGameState(GameState.waves);
     	                game.getMapManager().map.generateMap();
     	                //game.instantiatePlayer();
