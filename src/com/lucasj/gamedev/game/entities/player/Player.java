@@ -457,6 +457,9 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    	
 	    	if(game.party != null) {
 	    		game.getSocketClient().getPacketManager().playerPositionPacket(position);
+	    		Debug.log(this, "Packet Sent");
+	    	} else {
+	    		Debug.log(this, "Not in party");
 	    	}
 		}
 

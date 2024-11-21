@@ -106,11 +106,14 @@ public class PacketManager {
 		try {
 			JSONObject json = this.getBasePacket("host_to_clients");
 			
-			json.getJSONObject("data").put("player_position", new JSONObject());
+			// Create player_position object
+	        JSONObject playerPosition = new JSONObject();
+	        playerPosition.put("username", client.getUsername());
+	        playerPosition.put("x", position.getX());
+	        playerPosition.put("y", position.getY());
 
-			json.getJSONObject("player_position").put("username", client.getUsername());
-			json.getJSONObject("player_position").put("x", position.getX());
-			json.getJSONObject("player_position").put("y", position.getY());
+	        // Add player_position to data
+	        json.getJSONObject("data").put("player_position", playerPosition);
 			
 			client.sendData(json.toString().getBytes());
 		} catch (JSONException e) {

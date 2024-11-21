@@ -29,7 +29,6 @@ public class WavesEnemySpawner {
                 EnemyWavesData wavesData = Enemy.getWavesData(enemyType);
                 
                 // Use the wavesData as needed
-                System.out.println(wavesData.startRound);
                 if (wavesData != null && wavesData.spawnRate != -1 && wavesData.startRound <= game.getWavesManager().getWave()) {
                     spawnableEnemies.add(enemyType);
                     totalSpawnWeight += wavesData.spawnRate;
