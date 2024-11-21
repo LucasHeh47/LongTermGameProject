@@ -92,8 +92,9 @@ class GameServer(threading.Thread):
         player = self.get_player(auth_token)
         if player:
             new_party = Party()
-            new_party.add_player(player)
+            new_party.add_player(player)  # Add the host to the party
             active_parties.append(new_party)
+            player.party = new_party  # Link the player to the party
             print(f"Party created by {player.username}")
             self.send_data({"party": "party_created"}, ip_address)
         else:
@@ -108,17 +109,15 @@ class GameServer(threading.Thread):
             self.send_data({"error": "Invalid auth_token"}, ip_address)
             return
 
-        # Get the player's party
+        # Forward the packet to all other players, including the host
         party = player.party
         if not party:
             print(f"Player {player.username} is not in a party")
             self.send_data({"error": "Not in a party"}, ip_address)
             return
 
-        # Forward the packet to all other party members
         for member in party.players:
-            if member != player:  # Don't send to the sender
-                self.send_data(packet, member.ip_address)
+            self.send_data(packet, member.ip_address)  # Forward to everyone, including the sender
 
         print(f"Forwarded packet from {player.username} to party members")
 
@@ -141,6 +140,7 @@ class GameServer(threading.Thread):
         host_player.party.add_player(player)
         print(f"Player {player.username} joined the party hosted by {host_player.username}")
         self.send_data({"party": {"join_success": host_player.username}}, ip_address)
+        self.send_data({"party": {"player_joined": player.username}}, host_player.ip_address)
 
     def handle_party_going_into_game(self, packet, ip_address):
         auth_token = packet.get("auth_token")

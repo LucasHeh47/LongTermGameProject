@@ -88,6 +88,12 @@ public class GameClient extends Thread {
                         game.party = new Party(game);
                         game.party.setHost(game.getPlayer());
                     }
+                    
+                    if (status.has("player_joined")) {
+                        OnlinePlayer player = new OnlinePlayer(game, null, status.getString("player_joined"), new Vector2D(0, 0));
+                        Debug.log(this, player.getUsername() + " has joined the party!");
+                        game.party.addPlayer(player);
+                    }
 
                     if (status.has("join_success")) {
                         game.party = new Party(game);
@@ -141,14 +147,20 @@ public class GameClient extends Thread {
             
             if (data.has("player_position")) {
                 JSONObject position = data.getJSONObject("player_position");
-                double x = position.optDouble("x", 0);
-                double y = position.optDouble("y", 0);
-                
-                game.party.updatePlayerPosition(position.getString("username"), 
-                								new Vector2D(x, y),
-                								position.getInt("walking_image"));
-                
+                String username = position.getString("username");
+                double x = position.getDouble("x");
+                double y = position.getDouble("y");
+                int walkingImage = position.getInt("walking_image");
+
+                // Update the player's position in the party
+                game.party.updatePlayerPosition(username, new Vector2D(x, y), walkingImage);
+
+                // Log if the update is from the host
+                if (username.equals(game.username)) {
+                    Debug.log(this, "Updated host position: (" + x + ", " + y + ")");
+                }
             }
+
             
             if (data.has("player_health")) {
                 JSONObject position = data.getJSONObject("player_position");
