@@ -870,7 +870,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	@Override
 	public Entity setMaxHealth(float num) {
-		return null;
+		return this;
 	}
 	
 }

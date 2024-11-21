@@ -77,9 +77,12 @@ public class GameClient extends Thread {
                     break;
             }
             
-            if (response.has("status")) {
-                JSONObject status = response.optJSONObject("status");
-                if (status != null) {
+            if (response.has("party")) {
+                Object partyObject = response.get("party");
+
+                if (partyObject instanceof JSONObject) {
+                    JSONObject status = (JSONObject) partyObject;
+
                     if (status.has("party_created")) {
                         Debug.log(this, "Party created");
                         game.party = new Party(game);
@@ -94,6 +97,18 @@ public class GameClient extends Thread {
                         OnlinePlayer host = new OnlinePlayer(game, null, hostUsername, new Vector2D(0, 0));
                         game.party.setHost(host);
                     }
+                } else if (partyObject instanceof String) {
+                    String partyStatus = (String) partyObject;
+
+                    if (partyStatus.equals("party_created")) {
+                        Debug.log(this, "Party created (string)");
+                        game.party = new Party(game);
+                        game.party.setHost(game.getPlayer());
+                    } else {
+                        Debug.log(this, "Unknown party string status: " + partyStatus);
+                    }
+                } else {
+                    Debug.log(this, "Unexpected type for 'party': " + partyObject.getClass().getName());
                 }
             }
 

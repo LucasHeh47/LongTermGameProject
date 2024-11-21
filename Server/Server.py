@@ -95,7 +95,7 @@ class GameServer(threading.Thread):
             new_party.add_player(player)
             active_parties.append(new_party)
             print(f"Party created by {player.username}")
-            self.send_data({"status": "party_created"}, ip_address)
+            self.send_data({"party": "party_created"}, ip_address)
         else:
             print("Party creation failed: Invalid auth_token")
             self.send_data({"error": "Invalid auth_token"}, ip_address)
@@ -140,7 +140,7 @@ class GameServer(threading.Thread):
 
         host_player.party.add_player(player)
         print(f"Player {player.username} joined the party hosted by {host_player.username}")
-        self.send_data({"status": {"join_success": host_player.username}}, ip_address)
+        self.send_data({"party": {"join_success": host_player.username}}, ip_address)
 
     def handle_party_going_into_game(self, packet, ip_address):
         auth_token = packet.get("auth_token")
