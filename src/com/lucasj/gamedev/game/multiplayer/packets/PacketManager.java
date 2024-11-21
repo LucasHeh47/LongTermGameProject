@@ -102,6 +102,38 @@ public class PacketManager {
 		}
 	}
 	
+	public void playerPickedClassPacket() {
+		try {
+			JSONObject json = this.getBasePacket("host_to_clients");
+			JSONObject players = new JSONObject();
+			
+			players.put(client.getGame().party.getHost().getUsername(), !client.getGame().party.getHost().isPickingClass());
+			this.client.getGame().party.getPlayers().forEach(player -> {
+				try {
+					players.put(player.getUsername(), !player.isPickingClass());
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			});
+			
+			json.getJSONObject("data").put("players", players);
+			
+			client.sendData(json.toString().getBytes());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void playerPickedClass() {
+	    try {
+	        JSONObject json = this.getBasePacket("picked_class");
+	        client.sendData(json.toString().getBytes());
+	    } catch (JSONException e) {
+	        e.printStackTrace();
+	    }
+	}
+
+	
 	public void playerInfoPacket(float health, float maxHealth, Vector2D position, int walkingImage) {
 		try {
 			JSONObject json = this.getBasePacket("host_to_clients");

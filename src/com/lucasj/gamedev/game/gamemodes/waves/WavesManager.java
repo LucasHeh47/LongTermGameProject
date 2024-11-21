@@ -81,6 +81,7 @@ public class WavesManager {
 	}
 	
 	public void update(double deltaTime) {
+		
 		if(!hasGameStarted) return;
 		if(game.isPaused()) return;
 		game.getPlayer().update(deltaTime);

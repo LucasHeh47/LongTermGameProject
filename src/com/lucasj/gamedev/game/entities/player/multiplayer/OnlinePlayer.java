@@ -21,6 +21,7 @@ public class OnlinePlayer extends Entity implements PlayerMP {
 	private float animationSpeed = 0.1f;
 	private int animationTick = 1;
 	private long lastAnimationUpdate;
+	private boolean isPickingClass = true;
 
 	private String username;
 	private Color color;
@@ -114,6 +115,7 @@ public class OnlinePlayer extends Entity implements PlayerMP {
 	}
 	
 	public Entity setPosition(Vector2D pos) {
+		Debug.log(this, "Set player " + this.username + " to " + pos.toString());
 		this.position = pos;
 		return this;
 	}
@@ -132,6 +134,15 @@ public class OnlinePlayer extends Entity implements PlayerMP {
 	public Entity setMaxHealth(float num) {
 		this.setMaxHealth(num);
 		return this;
+	}
+
+	@Override
+	public boolean isPickingClass() {
+		return this.isPickingClass;
+	}
+
+	public void setPickingClass(boolean isPickingClass) {
+		this.isPickingClass = isPickingClass;
 	}
 	
 }

@@ -82,6 +82,8 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private PlayerUpgrades playerUpgrades;
 	
+	private boolean isPickingClass = true;
+	
 	private float xp;
 	
 	private ConcurrentList<Placeable> activePlaceables;
@@ -871,6 +873,14 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	@Override
 	public Entity setMaxHealth(float num) {
 		return this;
+	}
+
+	public boolean isPickingClass() {
+		return isPickingClass;
+	}
+
+	public void setPickingClass(boolean isPickingClass) {
+		this.isPickingClass = isPickingClass;
 	}
 	
 }

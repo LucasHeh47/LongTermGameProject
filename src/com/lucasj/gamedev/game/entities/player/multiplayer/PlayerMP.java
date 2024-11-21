@@ -10,4 +10,6 @@ public interface PlayerMP {
 	public void setWalkingImage(int num);
 	public Entity setHealth(float num);
 	public Entity setMaxHealth(float num);
+	public boolean isPickingClass();
+	public void setPickingClass(boolean picking);
 }

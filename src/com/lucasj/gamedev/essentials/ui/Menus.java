@@ -168,8 +168,16 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     			game.getPlayer().setPickingSecondary(false);
                     		}
                     	} else {
-	                        game.getWavesManager().startWaves();
-	                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
+                    		if(game.party == null) {
+		                        game.getWavesManager().startWaves();
+		                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
+                    		} else {
+                    			if(game.party.getHost().getUsername().equals(game.username) ) {
+                    				game.getPlayer().setPickingClass(false);
+                    			} else {
+                    				game.getSocketClient().getPacketManager().playerPickedClass();
+                    			}
+                    		}
                     	}
                     }, 
                     new Tooltip(game, "Assault Rifle", "{GREEN}- Good Control{NL}- Good Damage {NL}{YELLOW}- Medium Range{NL}{YELLOW}- Medium Fire Rate",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {

@@ -29,6 +29,7 @@ class GameServer(threading.Thread):
         while True:
             data, ip_address = self.socket.recvfrom(1024)
             message = data.decode('utf-8').strip()
+            print(message)
 
             try:
                 packet = json.loads(message)  # Decode JSON
@@ -55,6 +56,12 @@ class GameServer(threading.Thread):
 
             elif packet_type == "host_to_clients":
                 self.handle_host_to_clients(packet, ip_address)
+
+            elif packet_type == "clients_to_host":
+                self.handle_clients_to_host(packet, ip_address)
+
+            elif packet_type == "picked_class":
+                self.handle_class_picked(packet, ip_address)
 
             elif packet_type == "join_party":
                 self.handle_join_party(packet, ip_address)
@@ -117,9 +124,51 @@ class GameServer(threading.Thread):
             return
 
         for member in party.players:
+            if member is player: continue
+            print(f"Forwarded packet from {player.username} to {member.username}")
             self.send_data(packet, member.ip_address)  # Forward to everyone, including the sender
 
-        print(f"Forwarded packet from {player.username} to party members")
+    def handle_clients_to_host(self, packet, ip_address):
+        auth_token = packet.get("auth_token")
+        player = self.get_player(auth_token)
+        if not player:
+            print("host_to_clients failed: Invalid auth_token")
+            self.send_data({"error": "Invalid auth_token"}, ip_address)
+            return
+
+        # Forward the packet to all other players, including the host
+        party = player.party
+        if not party:
+            print(f"Player {player.username} is not in a party")
+            self.send_data({"error": "Not in a party"}, ip_address)
+            return
+
+        host = party.get_host()
+        print(f"Forwarded packet from {player.username} to {host.username}")
+        self.send_data(packet, host.ip_address)  # Forward to everyone, including the sender
+
+    def handle_class_picked(self, packet, ip_address):
+        auth_token = packet.get("auth_token")
+        player = self.get_player(auth_token)
+        if not player:
+            print("class_picked failed: Invalid auth_token")
+            self.send_data({"error": "Invalid auth_token"}, ip_address)
+            return
+
+        party = player.party
+        if not party:
+            print(f"Player {player.username} is not in a party")
+            self.send_data({"error": "Not in a party"}, ip_address)
+            return
+
+        player.is_picking_class = False  # Update player's class selection state
+        print(f"{player.username} picked their class.")
+
+        # Check if all players have picked their class
+        all_ready = all(not p.is_picking_class for p in party.players)
+        if all_ready:
+            print(f"All players in party have picked their classes.")
+            self.send_data({"status": "all_ready", "party_id": party.id}, party.get_all_addresses())
 
     def handle_join_party(self, packet, ip_address):
         auth_token = packet.get("auth_token")

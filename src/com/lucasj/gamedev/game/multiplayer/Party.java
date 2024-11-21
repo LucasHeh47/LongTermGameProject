@@ -51,7 +51,6 @@ public class Party {
 		if(host != game.getPlayer()) ((OnlinePlayer) host).update(deltaTime);
 		players.forEach(player -> {
 			if(player != game.getPlayer()) {
-				Debug.log(this, "updating " + player.getUsername());
 				((OnlinePlayer) player).update(deltaTime);
 			}
 		});
@@ -61,7 +60,6 @@ public class Party {
 		if(host != game.getPlayer()) ((OnlinePlayer) host).render(g2d);
 		players.forEach(player -> {
 			if(player != game.getPlayer()) {
-				Debug.log(this, "rendering " + player.getUsername());
 				((OnlinePlayer) player).render(g2d);
 			}
 		});
@@ -91,10 +89,8 @@ public class Party {
 			host.setWalkingImage(walkingImage);
 		} else {
 			for(PlayerMP p : this.getPlayers()) {
-				if(!p.getUsername().equals(game.username)) {
-					p.setPosition(position);
-					p.setWalkingImage(walkingImage);
-				}
+				p.setPosition(position);
+				p.setWalkingImage(walkingImage);
 			}
 		}
 	}
@@ -105,10 +101,8 @@ public class Party {
 			host.setMaxHealth(maxHealth);
 		} else {
 			for(PlayerMP p : this.getPlayers()) {
-				if(!p.getUsername().equals(game.username)) {
-					p.setHealth(health);
-					p.setMaxHealth(maxHealth);
-				}
+				p.setHealth(health);
+				p.setMaxHealth(maxHealth);
 			}
 		}
 	}
@@ -116,6 +110,14 @@ public class Party {
 	public void addPlayer(PlayerMP player) {
 		players.add(player);
 		((OnlinePlayer) player.getPlayer()).setColor(getColor(player));
+	}
+	
+	public boolean haveAllPickedAClass() {
+		boolean allPicked = true;
+		for (PlayerMP player : players) {
+			if(player.isPickingClass()) allPicked = false;
+		}
+		return allPicked;
 	}
 
 	public int getPartySize() {

@@ -54,7 +54,7 @@ public class GameClient extends Thread {
                 e.printStackTrace();
             }
         }
-        Debug.log(this, "Client stopped.");
+        System.exit(0);
     }
 
     public void readPacket(DatagramPacket packet) {
@@ -145,8 +145,14 @@ public class GameClient extends Thread {
                 game.getMenus().createGUIs();
             }
             
+            if (data.has("all_ready")) {
+                Debug.log(this, "All players are ready. Starting the game...");
+                game.getWavesManager().startWaves();
+            }
+            
             if (data.has("player_position")) {
                 JSONObject position = data.getJSONObject("player_position");
+                Debug.log(this, "Position: " + position);
                 String username = position.getString("username");
                 double x = position.getDouble("x");
                 double y = position.getDouble("y");
@@ -220,5 +226,9 @@ public class GameClient extends Thread {
 
     public PacketManager getPacketManager() {
         return packetManager;
+    }
+    
+    public Game getGame() {
+    	return game;
     }
 }
