@@ -96,7 +96,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private PlayerRewarder playerRewarder;
 	
-	private int money = 50000000;
+	private int money = 500;
 	private int gems = 0;
 	
 	private long lastWalkSound;
@@ -772,7 +772,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	public void addMoney(int money) {
-		this.money += money;
+		this.money += money*3;
 		this.xp += money/100;
 	}
 	
@@ -781,7 +781,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	public void addGem(int num) {
-		this.gems += num;
+		this.gems += num*3;
 	}
 	
 	public boolean removeGem(int num) {
