@@ -44,6 +44,17 @@ import com.lucasj.gamedev.physics.CollisionSurface;
  */
 public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	
+	public static Map<String, Class<?extends Enemy>> enemyClassMap = new HashMap<>();
+	
+	public static Enemy getEnemyByTag(Game game, String tag) {
+		for(Entity entity : game.instantiatedEntities) {
+			if(entity instanceof Enemy) {
+				if(((Enemy) entity).tag.equals(tag)) return (Enemy) entity;
+			}
+		}
+		return null;
+	}
+	
 	// WAVES DATA --------------------------------
 	public static class EnemyWavesData {
 		
@@ -135,6 +146,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	protected static <T extends Enemy> void registerEnemyType(Class<T> enemyClass, EnemyWavesData data) {
 	    registerWavesData(enemyClass, data);
 	    addEnemyType(enemyClass);
+	    Enemy.enemyClassMap.put(enemyClass.getSimpleName(), enemyClass);
 	}
 	
 	abstract void setCashDrop();
@@ -169,6 +181,17 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	
 	private boolean blocked;
 	private Vector2D intersectionPoint;
+	
+	public Enemy(Game game) {
+		super(game);
+		importance = 2;
+		if(aggroRange == 0) aggroRange = 750;
+		lastAttack = System.currentTimeMillis();
+		this.setCashDrop();
+		this.setDamageMultiplier();
+		this.setHealthMultiplier();
+		this.setMovementSpeedMultiplier();
+	}
 	
 	public Enemy(Game game, Vector2D position, Vector2D velocity, int maxHealth, int movementSpeed, int size,
 			String tag) {
@@ -266,11 +289,6 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 			Debug.log(this, game.instantiatedEntitiesOnScreen.size());
 		}
 		this.isMoving = (this.position != oldPos);
-		
-		float dx = (float) ((game.getPlayer().getPosition().getX() + game.getPlayer().getSize()/2) - this.getPosition().getX());
-		float dy = (float) ((game.getPlayer().getPosition().getY() + game.getPlayer().getSize()/2) - this.getPosition().getY());
-
-		this.angleToPlayer = (float) (Math.atan2(dy, dx)+Math.PI/2);
 		
 		if((System.currentTimeMillis() - this.lastTimeHurt)/1000.0 >= this.healthUnderlayDelay) {
 			this.healthUnderlayLength -= this.healthUnderlayRate;
@@ -801,8 +819,8 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		return aggrod;
 	}
 
-	public void setAggrod(Player aggrod) {
-		this.aggrod = aggrod;
+	public void setAggrod(PlayerMP playerMP) {
+		this.aggrod = playerMP;
 	}
 
 }

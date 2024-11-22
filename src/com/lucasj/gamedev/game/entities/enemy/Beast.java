@@ -22,6 +22,17 @@ public class Beast extends Enemy {
 	private float animationSpeed = 0.075f;
 	private int animationTick = 1;
 	private long lastAnimationUpdate;
+	
+	public Beast(Game game) {
+		super(game);
+
+		walking = new BufferedImage[4][4];
+		for(int i = 0; i < 4; i++) {
+			for (int j = 0; j<4; j++) {
+				walking[i][j] = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Enemies/Beast/Beast.png", new Vector2D(i*16, j*16), new Vector2D(16, 16));
+			}
+		}
+	}
 
 	public Beast(Game game, Vector2D position, int maxHealth, int movementSpeed, int size,
 			String tag) {

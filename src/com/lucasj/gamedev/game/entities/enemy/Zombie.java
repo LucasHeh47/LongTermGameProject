@@ -25,6 +25,17 @@ public class Zombie extends Enemy {
 	public static void initializeClass(){
 		registerEnemyType(Zombie.class, new EnemyWavesData(0, 15));
     }
+
+	public Zombie(Game game) {
+		super(game);
+
+		walking = new BufferedImage[4][4];
+		for(int i = 0; i < 4; i++) {
+			for (int j = 0; j<4; j++) {
+				walking[i][j] = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Enemies/Zombie/zombie.png", new Vector2D(i*16, j*16), new Vector2D(16, 16));
+			}
+		}
+	}
 	
 	/**
 	 * 

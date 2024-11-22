@@ -4,21 +4,20 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
+import com.lucasj.gamedev.events.entities.EntityDamagedEventListener;
+import com.lucasj.gamedev.events.entities.EntityDeathEvent;
+import com.lucasj.gamedev.events.entities.EntityDeathEventListener;
 import com.lucasj.gamedev.events.waves.WaveEndEvent;
-import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.npc.NPCManager;
 import com.lucasj.gamedev.game.gamemodes.waves.missions.Mission;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
-import com.lucasj.gamedev.world.particles.ParticleEmitter;
 
-public class WavesManager {
+public class WavesManager implements EntityDamagedEventListener, EntityDeathEventListener {
 
 	private int wave = 0;
 	private int enemiesKilledThisWave;
@@ -54,6 +53,8 @@ public class WavesManager {
 		this.game = game;
 		this.missionManager = new MissionManager(game, this);
 		spawnRate = 0.1f;
+		game.getEventManager().addListener(this, EntityDamagedEvent.class);
+		game.getEventManager().addListener(this, EntityDeathEvent.class);
 	}
 	
 	public void startWaves() {
@@ -142,9 +143,14 @@ public class WavesManager {
 	            intermissionTick = 0;
 	        }
 	    } else if (enemiesSpawnedThisWave < enemiesThisWave && (System.currentTimeMillis() - lastSpawn) / 1000.0 > spawnRate) {
-	        enemySpawner.spawnEnemy(getEnemyHealth(wave), new Vector2D(rand.nextInt(game.getWidth()), rand.nextInt(game.getHeight())));
-	        enemiesSpawnedThisWave++;
-	        lastSpawn = System.currentTimeMillis();
+	        if(game.party != null && game.party.getHost().getUsername().equals(game.username)) {
+		    	enemySpawner.spawnEnemy(getEnemyHealth(wave), new Vector2D(rand.nextInt(game.getWidth()), rand.nextInt(game.getHeight())));
+		        enemiesSpawnedThisWave++;
+		        lastSpawn = System.currentTimeMillis();
+		        
+		        game.getSocketClient().getPacketManager().syncEnemiesPacket();
+		        
+	        }
 	    }
 
 	    // Check if the wave should transition to the next
@@ -221,6 +227,22 @@ public class WavesManager {
 
 	public MissionManager getMissionManager() {
 		return missionManager;
+	}
+
+	@Override
+	public void onEntityDamaged(EntityDamagedEvent e) {
+		if(game.party == null || game.party.getHost().getUsername().equals(game.username)) return;
+		if(e.getEntity() instanceof Enemy) {
+			game.getSocketClient().getPacketManager().playerUpdateEnemyPacket((Enemy) e.getEntity());
+		}
+	}
+
+	@Override
+	public void onEntityDeath(EntityDeathEvent e) {
+		if(game.party == null || game.party.getHost().getUsername().equals(game.username)) return;
+		if(e.getEntity() instanceof Enemy) {
+			game.getSocketClient().getPacketManager().playerKilledEnemyPacket((Enemy) e.getEntity());
+		}
 	}
 
 }

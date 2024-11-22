@@ -132,7 +132,7 @@ public class OnlinePlayer extends Entity implements PlayerMP {
 
 	@Override
 	public Entity setMaxHealth(float num) {
-		this.setMaxHealth(num);
+		this.maxHealth = num;
 		return this;
 	}
 

@@ -6,6 +6,7 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 public interface PlayerMP {
 	public String getUsername();
 	public Object getPlayer();
+	public Vector2D getPosition();
 	public Entity setPosition(Vector2D pos);
 	public void setWalkingImage(int num);
 	public Entity setHealth(float num);

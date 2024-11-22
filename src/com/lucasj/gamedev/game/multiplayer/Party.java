@@ -127,6 +127,16 @@ public class Party {
 	public void setPartySize(int partySize) {
 		this.partySize = partySize;
 	}
+	
+	public PlayerMP getPlayerByUsername(String username) {
+		if(host.equals(username)) {
+			return host;
+		}
+		for (PlayerMP p : players) {
+			if(p.getUsername().equals(username)) return p;
+		}
+		return null;
+	}
 
 	public boolean isInGame() {
 		return ingame;

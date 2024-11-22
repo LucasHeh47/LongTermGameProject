@@ -1,17 +1,22 @@
 package com.lucasj.gamedev.game.multiplayer;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
+import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.player.multiplayer.OnlinePlayer;
 import com.lucasj.gamedev.game.multiplayer.packets.PacketManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
@@ -70,6 +75,8 @@ public class GameClient extends Thread {
                 case "host_to_clients":
                     processForwardedPacket(response);
                     break;
+                case "clients_to_host":
+                	processListeningPacket(response);
                 case "response_packet":
                     handleResponseAsHost(response);
                     break;
@@ -135,6 +142,55 @@ public class GameClient extends Thread {
             e.printStackTrace();
         }
     }
+    
+    private void processListeningPacket(JSONObject packet) throws JSONException {
+        JSONObject data = packet.optJSONObject("data");
+        if (data != null) {
+        	
+        	if(data.has("enemy_update")) {
+        		JSONObject enemyObj = data.getJSONObject("enemy_update");
+        		
+                // Extract enemy data from JSON
+                String tag = enemyObj.getString("tag");
+                String type = enemyObj.getString("type");
+                float health = (float) enemyObj.getDouble("health");
+                float maxHealth = (float) enemyObj.getDouble("maxHealth");
+                float speed = (float) enemyObj.getDouble("speed");
+                String aggroUsername = enemyObj.optString("Aggro", null); // Null if not present
+                JSONObject position = enemyObj.getJSONObject("position");
+                double x = position.getDouble("x");
+                double y = position.getDouble("y");
+                
+                try {
+                    // Create the enemy using the mapping and update its properties
+                    Enemy enemy = Enemy.enemyClassMap.get(type).getDeclaredConstructor(Game.class).newInstance(game);
+
+                    enemy.setTag(tag);
+                    enemy.setPosition(new Vector2D(x, y));
+                    enemy.setHealth(health);
+                    enemy.setMaxHealth(maxHealth);
+                    enemy.setMovementSpeed((int) speed);
+
+                    if (aggroUsername != null) {
+                        enemy.setAggrod(game.party.getPlayerByUsername(aggroUsername));
+                    }
+
+                    // Replace the existing enemy with the same tag (if any)
+                    game.instantiatedEntities.remove(Enemy.getEnemyByTag(game, tag));
+                    game.instantiatedEntities.add(enemy);
+
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    Debug.log(this, "Failed to create or update enemy: " + e.getMessage());
+                    e.printStackTrace();
+                }
+        	}
+        	
+        	if(data.has("killed_enemy")) {
+        		game.instantiatedEntities.remove(Enemy.getEnemyByTag(game, data.getString("killed_enemy")));
+        	}
+        	
+        }
+    }
 
     private void processForwardedPacket(JSONObject packet) throws JSONException {
         // Handle forwarded packets from the server
@@ -150,10 +206,59 @@ public class GameClient extends Thread {
                 game.getMenus().createGUIs();
             }
             
+            if(data.has("enemies")) {
+            	JSONObject enemies = data.getJSONObject("enemies");
+                Iterator<String> keys = enemies.keys(); // Use the iterator for keys
+                
+                List<Enemy> newEnemies = new ArrayList<>();
+                
+                while (keys.hasNext()) {
+                    String tag = keys.next();
+                    JSONObject enemyObj = enemies.getJSONObject(tag);
+                    
+                    // Extract enemy data from JSON
+                    String type = enemyObj.getString("type");
+                    float health = (float) enemyObj.getDouble("health");
+                    float maxHealth = (float) enemyObj.getDouble("maxHealth");
+                    float speed = (float) enemyObj.getDouble("speed");
+                    String aggroUsername = enemyObj.optString("Aggro", null); // Null if not present
+                    JSONObject position = enemyObj.getJSONObject("position");
+                    double x = position.getDouble("x");
+                    double y = position.getDouble("y");
+
+                    // Debug log for each enemy
+                    Debug.log(this, "Processing enemy: Tag=" + tag + ", Type=" + type + ", Position=(" + x + ", " + y + ")");
+                    
+                    Enemy enemy;
+					try {
+						enemy = Enemy.enemyClassMap.get(tag).getDeclaredConstructor().newInstance(game);
+	                    enemy.setAggrod(game.party.getPlayerByUsername(aggroUsername));
+	                    enemy.setPosition(new Vector2D(x, y));
+	                    enemy.setHealth(health);
+	                    enemy.setMaxHealth(maxHealth);
+	                    enemy.setMovementSpeed((int) speed);
+	                    
+	                    newEnemies.add(enemy);
+					} catch (InstantiationException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (InvocationTargetException e) {
+						e.printStackTrace();
+					} catch (NoSuchMethodException e) {
+						e.printStackTrace();
+					} catch (SecurityException e) {
+						e.printStackTrace();
+					}
+                }
+            }
+            
             if (data.has("player_position")) {
                 JSONObject position = data.getJSONObject("player_position");
                 Debug.log(this, "Position: " + position);
-                String username = position.getString("username");
+                String username = packet.getString("username");
                 double x = position.getDouble("x");
                 double y = position.getDouble("y");
                 int walkingImage = position.getInt("walking_image");
@@ -170,10 +275,11 @@ public class GameClient extends Thread {
             
             if (data.has("player_health")) {
                 JSONObject healthObject = data.getJSONObject("player_health");
-                float health = (float) healthObject.optDouble("health", 0);
-                float maxHealth = (float) healthObject.optDouble("max", 0);
+                Debug.log(this, "Health: " + healthObject);
+                float health = (float) healthObject.optDouble("health", -100);
+                float maxHealth = (float) healthObject.optDouble("max", -100);
                 
-                game.party.updatePlayerHealth(healthObject.getString("username"), 
+                game.party.updatePlayerHealth(packet.getString("username"), 
                 								health,
                 								maxHealth);
                 

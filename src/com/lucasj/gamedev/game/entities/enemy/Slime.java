@@ -23,6 +23,16 @@ public class Slime extends Enemy {
 	private int animationTick = 1;
 	private long lastAnimationUpdate;
 
+	public Slime(Game game) {
+		super(game);
+		walking = new BufferedImage[4][4];
+		for(int i = 0; i < 4; i++) {
+			for (int j = 0; j<4; j++) {
+				walking[i][j] = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Enemies/Slime/Slime.png", new Vector2D(i*16, j*16), new Vector2D(16, 16));
+			}
+		}
+	}
+
 	public Slime(Game game, Vector2D position, int maxHealth, int movementSpeed, int size,
 			String tag) {
 		super(game, position, new Vector2D(0, 0), maxHealth, movementSpeed, size, tag);
@@ -37,7 +47,7 @@ public class Slime extends Enemy {
 	public void update(double deltaTime) {
 		super.update(deltaTime);
 		
-		Vector2D playerPos = game.getPlayer().getPosition();
+		Vector2D playerPos = this.getAggrod().getPosition();
 	    Vector2D skeltetonPos = this.position;
 
 	    Vector2D direction = playerPos.subtract(skeltetonPos);

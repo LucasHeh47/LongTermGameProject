@@ -3,6 +3,8 @@ package com.lucasj.gamedev.game.multiplayer.packets;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.lucasj.gamedev.game.entities.Entity;
+import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.multiplayer.GameClient;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
@@ -132,7 +134,73 @@ public class PacketManager {
 	        e.printStackTrace();
 	    }
 	}
+	
+	public void playerUpdateEnemyPacket(Enemy enemy) {
+		try {
+			JSONObject json = this.getBasePacket("clients_to_host");
+			
+			JSONObject enemyObj = new JSONObject();
+			enemyObj.put("tag", enemy.getTag());
+			enemyObj.put("health", enemy.getHealth());
+			enemyObj.put("maxHealth", enemy.getMaxHealth());
+			enemyObj.put("speed", enemy.getMovementSpeed());
+			if(enemy.getAggrod() != null) enemyObj.put("Aggro", enemy.getAggrod().getUsername());
+			JSONObject position = new JSONObject();
+			position.put("x", enemy.getPosition().getX());
+			position.put("y", enemy.getPosition().getY());
+			enemyObj.put("position", position);
+			enemyObj.put("type", enemy.getClass().getSimpleName());
+			
+			json.getJSONObject("data").put("enemy_update", enemyObj);
+			
+			client.sendData(json.toString().getBytes());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void playerKilledEnemyPacket(Enemy enemy) {
+		try {
+			JSONObject json = this.getBasePacket("clients_to_host");
+			
+			json.getJSONObject("data").put("killed_enemy", enemy.getTag());
+			
+			client.sendData(json.toString().getBytes());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 
+	public void syncEnemiesPacket() {
+		try {
+			JSONObject json = this.getBasePacket("host_to_clients");
+			
+			JSONObject enemies = new JSONObject();
+			for(Entity entity : client.getGame().instantiatedEntities) {
+				if(entity instanceof Enemy) {
+					Enemy enemy = (Enemy) entity;
+					JSONObject enemyObj = new JSONObject();
+					enemyObj.put("health", enemy.getHealth());
+					enemyObj.put("maxHealth", enemy.getMaxHealth());
+					enemyObj.put("speed", enemy.getMovementSpeed());
+					if(enemy.getAggrod() != null) enemyObj.put("Aggro", enemy.getAggrod().getUsername());
+					JSONObject position = new JSONObject();
+					position.put("x", enemy.getPosition().getX());
+					position.put("y", enemy.getPosition().getY());
+					enemyObj.put("position", position);
+					enemyObj.put("type", enemy.getClass().getSimpleName());
+					
+					enemies.put(enemy.getTag(), enemyObj);
+				}
+			}
+			
+			json.put("enemies", enemies);
+			
+			client.sendData(json.toString().getBytes());
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	public void playerInfoPacket(float health, float maxHealth, Vector2D position, int walkingImage) {
 		try {
@@ -140,13 +208,11 @@ public class PacketManager {
 			
 			// Create player_position object
 	        JSONObject playerPosition = new JSONObject();
-	        playerPosition.put("username", client.getUsername());
 	        playerPosition.put("walking_image", walkingImage);
 	        playerPosition.put("x", position.getX());
 	        playerPosition.put("y", position.getY());
 	        
 	        JSONObject playerHealth = new JSONObject();
-	        playerHealth.put("username", client.getUsername());
 	        playerHealth.put("current", health);
 	        playerHealth.put("max", maxHealth);
 
