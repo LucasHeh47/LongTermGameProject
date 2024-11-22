@@ -1,8 +1,12 @@
+import random
 
+def generate_random_string(length, characters):
+    return ''.join(random.choice(characters) for _ in range(length))
 
 
 class Party:
     def __init__(self):
+        self.id = generate_random_string(32, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
         self.players = []
 
     def add_player(self, player):

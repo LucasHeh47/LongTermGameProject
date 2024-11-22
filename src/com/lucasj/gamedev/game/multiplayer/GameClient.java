@@ -77,6 +77,11 @@ public class GameClient extends Thread {
                     break;
             }
             
+            if (response.has("picking_class")) {
+                Debug.log(this, "All players are ready. Starting the game...");
+                game.getWavesManager().startWaves();
+            }
+            
             if (response.has("party")) {
                 Object partyObject = response.get("party");
 
@@ -119,8 +124,8 @@ public class GameClient extends Thread {
             }
 
             // Update auth_token if provided
-            if (response.has("auth_token")) {
-                String authToken = response.getString("auth_token");
+            if (response.has("new_auth_token")) {
+                String authToken = response.getString("new_auth_token");
                 game.authToken = authToken; // Save auth token
                 Debug.log(this, "Auth token updated: " + authToken);
             }
@@ -143,11 +148,6 @@ public class GameClient extends Thread {
                 game.getMapManager().map.generateMap();
                 //game.instantiatePlayer();
                 game.getMenus().createGUIs();
-            }
-            
-            if (data.has("all_ready")) {
-                Debug.log(this, "All players are ready. Starting the game...");
-                game.getWavesManager().startWaves();
             }
             
             if (data.has("player_position")) {

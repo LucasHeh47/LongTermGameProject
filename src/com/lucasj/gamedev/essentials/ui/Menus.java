@@ -156,7 +156,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         if(game.getGameState() != GameState.waves) return;
         
         GUI selectAClassMenu = new GUI(game, this, () -> {
-        	return game.getGameState() == GameState.waves && (!game.getWavesManager().hasGameStarted() || game.getPlayer().isPickingSecondary());
+        	return game.getGameState() == GameState.waves && (!game.getWavesManager().hasGameStarted() || game.getPlayer().isPickingSecondary() || game.getPlayer().isPickingClass());
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
@@ -171,14 +171,11 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     		if(game.party == null) {
 		                        game.getWavesManager().startWaves();
 		                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
+		                        game.getPlayer().setPickingClass(false);
                     		} else {
-                    			if(game.party.getHost().getUsername().equals(game.username) ) {
-                    				game.getPlayer().setPickingClass(false);
-    		                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
-                    			} else {
-                    				game.getSocketClient().getPacketManager().playerPickedClass();
-    		                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
-                    			}
+                				game.getSocketClient().getPacketManager().playerPickedClass();
+		                        game.getPlayer().setPrimaryGun(new AssaultRifle(game, game.getPlayer()));
+		                        game.getPlayer().setPickingClass(false);
                     		}
                     	}
                     }, 
@@ -205,14 +202,11 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     		if(game.party == null) {
 		                        game.getWavesManager().startWaves();
 		                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+		                        game.getPlayer().setPickingClass(false);
                     		} else {
-                    			if(game.party.getHost().getUsername().equals(game.username) ) {
-                    				game.getPlayer().setPickingClass(false);
-    		                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
-                    			} else {
-    		                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
-                    				game.getSocketClient().getPacketManager().playerPickedClass();
-                    			}
+		                        game.getPlayer().setPrimaryGun(new SMG(game, game.getPlayer()));
+                				game.getSocketClient().getPacketManager().playerPickedClass();
+		                        game.getPlayer().setPickingClass(false);
                     		}
                     	}
                     }, 
@@ -239,14 +233,11 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     		if(game.party == null) {
 		                        game.getWavesManager().startWaves();
 		                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+		                        game.getPlayer().setPickingClass(false);
                     		} else {
-                    			if(game.party.getHost().getUsername().equals(game.username) ) {
-                    				game.getPlayer().setPickingClass(false);
-    		                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
-                    			} else {
-                    				game.getSocketClient().getPacketManager().playerPickedClass();
-    		                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
-                    			}
+                				game.getSocketClient().getPacketManager().playerPickedClass();
+		                        game.getPlayer().setPrimaryGun(new Shotgun(game, game.getPlayer()));
+		                        game.getPlayer().setPickingClass(false);
                     		}
                     	}
                     }, 
@@ -273,14 +264,11 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     		if(game.party == null) {
 		                        game.getWavesManager().startWaves();
 		                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+		                        game.getPlayer().setPickingClass(false);
                     		} else {
-                    			if(game.party.getHost().getUsername().equals(game.username) ) {
-                    				game.getPlayer().setPickingClass(false);
-    		                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
-                    			} else {
-                    				game.getSocketClient().getPacketManager().playerPickedClass();
-    		                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
-                    			}
+                				game.getSocketClient().getPacketManager().playerPickedClass();
+		                        game.getPlayer().setPrimaryGun(new Sniper(game, game.getPlayer()));
+		                        game.getPlayer().setPickingClass(false);
                     		}
                     	}
                     }, 

@@ -81,7 +81,7 @@ class GameServer(threading.Thread):
         new_player = Player(packet["username"], ip_address, auth_token)
         players_online.append(new_player)
         print(f"User {packet['username']} logged in from {ip_address}")
-        self.send_data({"auth_token": auth_token, "status": "login_success"}, ip_address)
+        self.send_data({"new_auth_token": auth_token, "status": "login_success"}, ip_address)
 
     def handle_logout(self, packet, ip_address):
         auth_token = packet.get("auth_token")
@@ -165,10 +165,14 @@ class GameServer(threading.Thread):
         print(f"{player.username} picked their class.")
 
         # Check if all players have picked their class
-        all_ready = all(not p.is_picking_class for p in party.players)
+        all_ready = True
+        for p in player.party.players:
+            print(p.username + " ready?: " + str(not p.is_picking_class))
+            if p.is_picking_class: all_ready = False
         if all_ready:
             print(f"All players in party have picked their classes.")
-            self.send_data({"status": "all_ready", "party_id": party.id}, party.get_all_addresses())
+            for p in player.party.players:
+                self.send_data({"picking_class": "all_ready"}, p.ip_address)
 
     def handle_join_party(self, packet, ip_address):
         auth_token = packet.get("auth_token")

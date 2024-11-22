@@ -94,7 +94,6 @@ public class Button extends UIComponent implements MouseClickEventListener {
     }
     
     public void updatePositionWithPanel(Panel panel) {
-    	Debug.log(panel.getX() + " " + panel.getY(), this.getX() + " " + this.getY());
         int newX = panel.getX() + this.getX();
         int newY = panel.getY() + this.getY();
         this.setPosition(newX, newY);

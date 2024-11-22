@@ -30,7 +30,6 @@ public class PlayerRewarder implements EntityDeathEventListener, CoinCollectedEv
 	@Override
 	public void onCoinCollect(CoinCollectedEvent e) {
 		rewardCoinCollect(e.getPlayer(), e);
-		Debug.log("TEST", "Coin Collected!");
 	}
 	
 	@Override

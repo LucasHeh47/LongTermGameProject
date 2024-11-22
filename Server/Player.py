@@ -7,6 +7,7 @@ class Player:
         self.username = username
         self.ip_address = ip_address
         self.auth_token = auth_token
+        self.is_picking_class = True
 
     def set_party(self, party: Party):
         self.party = party
