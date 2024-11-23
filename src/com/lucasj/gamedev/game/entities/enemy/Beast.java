@@ -48,27 +48,31 @@ public class Beast extends Enemy {
 	public void update(double deltaTime) {
 		super.update(deltaTime);
 		
-		Vector2D playerPos = game.getPlayer().getPosition();
-	    Vector2D skeltetonPos = this.position;
-
-	    Vector2D direction = playerPos.subtract(skeltetonPos);
-
-	    // Determine the direction based on the angle of the direction vector
-	    if (Math.abs(direction.getX()) > Math.abs(direction.getY())) {
-	        // Horizontal movement
-	        if (direction.getX() > 0) {
-	            currentWalkingImage = 4; // Moving right
-	        } else {
-	            currentWalkingImage = 3; // Moving left
-	        }
-	    } else {
-	        // Vertical movement
-	        if (direction.getY() > 0) {
-	            currentWalkingImage = 1; // Moving down
-	        } else {
-	            currentWalkingImage = 2; // Moving up
-	        }
-	    }
+		if(this.getAggrod() == null) {
+			currentWalkingImage = 1;
+		} else {
+			Vector2D playerPos = this.getAggrod().getPosition();
+		    Vector2D pos = this.position;
+	
+		    Vector2D direction = playerPos.subtract(pos);
+	
+		    // Determine the direction based on the angle of the direction vector
+		    if (Math.abs(direction.getX()) > Math.abs(direction.getY())) {
+		        // Horizontal movement
+		        if (direction.getX() > 0) {
+		            currentWalkingImage = 4; // Moving right
+		        } else {
+		            currentWalkingImage = 3; // Moving left
+		        }
+		    } else {
+		        // Vertical movement
+		        if (direction.getY() > 0) {
+		            currentWalkingImage = 1; // Moving down
+		        } else {
+		            currentWalkingImage = 2; // Moving up
+		        }
+		    }
+		}
 		
 		
 		float checkAnimationSpeed = animationSpeed;

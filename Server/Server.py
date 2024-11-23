@@ -124,9 +124,9 @@ class GameServer(threading.Thread):
             return
 
         for member in party.players:
-            if member is player: continue
+            if member is player or member is party.get_host(): continue
             print(f"Forwarded packet from {player.username} to {member.username}")
-            self.send_data(packet, member.ip_address)  # Forward to everyone, including the sender
+            self.send_data(packet, member.ip_address)
 
     def handle_clients_to_host(self, packet, ip_address):
         auth_token = packet.get("auth_token")
@@ -145,7 +145,7 @@ class GameServer(threading.Thread):
 
         host = party.get_host()
         print(f"Forwarded packet from {player.username} to {host.username}")
-        self.send_data(packet, host.ip_address)  # Forward to everyone, including the sender
+        self.send_data(packet, host.ip_address)
 
     def handle_class_picked(self, packet, ip_address):
         auth_token = packet.get("auth_token")

@@ -7,6 +7,7 @@ import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.multiplayer.GameClient;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 
 public class PacketManager {
 	
@@ -195,7 +196,7 @@ public class PacketManager {
 			}
 			
 			json.put("enemies", enemies);
-			
+			Debug.log(this, "Syncing Enemies");
 			client.sendData(json.toString().getBytes());
 		} catch (JSONException e) {
 			e.printStackTrace();

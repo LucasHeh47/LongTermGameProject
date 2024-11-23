@@ -618,10 +618,11 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	public boolean takeDamage(float dmg) {
-		this.lastTimeHurt = System.currentTimeMillis();
-		PlayerDamageTakenEvent e = new PlayerDamageTakenEvent(this, dmg);
-		game.getEventManager().dispatchEvent(e);
-		return super.takeDamage(dmg);
+		return false;
+//		this.lastTimeHurt = System.currentTimeMillis();
+//		PlayerDamageTakenEvent e = new PlayerDamageTakenEvent(this, dmg);
+//		game.getEventManager().dispatchEvent(e);
+//		return super.takeDamage(dmg);
 	}
 
 	@Override

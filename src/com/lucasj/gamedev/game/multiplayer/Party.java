@@ -107,8 +107,14 @@ public class Party {
 		}
 	}
 	
+	public void removePlayer(String username) {
+		players.remove(this.getPlayerByUsername(username));
+		partySize -= 1;
+	}
+	
 	public void addPlayer(PlayerMP player) {
 		players.add(player);
+		partySize++;
 		((OnlinePlayer) player.getPlayer()).setColor(getColor(player));
 	}
 	

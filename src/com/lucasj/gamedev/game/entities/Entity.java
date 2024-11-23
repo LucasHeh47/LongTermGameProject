@@ -177,7 +177,6 @@ public abstract class Entity implements EntityCollisionEventListener {
 		EntityDeathEvent e = new EntityDeathEvent(this, killer);
 		game.getEventManager().dispatchEvent(e);
 		game.instantiatedEntities.remove(this);
-		System.out.println("KILLING ENTITY: " + this.getTag() + " | " + this.getClass().getSimpleName());
 	}
 	
 	public boolean takeDamage(float dmg) {

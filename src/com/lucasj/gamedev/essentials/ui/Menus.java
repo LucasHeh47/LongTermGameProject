@@ -15,6 +15,7 @@ import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.PlayerPlaceableManager;
+import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.weapons.Tier;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
 import com.lucasj.gamedev.game.weapons.guns.SMG;
@@ -156,7 +157,9 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         if(game.getGameState() != GameState.waves) return;
         
         GUI selectAClassMenu = new GUI(game, this, () -> {
-        	return game.getGameState() == GameState.waves && (!game.getWavesManager().hasGameStarted() || game.getPlayer().isPickingSecondary() || game.getPlayer().isPickingClass());
+       
+        	if(game.party != null) return game.getGameState() == GameState.waves && (game.getPlayer().isPickingClass() || game.getPlayer().isPickingSecondary());
+        	return game.getGameState() == GameState.waves && (!game.getWavesManager().hasGameStarted() || game.getPlayer().isPickingSecondary());
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
@@ -556,6 +559,25 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
             g2d.drawString(title, (game.getWidth() - titleWidth) / 2, 100);
         }
         if(game.getGameState() == GameState.wavesmenu) {
+        	
+        	
+        	if(game.party != null) {
+        		g2d.setFont(game.font.deriveFont(128));
+        		
+        		g2d.drawString("Party", 50, 50);
+
+        		g2d.setFont(game.font.deriveFont(72));
+        		g2d.drawString(game.party.getHost().getUsername(), 50, 75);
+        		
+        		int count = 25;
+        		for(PlayerMP player : game.party.getPlayers()) {
+        			g2d.drawString(player.getUsername(), 50, 75+count);
+        			count += 25;
+        		}
+        		
+        	}
+        	
+        	
         	int margin = 100;
     		int XpBarSize = 100;
     		int XpBarLength = 4; //length x size = actual length

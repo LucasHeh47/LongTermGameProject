@@ -150,6 +150,10 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 		        
 		        game.getSocketClient().getPacketManager().syncEnemiesPacket();
 		        
+	        } else if (game.party == null) {
+		    	enemySpawner.spawnEnemy(getEnemyHealth(wave), new Vector2D(rand.nextInt(game.getWidth()), rand.nextInt(game.getHeight())));
+		        enemiesSpawnedThisWave++;
+		        lastSpawn = System.currentTimeMillis();
 	        }
 	    }
 
@@ -165,6 +169,16 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 	
 	public void render(Graphics g) {
 		Graphics2D g2d = (Graphics2D)g;
+		
+		if(!this.hasGameStarted && !game.getPlayer().isPickingClass()) {
+			g2d.setColor(Color.black);
+			g2d.setFont(game.font.deriveFont(256));
+			int titleWidth = g2d.getFontMetrics().stringWidth("Waiting For Party...");
+	        g2d.drawString("Waiting For Party...", (game.getWidth() - titleWidth) / 2, 100);
+	        return;
+		}
+		if(game.getPlayer().isPickingClass()) return;
+		
 		if(betweenWaves) {
 			int titleWidth = g2d.getFontMetrics().stringWidth(Integer.toString(intermissionLength-intermissionTick));
 			
@@ -185,12 +199,12 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 
 	    g2d.setColor(Color.black);
 	    g2d.drawString("Wave: " + Integer.toString(this.wave), 520, game.getHeight() - 160);
-	    g2d.drawString("Left: " + Integer.toString(enemiesThisWave - enemiesKilledThisWave), 520, game.getHeight() - 100);
-	    int enemyCount = (int) game.instantiatedEntities.stream()
-                .filter(entity -> entity instanceof Enemy)
-                .count();
-
-	    g2d.drawString("Active: " + enemyCount, 520, game.getHeight() - 40);
+//	    g2d.drawString("Left: " + Integer.toString(enemiesThisWave - enemiesKilledThisWave), 520, game.getHeight() - 100);
+//	    int enemyCount = (int) game.instantiatedEntities.stream()
+//                .filter(entity -> entity instanceof Enemy)
+//                .count();
+//
+//	    g2d.drawString("Active: " + enemyCount, 520, game.getHeight() - 40);
 	    
 	    this.missionManager.render(g2d);
 	}

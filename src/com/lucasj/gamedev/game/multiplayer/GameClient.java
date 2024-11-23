@@ -49,7 +49,7 @@ public class GameClient extends Thread {
     public synchronized void run() {
         Debug.log(this, "Client started.");
         while (running) {
-            byte[] data = new byte[1024];
+            byte[] data = new byte[16384];
             DatagramPacket packet = new DatagramPacket(data, data.length);
             try {
                 socket.receive(packet);
@@ -77,6 +77,7 @@ public class GameClient extends Thread {
                     break;
                 case "clients_to_host":
                 	processListeningPacket(response);
+                    break;
                 case "response_packet":
                     handleResponseAsHost(response);
                     break;
@@ -187,6 +188,7 @@ public class GameClient extends Thread {
         	
         	if(data.has("killed_enemy")) {
         		game.instantiatedEntities.remove(Enemy.getEnemyByTag(game, data.getString("killed_enemy")));
+        		game.getWavesManager().killedEnemy();
         	}
         	
         }
@@ -307,7 +309,6 @@ public class GameClient extends Thread {
         DatagramPacket packet = new DatagramPacket(data, data.length, serverAddress, 1331);
         try {
             socket.send(packet);
-            Debug.log(this, "Packet sent to server.");
         } catch (IOException e) {
             Debug.log(this, "Error sending packet: " + e.getMessage());
             e.printStackTrace();

@@ -1,11 +1,11 @@
 package com.lucasj.gamedev.game.entities.enemy;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
@@ -47,27 +47,31 @@ public class Slime extends Enemy {
 	public void update(double deltaTime) {
 		super.update(deltaTime);
 		
-		Vector2D playerPos = this.getAggrod().getPosition();
-	    Vector2D skeltetonPos = this.position;
-
-	    Vector2D direction = playerPos.subtract(skeltetonPos);
-
-	    // Determine the direction based on the angle of the direction vector
-	    if (Math.abs(direction.getX()) > Math.abs(direction.getY())) {
-	        // Horizontal movement
-	        if (direction.getX() > 0) {
-	            currentWalkingImage = 4; // Moving right
-	        } else {
-	            currentWalkingImage = 3; // Moving left
-	        }
-	    } else {
-	        // Vertical movement
-	        if (direction.getY() > 0) {
-	            currentWalkingImage = 1; // Moving down
-	        } else {
-	            currentWalkingImage = 2; // Moving up
-	        }
-	    }
+		if(this.getAggrod() == null) {
+			currentWalkingImage = 1;
+		} else {
+			Vector2D playerPos = this.getAggrod().getPosition();
+		    Vector2D pos = this.position;
+	
+		    Vector2D direction = playerPos.subtract(pos);
+	
+		    // Determine the direction based on the angle of the direction vector
+		    if (Math.abs(direction.getX()) > Math.abs(direction.getY())) {
+		        // Horizontal movement
+		        if (direction.getX() > 0) {
+		            currentWalkingImage = 4; // Moving right
+		        } else {
+		            currentWalkingImage = 3; // Moving left
+		        }
+		    } else {
+		        // Vertical movement
+		        if (direction.getY() > 0) {
+		            currentWalkingImage = 1; // Moving down
+		        } else {
+		            currentWalkingImage = 2; // Moving up
+		        }
+		    }
+		}
 		
 		
 		float checkAnimationSpeed = animationSpeed;
