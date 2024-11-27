@@ -1,7 +1,11 @@
 package com.lucasj.gamedev.game.entities.player;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.lucasj.gamedev.events.level.LevelUpEvent;
+import com.lucasj.gamedev.game.levels.LevelUpPerk;
 import com.lucasj.gamedev.os.GameData;
 
 public class PlayerStats implements Serializable{
@@ -10,11 +14,15 @@ public class PlayerStats implements Serializable{
 	private int totalEnemiesKilled;
 	private int totalDamageDealt;
 	
+	private List<LevelUpPerk> perksUnlocked;
+	
 	private int currentXP;
 	private int xpToNextLevel = 200;
 	private int totalXP;
 	private int level;
     private float xpMultiplier;
+    
+    private int levelTokens = 0;
 	
 	public PlayerStats() {
         this.currentXP = 0;
@@ -22,31 +30,36 @@ public class PlayerStats implements Serializable{
         this.totalXP = 0;
         this.level = 1;
         this.xpMultiplier = 1.0f;
+        perksUnlocked = new ArrayList<>();
         calculateXPToNextLevel();
 	}
 	
 	private void calculateXPToNextLevel() {
         double base = 200;
-        double growthFactor = 1.2; // 1 + 0.2
+        double growthFactor = 2;
         double exponent = (level - 1) / 2.0;
         this.xpToNextLevel = (int)(base * Math.pow(growthFactor, exponent));
     }
 
     // Add XP and check if the player levels up
-    public void addXP(int amount) {
+    public boolean addXP(int amount) {
+    	boolean leveledUp = false;
         int xpGained = (int)(amount * xpMultiplier);
         currentXP += xpGained;
         totalXP += xpGained;
-        System.out.println("Added xp: " + currentXP + " / " + xpToNextLevel + " At lvl: " + level);
+        //System.out.println("Added xp: " + currentXP + " / " + xpToNextLevel + " At lvl: " + level);
         // Level up logic
         while (currentXP >= xpToNextLevel) {
             levelUp();
+            leveledUp = true;
         }
+        return leveledUp;
     }
 
     private void levelUp() {
         currentXP -= xpToNextLevel;
         level++;
+        this.levelTokens++;
         calculateXPToNextLevel();
     }
 	
@@ -60,6 +73,8 @@ public class PlayerStats implements Serializable{
             this.totalXP = loadedStats.totalXP;
             this.level = loadedStats.level;
             this.xpMultiplier = loadedStats.xpMultiplier;
+            this.levelTokens = loadedStats.levelTokens;
+            this.perksUnlocked = loadedStats.perksUnlocked;
             System.out.println("Player stats loaded successfully.");
         }
     }
@@ -94,6 +109,14 @@ public class PlayerStats implements Serializable{
 
 	public float getXpMultiplier() {
 		return xpMultiplier;
+	}
+
+	public int getLevelTokens() {
+		return levelTokens;
+	}
+
+	public void setLevelTokens(int levelTokens) {
+		this.levelTokens = levelTokens;
 	}
 
 }

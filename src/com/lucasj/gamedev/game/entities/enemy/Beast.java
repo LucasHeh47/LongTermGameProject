@@ -129,8 +129,8 @@ public class Beast extends Enemy {
 
 	@Override
 	void setCashDrop() {
-		this.cashDrop[0] = 250;
-		this.cashDrop[1] = 500;
+		this.cashDrop[0] = 500;
+		this.cashDrop[1] = 1000;
 	}
 
 	@Override

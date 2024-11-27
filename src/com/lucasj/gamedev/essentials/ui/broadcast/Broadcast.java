@@ -10,47 +10,83 @@ import java.util.Map;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.ui.GameColors;
-import com.lucasj.gamedev.essentials.ui.Panel;
 import com.lucasj.gamedev.essentials.ui.GameColors.colors;
+import com.lucasj.gamedev.essentials.ui.Panel;
+import com.lucasj.gamedev.essentials.ui.TypeWriter;
 import com.lucasj.gamedev.game.weapons.Tier;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 
 public class Broadcast {
 	
 	private Game game;
 	private String title;
 	private String subText;
+	private String setSubText;
 	private Vector2D position;
+	private Vector2D size;
 	private float setTime;
 	private float time;
 	public boolean finished = false;
 	
+	private Color borderColor;
+	private Color backgroundColor;
+	private Color textColor;
+	private Color timerColor;
 	
-	public Broadcast(Game game, String title, String subText, Vector2D position, float time) {
+	public boolean hasTypeWriter;
+	private TypeWriter typeWriter;
+	
+	/***
+	 * 
+	 * @param game
+	 * @param title
+	 * @param subText
+	 * @param position
+	 * @param time
+	 */
+	public Broadcast(Game game, String title, String subText, Vector2D position, Vector2D size, float time) {
 		this.game = game;
 		this.title = title;
 		this.subText = subText;
+		this.setSubText = subText;
 		this.position = position;
+		this.size = size;
 		this.time = time;
 		this.setTime = time;
+		this.hasTypeWriter = true;
+		
+		borderColor = Color.black;
+		backgroundColor = Color.DARK_GRAY;
+		this.textColor = Color.white;
+		this.timerColor = Color.yellow;
+		
+		if(this.hasTypeWriter) {
+			typeWriter = new TypeWriter(subText, 0.05f);
+			subText = "";
+		}
+		
 	}
 	
 	public void update(double deltaTime) {
 		time -= deltaTime;
+		typeWriter.update(deltaTime);
 		if( time <= 0 ) finished = true;
 	}
 	
 	public void render(Graphics2D g2d) {
+		if(typeWriter != null) {
+			typeWriter.setStringToType(setSubText);
+			subText = typeWriter.getCurrentString();
+		}
         // Render the background panel
-        Panel panel = new Panel((int) position.getX(), (int) position.getY(), 500, 250, Color.DARK_GRAY, Color.BLACK, 20, 10);
+        Panel panel = new Panel((int) position.getX(), (int) position.getY(), size.getXint(), size.getYint(), backgroundColor, borderColor, 20, 10);
         panel.render(g2d);
         
-        // Render the timer bar
-        g2d.setColor(Color.YELLOW);
-        g2d.fill(new RoundRectangle2D.Float((int) position.getX(), (int) position.getY(), (int) (495 * (time / setTime)), 5, 10, 10));
-        g2d.setColor(Color.WHITE);
+        g2d.setColor(timerColor);
+        g2d.fill(new RoundRectangle2D.Float((int) position.getX(), (int) position.getY(), (int) (size.getXint() * (time / setTime)), 5, 10, 10));
+        g2d.setColor(this.textColor);
         
-        // Set font and color for the title
         g2d.setFont(game.font.deriveFont(1f));
         FontMetrics titleMetrics = g2d.getFontMetrics();
         int panelCenterX = (int) position.getX() + panel.getWidth() / 2;
@@ -97,7 +133,6 @@ public class Broadcast {
     private void drawTextWithColors(Graphics2D g2d, String text, int x, int y, Font font, boolean centered) {
         g2d.setFont(font);
         String[] textParts = text.split("(?=\\{\\w+\\})|(?<=\\})");
-        Map<String, Color> colorMap = createColorMap();
         int currentX = x;
         
         if (centered) {
@@ -114,7 +149,7 @@ public class Broadcast {
         for (String part : textParts) {
             if (part.matches("\\{\\w+\\}")) {
                 String colorName = part.replaceAll("[{}]", "").toUpperCase();
-                g2d.setColor(colorMap.getOrDefault(colorName, Color.WHITE));
+                g2d.setColor(GameColors.colors.getColor(colorName));
             } else {
                 g2d.drawString(part, currentX, y);
                 currentX += g2d.getFontMetrics().stringWidth(part);
@@ -122,35 +157,42 @@ public class Broadcast {
         }
     }
 
-	/**
-	 * Creates a map of color tags to Color values.
-	 *
-	 * @return the map of color tags to Color values
-	 */
-	private Map<String, Color> createColorMap() {
-	    Map<String, Color> colorMap = new HashMap<>();
-	    colorMap.put("RED", Color.RED);
-	    colorMap.put("BLUE", Color.BLUE);
-	    colorMap.put("GREEN", Color.GREEN);
-	    colorMap.put("YELLOW", Color.YELLOW);
-	    colorMap.put("WHITE", Color.WHITE);
-	    colorMap.put("BLACK", Color.BLACK);
-	    colorMap.put("GOLD", colors.GOLD.getValue());
-	    colorMap.put("LIGHT_GRAY", Color.LIGHT_GRAY);
-	    colorMap.put("COMMON", GameColors.GUN_COLORS(Tier.Common));
-	    colorMap.put("UNCOMMON", GameColors.GUN_COLORS(Tier.Uncommon));
-	    colorMap.put("RARE", GameColors.GUN_COLORS(Tier.Rare));
-	    colorMap.put("EPIC", GameColors.GUN_COLORS(Tier.Epic));
-	    colorMap.put("LEGENDARY", GameColors.GUN_COLORS(Tier.Legendary));
-	    colorMap.put("MYTHIC", GameColors.GUN_COLORS(Tier.Mythic));
-	    colorMap.put("DIVINE", GameColors.GUN_COLORS(Tier.Divine));
-	    colorMap.put("ETHEREAL", GameColors.GUN_COLORS(Tier.Ethereal));
-	    // Add more colors as needed
-	    return colorMap;
+	public void setSubText(String subText) {
+		
+		Debug.log(this, subText);
+		this.setSubText = subText;
+	}
+	
+	public void setPosition(Vector2D pos) {
+		this.position = pos;
+	}
+	
+	public Vector2D getPosition() {
+		return this.position;
 	}
 
-	public void setSubText(String subText) {
-		this.subText = subText;
+	public Broadcast setBorderColor(Color borderColor) {
+		this.borderColor = borderColor;
+		return this;
+	}
+
+	public Broadcast setBackgroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+		return this;
+	}
+
+	public Broadcast setTextColor(Color textColor) {
+		this.textColor = textColor;
+		return this;
+	}
+
+	public Broadcast setTimerColor(Color timerColor) {
+		this.timerColor = timerColor;
+		return this;
+	}
+	
+	public Vector2D getSize() {
+		return this.size;
 	}
 
 }

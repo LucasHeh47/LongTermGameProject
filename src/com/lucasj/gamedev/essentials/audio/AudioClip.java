@@ -11,11 +11,13 @@ public abstract class AudioClip {
 	protected float soundMultiplier = 1.0f;
 
 	private final Clip clip;
+	private String fileName;
 	protected Game game;
 	
-	public AudioClip(Clip clip, Game game, float soundMultiplier) {
+	public AudioClip(Clip clip, Game game, float soundMultiplier, String fileName) {
 		this.clip = clip;
 		this.game = game;
+		this.fileName = fileName;
 	}
 	
 	public void update() {
@@ -31,4 +33,12 @@ public abstract class AudioClip {
 		clip.close();
 	}
 	
+	public Clip getClip() {
+		return clip;
+	}
+	
+	public String getFileName() {
+		return fileName;
+	}
 }
+

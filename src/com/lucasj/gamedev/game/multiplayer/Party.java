@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.multiplayer.OnlinePlayer;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 
 public class Party {
 
@@ -113,6 +113,7 @@ public class Party {
 	}
 	
 	public void addPlayer(PlayerMP player) {
+		if(player instanceof Player) player.setColor(Color.blue);
 		players.add(player);
 		partySize++;
 		((OnlinePlayer) player.getPlayer()).setColor(getColor(player));

@@ -24,9 +24,25 @@ public class Button extends UIComponent implements MouseClickEventListener {
     private Game game;
     public boolean hovering = false;
     private int borderRadius; // New property for border radius
+    private Color borderColor;
     
     public boolean adjustedPositionWithPanel = false;
     
+    /***
+     * 
+     * @param game
+     * @param menu
+     * @param state
+     * @param text
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param bgColor
+     * @param textColor
+     * @param onClick
+     * @param tooltip
+     */
     public Button(Game game, Menus menu, GameState state, String text, int x, int y, int width, int height, Color bgColor, Color textColor, Runnable onClick, Tooltip tooltip) {
         this.text = text;
         this.game = game;
@@ -40,12 +56,13 @@ public class Button extends UIComponent implements MouseClickEventListener {
         this.onClick = onClick;
         this.menu = menu;
         this.tooltip = tooltip;
+        borderColor = Color.DARK_GRAY;
         this.decidingFactor = () -> {
         	return true;
         };
     }
-    
-    public Button setDecidingFactor(Supplier<Boolean> factor) {
+
+	public Button setDecidingFactor(Supplier<Boolean> factor) {
     	this.decidingFactor = factor;
     	return this;
     }
@@ -62,7 +79,7 @@ public class Button extends UIComponent implements MouseClickEventListener {
         hovering = menu.getLastHoveredButton() == this.text;
         if(hovering) g2d.setStroke(new BasicStroke(6));
         // Draw border
-        g2d.setColor(Color.DARK_GRAY);
+        g2d.setColor(borderColor);
         if (borderRadius > 0) {
             g2d.draw(new RoundRectangle2D.Float(x, y, width, height, borderRadius, borderRadius));
         } else {
@@ -171,5 +188,10 @@ public class Button extends UIComponent implements MouseClickEventListener {
 	public void onMouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public Button setBorderColor(Color color) {
+		this.borderColor = color;
+		return this;
 	}
 }

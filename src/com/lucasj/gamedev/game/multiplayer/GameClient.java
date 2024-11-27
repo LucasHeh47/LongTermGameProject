@@ -1,5 +1,6 @@
 package com.lucasj.gamedev.game.multiplayer;
 
+import java.awt.Color;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.DatagramPacket;
@@ -16,8 +17,10 @@ import org.json.JSONObject;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
+import com.lucasj.gamedev.essentials.ui.broadcast.Broadcast;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.player.multiplayer.OnlinePlayer;
+import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.multiplayer.packets.PacketManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
@@ -105,6 +108,8 @@ public class GameClient extends Thread {
                     if (status.has("player_joined")) {
                         OnlinePlayer player = new OnlinePlayer(game, null, status.getString("player_joined"), new Vector2D(0, 0));
                         Debug.log(this, player.getUsername() + " has joined the party!");
+                        game.addBroadcast(new Broadcast(game, player.getUsername() + " has joined the party", "", new Vector2D(-300, game.getHeight()/4),
+            					new Vector2D(300, 75), 3));
                         game.party.addPlayer(player);
                     }
 
@@ -114,7 +119,9 @@ public class GameClient extends Thread {
                         String hostUsername = status.getString("join_success");
                         Debug.log(this, "Host: " + hostUsername);
                         OnlinePlayer host = new OnlinePlayer(game, null, hostUsername, new Vector2D(0, 0));
+                        Debug.log(this, host == null);
                         game.party.setHost(host);
+                        game.party.addPlayer((PlayerMP) game.getPlayer());
                     }
                 } else if (partyObject instanceof String) {
                     String partyStatus = (String) partyObject;

@@ -8,7 +8,7 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 public abstract class Projectile extends Entity {
 
 	private long timeCreated;
-	private double timeToLive;
+	protected double timeToLive;
 	
 	protected PlayerAttackEvent playerAttackEvent = null;
 	

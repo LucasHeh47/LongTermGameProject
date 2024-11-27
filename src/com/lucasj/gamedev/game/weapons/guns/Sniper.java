@@ -11,7 +11,7 @@ public class Sniper extends Gun {
 
 	public Sniper(Game game, Player p) {
 		super(game, p, 
-				80, // Base damage
+				40, // Base damage
 				100, // Projectile speed
 				3f, // Fire rate
 				1, // Clip size

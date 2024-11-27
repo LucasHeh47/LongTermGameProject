@@ -3,6 +3,7 @@ package com.lucasj.gamedev.game.entities.enemy;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.lang.reflect.Constructor;
@@ -18,6 +19,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.ui.GameColors.colors;
 import com.lucasj.gamedev.events.entities.EntityAggroEvent;
@@ -25,9 +27,12 @@ import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.Breadcrumb;
 import com.lucasj.gamedev.game.entities.collectibles.Coin;
+import com.lucasj.gamedev.game.entities.particles.ParticleGenerator;
+import com.lucasj.gamedev.game.entities.particles.ParticleShape;
 import com.lucasj.gamedev.game.entities.placeables.data.LandmineEnemyDistanceData;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
+import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
@@ -172,9 +177,17 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	protected boolean isMoving = false;
 	protected float angleToPlayer;
 	private long lastTimeHurt;
+	private boolean onFire = false;
+	private int fireTick = 1;
+	private float fireSpeed = 0.05f;
+	private long setFire;
+	private float fireLength;
+	
+	private long lastFireTick;
+	private boolean isZapped = false;
+	private long zapStart;
 	
 	private float healthUnderlayDelay = 0.5f;
-	private float healthUnderlayRate = 0.8f;
 	private float healthUnderlayLength;
 	
 	private Quadtree quadtree;
@@ -239,7 +252,22 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		g.setColor(Color.red);
 		healthWidth = (int) (barWidth * ((double) health / maxHealth));
 		g.fillRect(barX, barY, healthWidth, barHeight);
-
+		
+		if(this.onFire) {
+			Image fire = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Fire/EntityOnFire/" + fireTick + ".png", 
+					new Vector2D(), new Vector2D(16, 16));
+			g.drawImage(fire, this.getScreenPosition().getXint(), this.getScreenPosition().getYint(), 
+					this.size, this.size, null);
+			if((System.currentTimeMillis() - lastFireTick)/1000.0 >= fireSpeed) {
+				fireTick++;
+				if(fireTick == 10) {
+					fireTick = 1;
+					this.takeDamage((float) ((10 * game.getPlayer().getPlayerUpgrades().getDamageMultiplier()) * (game.getWavesManager().getWave() * WavesManager.HEALTH_GROWTH_RATE)));
+				}
+				this.lastFireTick = System.currentTimeMillis();
+			}
+		}
+		
 	    Graphics2D g2d = (Graphics2D) g;
 	 // Render the ray if it exists
 	    if(game.testing) {
@@ -283,16 +311,40 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		super.update(deltaTime);
 		Vector2D oldPos = this.position.copy();
 		if(game.instantiatedEntitiesOnScreen.contains(this)) {
-	        applyFlockingBehavior(deltaTime);
-		    findNearestBreadcrumbToPlayer(deltaTime);
-		} else {
-			Debug.log(this, game.instantiatedEntitiesOnScreen.size());
+			if(!this.isZapped) {
+		        applyFlockingBehavior(deltaTime);
+			    findNearestBreadcrumbToPlayer(deltaTime);
+			}
 		}
 		this.isMoving = (this.position != oldPos);
 		
+		if(this.isZapped) {
+			
+			ParticleGenerator particles = new ParticleGenerator(game, 
+					new Vector2D(this.position.add(size/2).getX(), this.position.add(size/4).getY()),
+					0.1f,
+					0.01f,
+					0,
+					365f,
+					20f,
+					0.08f, 
+					5).setColorAndShape(() -> {
+						return SpriteTools.createColorGradient(new Color(230, 245, 255), new Color(158, 213, 255), 8);
+					}, ParticleShape.Square);
+			
+			if((System.currentTimeMillis() - this.zapStart)/1000.0 >= 5) {
+				this.isZapped = false;
+			}
+		}
+		
 		if((System.currentTimeMillis() - this.lastTimeHurt)/1000.0 >= this.healthUnderlayDelay) {
-			this.healthUnderlayLength -= this.healthUnderlayRate;
+			this.healthUnderlayLength -= this.maxHealth / 100;
 			if(this.healthUnderlayLength <= this.health) this.healthUnderlayLength = this.health;
+		}
+		
+		if(this.onFire && (System.currentTimeMillis() - this.setFire)/1000.0 >= this.fireLength) {
+			this.onFire = false;
+			this.fireLength = -1;
 		}
 		
 		this.attackPlayer();
@@ -361,10 +413,10 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	            if (distance < effectiveSeparationRadius) {
 	                // Calculate the force vector to push the enemies apart
 	                Vector2D diff = this.position.subtract(entity.getPosition()).normalize();
-	                double strength = (effectiveSeparationRadius - distance) / effectiveSeparationRadius;
+	                double strength = (effectiveSeparationRadius + 2000) / effectiveSeparationRadius;
 
 	                // Scale the force based on the strength (closer enemies result in stronger push)
-	                diff = diff.multiply(strength * 10.0); // Adjust multiplier if needed
+	                diff = diff.multiply(strength * 500.0); // Adjust multiplier if needed
 
 	                force = force.add(diff);
 	                count++;
@@ -821,6 +873,17 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 
 	public void setAggrod(PlayerMP playerMP) {
 		this.aggrod = playerMP;
+	}
+	
+	public void setOnFire(float seconds) {
+		this.onFire = true;
+		this.setFire = System.currentTimeMillis();
+		this.fireLength = seconds;
+	}
+	
+	public void zap() {
+		this.isZapped = true;
+		this.zapStart = System.currentTimeMillis();
 	}
 
 }

@@ -12,6 +12,8 @@ import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDamagedEventListener;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEventListener;
+import com.lucasj.gamedev.events.level.LevelUpEvent;
+import com.lucasj.gamedev.events.level.LevelUpEventListener;
 import com.lucasj.gamedev.events.player.PlayerAttackEvent;
 import com.lucasj.gamedev.events.player.PlayerAttackEventListener;
 import com.lucasj.gamedev.events.player.PlayerMoveEvent;
@@ -127,6 +129,15 @@ public class EventManager {
                 listeners.forEach(listener -> {
                     if (listener instanceof SwapWeaponEventListener) {
                         ((SwapWeaponEventListener) listener).onSwapWeapon((SwapWeaponEvent) e);
+                    }
+                });
+            }
+    	} else if (e instanceof LevelUpEvent) {
+    		List<Object> listeners = eventMap.get(LevelUpEvent.class);
+            if (listeners != null) {
+                listeners.forEach(listener -> {
+                    if (listener instanceof LevelUpEventListener) {
+                        ((LevelUpEventListener) listener).onLevelUp((LevelUpEvent) e);
                     }
                 });
             }

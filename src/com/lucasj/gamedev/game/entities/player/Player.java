@@ -17,10 +17,12 @@ import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.essentials.InputHandler;
 import com.lucasj.gamedev.essentials.ui.GameColors.colors;
+import com.lucasj.gamedev.essentials.ui.broadcast.Broadcast;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.events.input.KeyboardEventListener;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
+import com.lucasj.gamedev.events.level.LevelUpEvent;
 import com.lucasj.gamedev.events.player.PlayerDamageTakenEvent;
 import com.lucasj.gamedev.events.player.PlayerMoveEvent;
 import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
@@ -28,9 +30,10 @@ import com.lucasj.gamedev.events.weapons.SwapWeaponEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
 import com.lucasj.gamedev.game.entities.placeables.Placeable;
-import com.lucasj.gamedev.game.entities.player.multiplayer.OnlinePlayer;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
+import com.lucasj.gamedev.game.levels.LevelUpManager;
+import com.lucasj.gamedev.game.weapons.AmmoMod;
 import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
 import com.lucasj.gamedev.game.weapons.guns.Shotgun;
@@ -84,8 +87,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private boolean isPickingClass = true;
 	
-	private float xp;
-	
 	private ConcurrentList<Placeable> activePlaceables;
 	private PlayerPlaceableManager placeableManager;
 	private boolean placingMode;
@@ -96,8 +97,12 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private PlayerRewarder playerRewarder;
 	
+	private LevelUpManager lvlUpManager;
+	
 	private int money = 500;
 	private int gems = 0;
+	
+	private int xp;
 	
 	private long lastWalkSound;
 	private float walkSoundCooldown = 0.5f;
@@ -106,12 +111,15 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	private float healthUnderlayRate = 0.35f;
 	private float healthUnderlayLength;
 	
+	private Color color;
+	
 	private MiniMap minimap;
 	
 	
 	public Player(Game game, InputHandler input) {
 		super(game);
 		minimap = new MiniMap(game);
+		lvlUpManager = new LevelUpManager(game);
 		activePlaceables = new ConcurrentList<>();
 		placeableManager = new PlayerPlaceableManager(game, this);
 		this.input = input;
@@ -141,6 +149,18 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	@Override
 	public void update(double deltaTime) {
 		if(!game.getWavesManager().hasGameStarted()) return;
+		if(globalStats.addXP((int) xp)) {
+			game.addBroadcast(new Broadcast(game, "Level " + (globalStats.getLevel()-1) + " > " + globalStats.getLevel(), "", new Vector2D(-300, game.getHeight()/4),
+					new Vector2D(300, 75), 2)
+					.setBackgroundColor(new Color(255, 252, 82))
+					.setBorderColor(new Color(192, 190, 78))
+					.setTextColor(Color.DARK_GRAY.darker()));
+
+	        
+	        LevelUpEvent e = new LevelUpEvent(globalStats.getLevel());
+	        game.getEventManager().dispatchEvent(e);
+		}
+		xp = 0;
 		this.activePlaceables.update();
 		this.screenPosition = new Vector2D(game.getWidth()/2, game.getHeight()/2);
 		isMoving = false;
@@ -177,9 +197,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
     	if(game.party != null) {
     		game.getSocketClient().getPacketManager().playerInfoPacket(health, maxHealth, position, this.currentWalkingImage);
-    		Debug.log(this, "Packet Sent");
-    	} else {
-    		Debug.log(this, "Not in party");
     	}
 		
 		
@@ -243,7 +260,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    if(game.party != null) {
 	    	game.party.render(g2d);
 	    }
-	    
 	}
 	
 	private void renderAmmo(Graphics2D g2d) {
@@ -303,6 +319,24 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		g2d.drawImage(frame, 128, game.getHeight()-228, 128, 128, null);
 		g2d.drawImage(this.primaryGun.getUIImage(), 128, game.getHeight()-228+32, 128, 64, null);
 		
+		if(this.primaryGun.getAmmoMod() != AmmoMod.None) {
+			Image image = null;
+			switch(this.primaryGun.getAmmoMod()) {
+			case Flame:
+				image = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/AmmoMods/flame.png", new Vector2D(), new Vector2D(32, 32));
+				break;
+			case Electric:
+				image = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/AmmoMods/electric.png", new Vector2D(), new Vector2D(32, 32));
+				break;
+			case None:
+				Debug.log(this, "how the fuck did you get here");
+				break;
+				
+			}
+			g2d.drawImage(image, 128*2-36, game.getHeight()-136, 32, 32, null);
+			
+		}
+		
 		if(this.secondaryGun != null) {
 			frame = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/UI/frame.png", new Vector2D(0, 0), new Vector2D(32, 32));
 			color = new Color(0, 0, 0);
@@ -345,6 +379,28 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	        game.getGraphicUtils().drawVignette(g2d, 260, game.getHeight()-164, 64, 64, r, g, b, 120);
 			g2d.drawImage(frame, 260, game.getHeight()-164, 64, 64, null);
 			g2d.drawImage(this.secondaryGun.getUIImage(), 260, game.getHeight()-164+16, 64, 32, null);
+			
+			if(this.secondaryGun.getAmmoMod() != AmmoMod.None) {
+				Image image = null;
+				switch(this.secondaryGun.getAmmoMod()) {
+				case Flame:
+					image = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/AmmoMods/flame.png", new Vector2D(), new Vector2D(32, 32));
+					break;
+				case Electric:
+					image = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/AmmoMods/electric.png", new Vector2D(), new Vector2D(32, 32));
+					break;
+				case Mutant:
+					image = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/AmmoMods/mutant.png", new Vector2D(), new Vector2D(32, 32));
+					break;
+				case None:
+					Debug.log(this, "how the fuck did you get here");
+					break;
+					
+				}
+				g2d.drawImage(image, 260 + 42, game.getHeight()-118, 16, 16, null);
+				
+			}
+			
 		}
 	}
 	
@@ -554,7 +610,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		        ).normalize();
 
 		        // Calculate the final bullet velocity
-		        Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed() * 25 * deltaTime);
+		        Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed() * 25);
 
 		        // Create and instantiate the bullet
 		        int damage = (int) ((10 + this.primaryGun.getDamage()) * this.getPlayerUpgrades().getDamageMultiplier());
@@ -569,6 +625,12 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		            damage
 		        );
 		        b.setPierce(this.getPrimaryGun().getPierce());
+		        
+		        Random rand = new Random();
+		        int chance = rand.nextInt(100);
+		        if(chance <= primaryGun.getTier().getAmmoModMultiplier()) {
+		        	b.setAmmoMod(primaryGun.getAmmoMod());
+		        }
 		        b.instantiate();
 		    }
 	        this.primaryGun.useRound();
@@ -589,7 +651,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		    // Add the bloom to the normalized direction
 		    Vector2D bloomedVelocity = new Vector2D(vel.getX() + bloomX, vel.getY() + bloomY).normalize();
 			
-			Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed()*25*deltaTime);
+			Vector2D bulletVelocity = bloomedVelocity.multiply(this.primaryGun.getProjectileSpeed()*25);
 			
 			int damage = (int) ((10 + this.primaryGun.getDamage()) * this.getPlayerUpgrades().getDamageMultiplier());
 			Bullet b = new Bullet(game, this, this.position, 
@@ -599,11 +661,43 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		            this.getPrimaryGun().getRange(), 
 					damage);
 			b.setPierce(this.getPrimaryGun().getPierce());
+
+	        Random rand = new Random();
+	        int chance = rand.nextInt(100);
+	        if(chance <= primaryGun.getTier().getAmmoModMultiplier()) {
+	        	b.setAmmoMod(primaryGun.getAmmoMod());
+	        }
+	        
 			this.primaryGun.useRound();
 			if(!this.primaryGun.isAutomatic()) this.playerAttacking = false;
 			b.instantiate();
 		}
 		game.getAudioPlayer().playSound(primaryGun.getGunFireSound(), this.getPosition());
+		
+//		float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
+//		float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
+//
+//		// Calculate the angle in radians and convert to degrees
+//		float angle = (float) Math.toDegrees(Math.atan2(dy, dx));
+//
+//		// Ensure the angle is in the range [0, 360)
+//		if (angle < 0) {
+//		    angle += 360;
+//		}
+//
+//		
+//		ParticleGenerator particles = new ParticleGenerator(game, 
+//				this.position.add(size/2), 
+//				0.1f,
+//				0.5f,
+//				angle,
+//				90f,
+//				5,
+//				0.001f).setColorAndShape(() -> {
+//					return SpriteTools.createColorGradient(new Color(173, 173, 173), new Color(40, 40, 40), 8);
+//				}, ParticleShape.Circle);
+		
+		
 //		PlayerAttackEvent e = new PlayerAttackEvent(b, damage);
 //		b.setPlayerAttackEvent(e);
 		//game.getEventManager().dispatchEvent(e);
@@ -618,24 +712,20 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	public boolean takeDamage(float dmg) {
-		return false;
-//		this.lastTimeHurt = System.currentTimeMillis();
-//		PlayerDamageTakenEvent e = new PlayerDamageTakenEvent(this, dmg);
-//		game.getEventManager().dispatchEvent(e);
-//		return super.takeDamage(dmg);
+		//return false;
+		this.lastTimeHurt = System.currentTimeMillis();
+		PlayerDamageTakenEvent e = new PlayerDamageTakenEvent(this, dmg);
+		game.getEventManager().dispatchEvent(e);
+		return super.takeDamage(dmg);
 	}
 
 	@Override
 	public void entityDeath() {
 		game.setGameState(GameState.mainmenu);
-		System.out.println("Total xp earned: " + xp);
-		globalStats.addXP((int) xp);
-		xp = 0;
 	}
 
 	@Override
 	public void onMouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -674,9 +764,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
         }
         if(e.getKeyCode() == KeyEvent.VK_Q) {
         	this.swapWeapons();
-        }
-        if(e.getKeyCode() == KeyEvent.VK_E) {
-        	game.getWavesManager().getMissionManager().startMission();
         }
 		if(e.getKeyCode() == KeyEvent.VK_1) {
 			if(this.placeableManager.getEquippedPlaceable() != null) {
@@ -773,7 +860,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	public void addMoney(int money) {
-		this.money += money*3;
+		this.money += money;
 		this.xp += money/100;
 	}
 	
@@ -782,7 +869,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	public void addGem(int num) {
-		this.gems += num*3;
+		this.gems += num;
 	}
 	
 	public boolean removeGem(int num) {
@@ -882,6 +969,14 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	public void setPickingClass(boolean isPickingClass) {
 		this.isPickingClass = isPickingClass;
+	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
 	}
 	
 }

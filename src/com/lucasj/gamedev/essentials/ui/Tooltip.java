@@ -46,6 +46,16 @@ public class Tooltip {
         this.finalSubText = buildFinalSubText();
     }
     
+    /***
+     * 
+     * @param game
+     * @param text
+     * @param subText
+     * @param x
+     * @param y
+     * @param bgColor
+     * @param textColor
+     */
     public Tooltip(Game game, String text, String subText, int x, int y, Color bgColor, Color textColor) {
         this.text = text;
         this.subText = subText;
@@ -58,9 +68,20 @@ public class Tooltip {
         this.finalSubText = buildFinalSubText();
     }
     
+    /***
+     * 
+     * @param game
+     * @param text
+     * @param subText
+     * @param x
+     * @param y
+     * @param bgColor
+     * @param textColor
+     * @param requirements
+     */
     public Tooltip(Game game, String text, String subText, int x, int y, Color bgColor, Color textColor, Supplier<List<Supplier<String>>> requirements) {
         this.text = text;
-        this.subText = subText;
+        this.subText = "{LIGHT_GRAY}" + subText;
         this.x = x;
         this.y = y;
         this.bgColor = bgColor;
@@ -100,7 +121,7 @@ public class Tooltip {
                 StringBuilder currentLine = new StringBuilder();
                 for (String word : words) {
                     String testLine = currentLine + word + " ";
-                    if (g2d.getFontMetrics().stringWidth(testLine) > 400) {
+                    if (g2d.getFontMetrics().stringWidth(testLine) > 800) {
                         wrappedSubTextLines.add(currentLine.toString().trim());
                         currentLine = new StringBuilder(word + " ");
                     } else {
@@ -153,39 +174,17 @@ public class Tooltip {
     private void drawTextWithColors(Graphics2D g2d, String text, int x, int y, Font font) {
         g2d.setFont(font);
         String[] textParts = text.split("(?=\\{\\w+\\})|(?<=\\})");
-        Map<String, Color> colorMap = createColorMap();
         int currentX = x;
 
         for (String part : textParts) {
             if (part.matches("\\{\\w+\\}")) {
                 String colorName = part.replaceAll("[{}]", "").toUpperCase();
-                g2d.setColor(colorMap.getOrDefault(colorName, textColor));
+                g2d.setColor(GameColors.colors.getColor(colorName));
             } else {
                 g2d.drawString(part, currentX, y);
                 currentX += g2d.getFontMetrics().stringWidth(part);
             }
         }
-    }
-
-    // Helper method to create a color map
-    private Map<String, Color> createColorMap() {
-        Map<String, Color> colorMap = new HashMap<>();
-        colorMap.put("RED", Color.RED);
-        colorMap.put("BLUE", Color.BLUE);
-        colorMap.put("GREEN", Color.GREEN);
-        colorMap.put("YELLOW", Color.YELLOW);
-        colorMap.put("WHITE", Color.WHITE);
-        colorMap.put("BLACK", Color.BLACK);
-        colorMap.put("COMMON", GameColors.GUN_COLORS(Tier.Common));
-        colorMap.put("UNCOMMON", GameColors.GUN_COLORS(Tier.Uncommon));
-        colorMap.put("RARE", GameColors.GUN_COLORS(Tier.Rare));
-        colorMap.put("EPIC", GameColors.GUN_COLORS(Tier.Epic));
-        colorMap.put("LEGENDARY", GameColors.GUN_COLORS(Tier.Legendary));
-        colorMap.put("MYTHIC", GameColors.GUN_COLORS(Tier.Mythic));
-        colorMap.put("DIVINE", GameColors.GUN_COLORS(Tier.Divine));
-        colorMap.put("ETHEREAL", GameColors.GUN_COLORS(Tier.Ethereal));
-        // Add more colors as needed
-        return colorMap;
     }
 
     // Method to position the tooltip
@@ -201,7 +200,7 @@ public class Tooltip {
 
     // Method to set the subText
     public void setSubText(String subText) {
-        this.subText = subText;
+        this.subText = "{LIGHT_GRAY}" + subText;
     }
 
     // Method to check if the tooltip should be shown based on mouse position

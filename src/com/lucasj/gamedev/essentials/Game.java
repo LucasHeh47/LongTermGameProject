@@ -11,11 +11,14 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.audio.AudioPlayer;
 import com.lucasj.gamedev.essentials.ui.Menus;
+import com.lucasj.gamedev.essentials.ui.broadcast.Broadcast;
 import com.lucasj.gamedev.events.EventManager;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
@@ -25,6 +28,7 @@ import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.enemy.Skeleton;
 import com.lucasj.gamedev.game.entities.enemy.Slime;
 import com.lucasj.gamedev.game.entities.enemy.Zombie;
+import com.lucasj.gamedev.game.entities.particles.ParticleGenerator;
 import com.lucasj.gamedev.game.entities.placeables.Landmine;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.projectiles.Projectile;
@@ -33,6 +37,7 @@ import com.lucasj.gamedev.game.multiplayer.GameClient;
 import com.lucasj.gamedev.game.multiplayer.Party;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.os.GameData;
 import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.settings.SettingsManager;
@@ -46,6 +51,7 @@ public class Game {
     private InputHandler input;
     public ConcurrentList<Entity> instantiatedEntities;
     public ConcurrentList<Collectible> instantiatedCollectibles;
+    public ConcurrentList<ParticleGenerator> instantiatedParticles;
     public List<Entity> instantiatedEntitiesOnScreen;
     private Quadtree<Entity> quadtree;
     private Quadtree<Entity> entityQuadtree;
@@ -61,6 +67,8 @@ public class Game {
     private WavesManager wavesManager;
     private Camera camera;
     private EventManager eventManager;
+    
+    private Queue<Broadcast> broadcastQueue;
     
     private AudioPlayer audioPlayer;
     
@@ -110,6 +118,8 @@ public class Game {
     	
     	audioPlayer = new AudioPlayer(this);
     	
+    	broadcastQueue = new LinkedList<>();
+    	
     	this.window = window;
     	
     	eventManager = new EventManager();
@@ -130,6 +140,7 @@ public class Game {
         camera = new Camera(this, new Vector2D(getWidth(), getHeight()), new Vector2D(0, 0));
         instantiatedEntities = new ConcurrentList<Entity>();
         instantiatedEntitiesOnScreen = new ArrayList<Entity>();
+        instantiatedParticles = new ConcurrentList<ParticleGenerator>();
         entityQuadtree = new Quadtree<>(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
         quadtree = new Quadtree<>(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
         
@@ -155,6 +166,10 @@ public class Game {
     	menus.update();
     	camera.update(deltaTime);
     	audioPlayer.update();
+    	
+    	instantiatedParticles.forEach(generator -> {
+    		generator.update(deltaTime);
+    	});
         
         if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
 //        	this.renderScreenTick++;
@@ -166,6 +181,34 @@ public class Game {
             wavesManager.update(deltaTime);
             
         }
+        
+		if(broadcastQueue.peek() != null) {
+			Broadcast cast = broadcastQueue.peek();
+			cast.update(deltaTime);
+			if(cast.getPosition().getXint() != 0) {
+				cast.setPosition(
+						new Vector2D(
+								cast.getPosition().getXint() + 2, 
+								cast.getPosition().getYint()));
+				if(cast.getPosition().getX() >= 0) {
+					cast.setPosition(
+							new Vector2D(
+									0, 
+									cast.getPosition().getYint()));
+				}
+			}
+			if(cast.finished) {
+				cast.setPosition(
+						new Vector2D(
+								cast.getPosition().getXint() - 4, 
+								cast.getPosition().getYint()));
+				if(cast.getPosition().getX() <= cast.getSize().getX()*-1.5) {
+					broadcastQueue.remove();
+				}
+			}
+		}
+        
+        
     	this.updateLists();
     }
     
@@ -183,6 +226,7 @@ public class Game {
     	this.collisionSurfaces.update();
     	this.instantiatedEntities.update();
     	this.instantiatedCollectibles.update();
+    	this.instantiatedParticles.update();
     }
     
     public void instantiatePlayer() {
@@ -228,11 +272,16 @@ public class Game {
         		
             });
         	if(p != null) p.render(g);
+        	
+        	instantiatedParticles.forEach(generator -> {
+        		generator.render(g);
+        	});
+        	
         	this.getWavesManager().render(g);
         }
     	menus.render(g2d);
  
-
+    	if(broadcastQueue != null && broadcastQueue.peek() != null) broadcastQueue.peek().render(g2d);
         //this.getGraphicUtils().drawVignette(g2d, this.getWidth(), this.getHeight(), 0, 0, 0, 160);
     }
     
@@ -423,6 +472,10 @@ public class Game {
 
 	public AudioPlayer getAudioPlayer() {
 		return audioPlayer;
+	}
+	
+	public void addBroadcast(Broadcast cast) {
+		this.broadcastQueue.add(cast);
 	}
 	
 }

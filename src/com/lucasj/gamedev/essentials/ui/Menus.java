@@ -16,6 +16,7 @@ import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.PlayerPlaceableManager;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
+import com.lucasj.gamedev.game.weapons.AmmoMod;
 import com.lucasj.gamedev.game.weapons.Tier;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
 import com.lucasj.gamedev.game.weapons.guns.SMG;
@@ -78,7 +79,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	}, () -> {
     		List<Button> buttons = new ArrayList<>();
     		
-    		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 450), (game.getHeight() - 200), 400, 150,
+    		buttons.add(new Button(game, this, GameState.wavesmenu, "Play", (game.getWidth() - 450), (game.getHeight() - 320), 400, 150,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	            	if(game.party != null && game.party.getHost().getUsername().equals(game.username)) game.getSocketClient().getPacketManager().partyGoingIntoGamePacket();
     	                game.setGameState(GameState.waves);
@@ -86,6 +87,18 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	                //game.instantiatePlayer();
     	                this.createGUIs();
     	            }, null).setBorderRadius(20));
+    		
+    		buttons.add(new Button(game, this, GameState.wavesmenu, 
+    	    		"Level: " + Integer.toString(Player.getGlobalStats().getLevel()), 
+    	    		100, game.getHeight() - 350, 200, 100, new Color(255, 252, 82), Color.black, () -> {
+    	    			game.setGameState(GameState.levelmenu);
+    	    		}, new Tooltip(game, "Level " + Integer.toString(Player.getGlobalStats().getLevel()), 
+    	    				"{LIGHT_GRAY}XP Needed until Level {YELLOW}" + Integer.toString(Player.getGlobalStats().getLevel()+1) + "{LIGHT_GRAY}: {WHITE}" + (Player.getGlobalStats().getXpToNextLevel() - Player.getGlobalStats().getCurrentXP())
+    	    				 + "{NL}{LIGHT_GRAY}Total XP: " + Player.getGlobalStats().getTotalXP(),
+    	    				this.mousePos.getXint(),
+    	    				this.mousePos.getYint(),
+    	    				Color.DARK_GRAY,
+    	    				Color.white)).setBorderRadius(40).setBorderColor(new Color(192, 190, 78).darker()));
     		
     		buttons.add(new Button(game, this, GameState.wavesmenu, "Create Party", (game.getWidth() - 450), 50, 400, 100,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
@@ -101,10 +114,22 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	            	return game.party == null;
     	            }));
     	        
-    	    buttons.add(new Button(game, this, GameState.wavesmenu, "Back", (game.getWidth() - 200) / 2, 255, 200, 50,
+    	    buttons.add(new Button(game, this, GameState.wavesmenu, "Back", (game.getWidth() - 450), (game.getHeight() - 150), 400, 100,
     	                Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                    game.setGameState(GameState.mainmenu);
     	                    game.getMapManager().map.generateMap();
+    	                }, null).setBorderRadius(20));
+    	    return buttons;
+    	}, null, null);
+    
+    	GUI levelMenu = new GUI(game, this, () -> {
+    		return game.getGameState() == GameState.levelmenu;
+    	}, () -> {
+    		List<Button> buttons = new ArrayList<>();
+    	        
+    	    buttons.add(new Button(game, this, GameState.levelmenu, "Back", (game.getWidth() - 450), (game.getHeight() - 150), 400, 100,
+    	                Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	                    game.setGameState(GameState.wavesmenu);
     	                }, null).setBorderRadius(20));
     	    return buttons;
     	}, null, null);
@@ -244,7 +269,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     		}
                     	}
                     }, 
-                    new Tooltip(game, "Shotgun", "{GREEN}- Shoots Pellets{NL}- Medium-High Damage{NL}{YELLOW}- Area Damage{NL}{RED}- Close Range{NL}{RED}- Medium-Slow Fire Rate{NL}{RED}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    new Tooltip(game, "Shotgun", "{GREEN}- Shoots Pellets{NL}- Medium-High Damage{NL}- Higher Chance for Ammo Mods{NL}{YELLOW}- Area Damage{NL}{RED}- Close Range{NL}{RED}- Medium-Slow Fire Rate{NL}{RED}- Semi-Automatic",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
                     	if(!game.getWavesManager().hasGameStarted()) return null;
                     	List<Supplier<String>> list = new ArrayList<>();
                     	
@@ -461,6 +486,53 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	    15                                      // padding for inner spacing
         	));
         
+        GUI missionMenu = new GUI(game, this, () ->{
+        	return game.getGameState() == GameState.waves && 
+        			game.getWavesManager() != null && 
+        			game.getWavesManager().getNPCManager() != null && 
+        			game.getWavesManager().getNPCManager().getMission() != null &&
+        			game.getWavesManager().getNPCManager().getMission().isOpen();
+        			
+        }, () -> {
+        	List<Button> buttons = new ArrayList<>();
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Start Mission",  50, 100, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	if(game.getPlayer().getMoney() >= 1000 && game.getWavesManager().getMissionManager().canStartMission()) {
+                    		game.getWavesManager().getMissionManager().startMission();
+                    		game.getPlayer().removeMoney(1000);
+                    	}
+                    }, 
+                    new Tooltip(game, "$1,000", "Start a mission once per wave.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasEnough= game.getPlayer().getMoney() >= 1000;
+                    		return hasEnough ? "" : "{RED}(!) Not Enough Money!";
+                    	});
+                    	list.add(() -> {
+                    		boolean canStart = game.getWavesManager().getMissionManager().canStartMission();
+                    		return canStart ? "" : "{RED}(!) You have done a mission this wave!";
+                    	});
+                    	return list;
+                    })));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "X", 0, 0, 50, 50,
+                Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    game.getWavesManager().getNPCManager().getMission().close();
+                }, null));
+        	
+        	return buttons;
+        }, null, null).setPanel(new Panel(
+        	    (int) ((game.getWidth() - 275) / 1.2),  // x position, based on button alignment
+        	    150,                                    // y position, starting above the first button
+        	    350,                                    // width to fit buttons with padding
+        	    800,                                    // height to cover all upgrade buttons
+        	    new Color(50, 50, 50, 180),             // bgColor, semi-transparent dark color
+        	    Color.BLACK,                            // borderColor, black for definition
+        	    20,                                     // borderRadius, for rounded corners
+        	    15                                      // padding for inner spacing
+        	));
+        
         GUI gunsmithMenu = new GUI(game, this, () ->{
         	return game.getGameState() == GameState.waves && 
         			game.getWavesManager() != null && 
@@ -481,7 +553,25 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	
         	if(game.getPlayer().getPrimaryGun().getTier() == Tier.lastTier()) gunUpgradeDesc = " ";
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Gun Tier", 50, 500, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Secondary Class", 50, 175, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	game.getWavesManager().getNPCManager().closeAll();
+                        game.getPlayer().getPlayerUpgrades().unlockSecondClass();
+                    }, 
+                    new Tooltip(game, "Select a Secondary Weapon", " ",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasEnough = game.getPlayer().getMoney() >= 10000;
+                    		return hasEnough ? "{GREEN}- $10,000" : "{RED}- $10,000";
+                    	});
+                    	list.add(() -> {
+                    		boolean hasEnough = game.getPlayer().getGems() >= 10;
+                    		return hasEnough ? "{GREEN}- 10 Gems" : "{RED}- 10 Gems";
+                    	});
+                    	return list;
+                    })));
+
+        	buttons.add(new Button(game, this, GameState.waves, "Gun Tier", 50, 250, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                     	if(game.getPlayer().getPrimaryGun().getTier() != Tier.lastTier()) game.getPlayer().getPlayerUpgrades().upgradeWeapon();
                     }, 
@@ -499,23 +589,60 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     })
                     ));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Secondary Class", 50, 175, 250, 50,
+
+        	buttons.add(new Button(game, this, GameState.waves, "Ammo Mod - Flame", 50, 400, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
-                    	game.getWavesManager().getNPCManager().closeAll();
-                        game.getPlayer().getPlayerUpgrades().unlockSecondClass();
+                    	game.getPlayer().getPlayerUpgrades().purchaseAmmoMod(AmmoMod.Flame);
                     }, 
-                    new Tooltip(game, "Select a Secondary Weapon", " ",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    new Tooltip(game, "5 Gems", "{LIGHT_GRAY}Sets enemies on fire and deals {RED}" + game.getPlayer().getPlayerUpgrades().getDamageMultiplier()*10 + " {LIGHT_GRAY}damage",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
                     	List<Supplier<String>> list = new ArrayList<>();
                     	list.add(() -> {
-                    		boolean hasEnough = game.getPlayer().getMoney() >= 50000;
-                    		return hasEnough ? "{GREEN}- $50,000" : "{RED}- $50,000";
+                    		boolean hasGems = game.getPlayer().getGems() >= 5;
+                    		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
                     	});
                     	list.add(() -> {
-                    		boolean hasEnough = game.getPlayer().getGems() >= 10;
-                    		return hasEnough ? "{GREEN}- 10 Gems" : "{RED}- 10 Gems";
+                    		boolean hasMod = game.getPlayer().getPrimaryGun().getAmmoMod() != AmmoMod.Flame;
+                    		return hasMod ? "" : "{RED}(!) Weapon already has Flame!";
                     	});
                     	return list;
-                    })));
+                    })
+                    ));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Ammo Mod - Electricity", 50, 475, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	game.getPlayer().getPlayerUpgrades().purchaseAmmoMod(AmmoMod.Electric);
+                    }, 
+                    new Tooltip(game, "5 Gems", "{LIGHT_GRAY}Stuns enemies for {RED}" + 5 + " {LIGHT_GRAY}seconds",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasGems = game.getPlayer().getGems() >= 5;
+                    		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
+                    	});
+                    	list.add(() -> {
+                    		boolean hasMod = game.getPlayer().getPrimaryGun().getAmmoMod() != AmmoMod.Electric;
+                    		return hasMod ? "" : "{RED}(!) Weapon already has Electricity!";
+                    	});
+                    	return list;
+                    })
+                    ));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Ammo Mod - Mutant", 50, 550, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	game.getPlayer().getPlayerUpgrades().purchaseAmmoMod(AmmoMod.Mutant);
+                    }, 
+                    new Tooltip(game, "5 Gems", "{LIGHT_GRAY}Splits into 2 bullets on impact. Chance to further split.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasGems = game.getPlayer().getGems() >= 5;
+                    		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
+                    	});
+                    	list.add(() -> {
+                    		boolean hasMod = game.getPlayer().getPrimaryGun().getAmmoMod() != AmmoMod.Mutant;
+                    		return hasMod ? "" : "{RED}(!) Weapon already has Electricity!";
+                    	});
+                    	return list;
+                    })
+                    ));
         	
         	buttons.add(new Button(game, this, GameState.waves, "X", 0, 0, 50, 50,
                 Color.LIGHT_GRAY, Color.BLACK, () -> {
@@ -561,7 +688,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         if(game.getGameState() == GameState.wavesmenu) {
         	
         	
-        	if(game.party != null) {
+        	if(game.party != null && game.party.getHost() != null) {
         		g2d.setFont(game.font.deriveFont(128));
         		
         		g2d.drawString("Party", 50, 50);
@@ -582,14 +709,8 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     		int XpBarSize = 100;
     		int XpBarLength = 4; //length x size = actual length
     		
-    		g2d.setFont(game.font.deriveFont(Font.PLAIN, 64f)); // Derive the font size explicitly as a float
-
-    	    // Measure the width of the money string to center it if needed
-    	    int titleWidth = g2d.getFontMetrics().stringWidth("$" + Integer.toString(Player.getGlobalStats().getLevel()));
-
-    	    g2d.setColor(Color.black);
-    	    g2d.drawString("Level: " + Integer.toString(Player.getGlobalStats().getLevel()), 100, game.getHeight() - 220);
-    		
+    		g2d.setFont(game.font.deriveFont(Font.PLAIN, 64f));
+    	    
     		g2d.setColor(Color.black);
     		g2d.fillRect(margin, game.getHeight()-(margin*2), XpBarLength * XpBarSize, XpBarSize);
     		
@@ -598,6 +719,24 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     				, (int) (game.getHeight() - margin*2 + margin*0.1), 
     				(int) (((XpBarSize * XpBarLength) - (margin*0.2)) * ((double) Player.getGlobalStats().getCurrentXP()/Player.getGlobalStats().getXpToNextLevel())), 
     				(int)(XpBarSize - (XpBarSize * 0.2)));
+        }
+        if(game.getGameState() == GameState.levelmenu) {
+        	
+        	int margin = 100;
+    		int XpBarSize = 100;
+    		int XpBarLength = 4; //length x size = actual length
+    		
+    		g2d.setFont(game.font.deriveFont(Font.PLAIN, 64f)); // Derive the font size explicitly as a float
+    	    
+    		g2d.setColor(Color.black);
+    		g2d.fillRect(margin, game.getHeight()-(margin*2), XpBarLength * XpBarSize, XpBarSize);
+    		
+    		g2d.setColor(Color.green);
+    		g2d.fillRect((int)(margin + (margin*0.1))
+    				, (int) (game.getHeight() - margin*2 + margin*0.1), 
+    				(int) (((XpBarSize * XpBarLength) - (margin*0.2)) * ((double) Player.getGlobalStats().getCurrentXP()/Player.getGlobalStats().getXpToNextLevel())), 
+    				(int)(XpBarSize - (XpBarSize * 0.2)));
+        	
         }
     }
 	
@@ -668,7 +807,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 	                    hoveredButton.hovering = true;
 
 	                    // Play the hover sound only if entering a new button or a different button
-	                    if (!hoverSoundPlayed || lastHoveredButton != button.getText()) {
+	                    if (!hoverSoundPlayed || !lastHoveredButton.equals(button.getText())) {
 	                        game.getAudioPlayer().playSound("UI/button_hover.wav", null);
 	                        hoverSoundPlayed = true;
 	                        lastHoveredButton = button.getText();

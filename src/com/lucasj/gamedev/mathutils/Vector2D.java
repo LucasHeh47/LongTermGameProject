@@ -23,6 +23,10 @@ public class Vector2D {
     public double getX() {
         return x;
     }
+    
+    public int getXint() {
+        return (int) x;
+    }
 
     public void setX(double x) {
         this.x = x;
@@ -34,6 +38,10 @@ public class Vector2D {
 
     public double getY() {
         return y;
+    }
+    
+    public int getYint() {
+        return (int) y;
     }
 
     public void setY(double y) {
@@ -129,5 +137,32 @@ public class Vector2D {
 	public Vector2D divide(Vector2D dividend) {
 		return new Vector2D(this.x / dividend.x, this.y / dividend.y);
 	}
+	
+	public float toDeg() {
+		float angle = (float) Math.toDegrees(Math.atan2(y, x));
+
+		// Ensure the angle is in the range [0, 360)
+		if (angle < 0) {
+		    angle += 360;
+		}
+		return angle;
+	}
+	
+	public Vector2D rotate(float deg) {
+        // Convert degrees to radians
+        float radians = (float) Math.toRadians(deg);
+
+        // Calculate the new components of the rotated vector
+        float cos = (float) Math.cos(radians);
+        float sin = (float) Math.sin(radians);
+
+        // Compute the rotated vector components
+        float newX = (float) (cos * x - sin * y);
+        float newY = (float) (sin * x + cos * y);
+
+        // Return a new vector with the same magnitude as the original
+        float magnitude = (float) this.magnitude();
+        return new Vector2D(newX, newY).normalize().multiply(magnitude);
+    }
 }
 

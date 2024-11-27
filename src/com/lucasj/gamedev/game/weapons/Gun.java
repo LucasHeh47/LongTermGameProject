@@ -22,6 +22,8 @@ public abstract class Gun {
 	protected float bloom = 0;
 	protected int pierce = 0;
 	
+	protected AmmoMod ammoMod = AmmoMod.None;
+	
 	protected Image UIImage;
 	
 	protected String gunFireSound;
@@ -136,6 +138,14 @@ public abstract class Gun {
 
 	public String getGunFireSound() {
 		return gunFireSound;
+	}
+
+	public AmmoMod getAmmoMod() {
+		return ammoMod;
+	}
+
+	public void setAmmoMod(AmmoMod ammoMod) {
+		this.ammoMod = ammoMod;
 	}
 	
 }

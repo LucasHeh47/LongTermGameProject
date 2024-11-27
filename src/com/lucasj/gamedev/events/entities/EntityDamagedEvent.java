@@ -6,13 +6,19 @@ import com.lucasj.gamedev.game.entities.Entity;
 public class EntityDamagedEvent implements GameEvent{
 
 	private float damage;
+	private float realDamage;
 	private Entity attacker;
 	private Entity entity;
 	
 	public EntityDamagedEvent(Entity entity, Entity attacker, float damage) {
 		this.entity = entity;
 		this.attacker = attacker;
-		this.damage = damage;
+		this.realDamage = damage;
+		if(entity.isAlive()) {
+			this.damage = damage;
+		} else {
+			this.damage = entity.getLastHealth();
+		}
 	}
 	
 	@Override
@@ -23,6 +29,10 @@ public class EntityDamagedEvent implements GameEvent{
 
 	public float getDamage() {
 		return damage;
+	}
+	
+	public float getRealDamage() {
+		return realDamage;
 	}
 
 	public void setDamage(float damage) {

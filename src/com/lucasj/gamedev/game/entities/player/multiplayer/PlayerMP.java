@@ -1,5 +1,7 @@
 package com.lucasj.gamedev.game.entities.player.multiplayer;
 
+import java.awt.Color;
+
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
@@ -13,4 +15,6 @@ public interface PlayerMP {
 	public Entity setMaxHealth(float num);
 	public boolean isPickingClass();
 	public void setPickingClass(boolean picking);
+	public Color getColor();
+	public void setColor(Color color);
 }

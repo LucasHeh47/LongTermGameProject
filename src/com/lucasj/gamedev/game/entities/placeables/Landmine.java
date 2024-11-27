@@ -70,7 +70,6 @@ public class Landmine extends Placeable {
 	            // Apply damage and check if the enemy dies
 	            boolean died = enemy.takeDamage(damage);
 	            if (died) {
-	                game.getWavesManager().killedEnemy();
 	                enemy.setKiller(this.player);
 	            }
 	        }

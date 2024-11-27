@@ -11,13 +11,19 @@ public enum Tier {
 	Ethereal(8);
 	
 	private int tier;
+	
+	private static Tier lastTier = Legendary;
 
 	Tier(int i) {
 		this.tier = i;
 	}
 	
 	public static Tier lastTier() {
-		return Ethereal;
+		return lastTier;
+	}
+	
+	public static void setLastTier(Tier tier) {
+		lastTier = tier;
 	}
 	
 	public float getDamageMultiplier() {
@@ -110,6 +116,22 @@ public enum Tier {
 		}
 	}
 	
+	public int getAmmoModMultiplier() {
+		// x/100
+		// Common: 10 un: 12 Rare: 13 Epic: 14 Legendary: 15 Mythic: 15 Godly: 17
+		switch (this) {
+        case Common: return 10;
+        case Uncommon: return 12;
+        case Rare: return 13;
+        case Epic: return 14;
+        case Legendary: return 15;
+        case Mythic: return 15;
+        case Divine: return 17;
+        case Ethereal: return 20;
+        default: return 10;
+		}
+	}
+	
 	public Tier upgrade() {
         switch (this) {
             case Common: return Uncommon;
@@ -135,6 +157,20 @@ public enum Tier {
         case Divine: return 15;
         case Ethereal: return 20;
         default: return 10;
+		}
+	}
+
+	public float FlamePerkMultiplier() {
+		switch (this) {
+        case Common: return 1;
+        case Uncommon: return 1.2f;
+        case Rare: return 1.4f;
+        case Epic: return 1.5f;
+        case Legendary: return 1.6f;
+        case Mythic: return 1.65f;
+        case Divine: return 1.75f;
+        case Ethereal: return 1.8f;
+        default: return 1;
 		}
 	}
 	

@@ -12,6 +12,7 @@ public class NPCManager {
 	private NPC playerUpgradeNPC;
 	private NPC craftingTable;
 	private NPC gunsmith;
+	private NPC mission;
 	
 	public NPCManager(Game game, Player player) {
 		this.game = game;
@@ -26,6 +27,8 @@ public class NPCManager {
 		craftingTable.instantiate();
 		gunsmith = new NPC(game, new Vector2D(1500, 300), 50);
 		gunsmith.instantiate();
+		mission = new NPC(game, new Vector2D(1500, 1000), 50);
+		mission.instantiate();
 	}
 
 	public NPC getPlayerUpgradeNPC() {
@@ -40,13 +43,18 @@ public class NPCManager {
 		this.playerUpgradeNPC.close();
 		this.craftingTable.close();
 		this.gunsmith.close();
+		this.mission.close();
 	}
 	
 	public boolean isAnyOpen() {
-		return this.playerUpgradeNPC.isOpen() || this.craftingTable.isOpen() || gunsmith.isOpen();
+		return this.playerUpgradeNPC.isOpen() || this.craftingTable.isOpen() || gunsmith.isOpen() || this.mission.isOpen();
 	}
 
 	public NPC getGunsmith() {
 		return gunsmith;
+	}
+	
+	public NPC getMission() {
+		return mission;
 	}
 }

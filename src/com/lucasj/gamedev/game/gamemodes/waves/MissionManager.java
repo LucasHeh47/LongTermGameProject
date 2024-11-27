@@ -28,6 +28,8 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 	private Game game;
 	private WavesManager waves;
 	
+	private boolean canStartMission = true;
+	
 	public MissionManager(Game game, WavesManager waves) {
 		this.game = game;
 		this.waves = waves;
@@ -62,6 +64,8 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 	public void startMission() {
 		if(Mission.activeMission != null) return;
 		
+		if(!canStartMission) return;
+		
 		List<Class<? extends Mission>> missions = new ArrayList<>();
 		for (Class<?> nested : Missions.class.getDeclaredClasses()) {
 			if (Modifier.isStatic(nested.getModifiers())) {
@@ -80,7 +84,7 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		        e.printStackTrace(); // Handle reflection-related exceptions
 		    }
 		}
-
+		this.setCanStartMission(false);
 		Debug.log(this, "starting mission");
 	}
 
@@ -139,6 +143,14 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		if(Mission.activeMission.getName().equals("Frenzy")) {
 			((Missions.Frenzy) Mission.activeMission).setDividend();
 		}
+	}
+
+	public boolean canStartMission() {
+		return canStartMission;
+	}
+
+	public void setCanStartMission(boolean canStartMission) {
+		this.canStartMission = canStartMission;
 	}
 
 }

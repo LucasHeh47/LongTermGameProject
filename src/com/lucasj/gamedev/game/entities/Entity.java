@@ -8,6 +8,7 @@ import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.entities.EntityCollisionEventListener;
 import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
+import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.npc.NPC;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.utils.RandomStringGenerator;
@@ -25,6 +26,7 @@ public abstract class Entity implements EntityCollisionEventListener {
 	protected String tag;
 	public int importance;
 	protected boolean isAlive;
+	private float lastHealth;
 	
 	private Entity killer;
 	
@@ -172,6 +174,9 @@ public abstract class Entity implements EntityCollisionEventListener {
 	public abstract void entityDeath();
 	
 	public final void die() {
+		if(this instanceof Enemy) {
+			game.getWavesManager().killedEnemy();
+		}
 		entityDeath();
 		isAlive = false;
 		EntityDeathEvent e = new EntityDeathEvent(this, killer);
@@ -181,6 +186,7 @@ public abstract class Entity implements EntityCollisionEventListener {
 	
 	public boolean takeDamage(float dmg) {
 		if(this instanceof NPC) return false;
+		this.lastHealth = health;
 		this.setHealth(this.getHealth()-dmg);
 		EntityDamagedEvent e = new EntityDamagedEvent(this, this.killer, dmg);
 		game.getEventManager().dispatchEvent(e);
@@ -270,5 +276,9 @@ public abstract class Entity implements EntityCollisionEventListener {
 
 	public void setKiller(Entity killer) {
 		this.killer = killer;
+	}
+	
+	public float getLastHealth() {
+		return this.lastHealth;
 	}
 }

@@ -12,10 +12,10 @@ public class SoundClip extends AudioClip {
 
     private final Vector2D position;
 
-    public SoundClip(Clip clip, Game game, Vector2D position, float sound) {
-        super(clip, game, sound);
+    public SoundClip(Clip clip, Game game, Vector2D position, float sound, String fileName) {
+        super(clip, game, sound, fileName);
         this.position = position;
-
+        
         // Get the MASTER_GAIN control for adjusting volume
         FloatControl control = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 

@@ -30,21 +30,22 @@ public abstract class Mission {
 		
 		Mission.activeMission = this;
 		
-		this.broadcast = new Broadcast(game, name, descriptionToDisplay, new Vector2D(100, 100), length);
+		this.broadcast = new Broadcast(game, name, descriptionToDisplay, new Vector2D(100, 100), new Vector2D(500, 250), length);
 	}
 	
 	public void update(double deltaTime) {
 		
 		descriptionToDisplay = descriptionToDisplay.concat("{NL}{NL}{GREEN}" + rewards);
 		
-		broadcast.setSubText(descriptionToDisplay);
 		if(broadcast != null) {
+			broadcast.setSubText(descriptionToDisplay);
 			broadcast.update(deltaTime);
 		} else {
 			Debug.log(this, "Updated before instance");
 		}
 
 		if(isAccomplished()) {
+			game.getPlayer().addXp(100);
 			reward();
 			Mission.activeMission = null;
 		}

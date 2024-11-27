@@ -1,6 +1,7 @@
 package com.lucasj.gamedev.game.entities.player;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.game.weapons.AmmoMod;
 import com.lucasj.gamedev.game.weapons.Gun;
 
 public class PlayerUpgrades {
@@ -19,7 +20,7 @@ public class PlayerUpgrades {
     // How much you get from each upgrade
     private int maxHealthUpgrade = 10;
     private float healthRegenUpgrade = 0.03f;
-    private float damageMultiplierUpgrade = 0.25f;
+    private float damageMultiplierUpgrade = 0.33f;
     private float movementSpeedMultiplier = 0.05f;
     
     private int regenUpgradeCount = 0;
@@ -100,9 +101,9 @@ public class PlayerUpgrades {
     public boolean unlockSecondClass() {
     	if(player.getSecondaryGun() != null) return false;
     	
-    	if(player.getMoney() >= 50000 && player.getGems() >= 10) {
+    	if(player.getMoney() >= 10000 && player.getGems() >= 10) {
     		player.removeGem(10);
-    		player.removeMoney(50000);
+    		player.removeMoney(10000);
         	player.setPickingSecondary(true);
         	return true;
     	}
@@ -119,6 +120,16 @@ public class PlayerUpgrades {
 			return true;
 		}
 		return false;
+    }
+    
+    public boolean purchaseAmmoMod(AmmoMod mod) {
+    	if(player.getPrimaryGun().getAmmoMod() == mod) return false;
+    	if(game.getPlayer().getGems() >= 5) {
+    		game.getPlayer().getPrimaryGun().setAmmoMod(mod);
+    		game.getPlayer().removeGem(5);
+    		return true;
+    	}
+    	return false;
     }
     
     public int getWeaponUpgradeCost() {

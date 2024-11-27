@@ -41,14 +41,24 @@ public class AudioPlayer {
 	
 	public void playMusic(String fileName) {
 		final Clip clip = getClip(AudioPlayer.SFX_DIRECTORY + fileName);
-		audioClips.add(new MusicClip(clip, game, 1));
+		audioClips.add(new MusicClip(clip, game, 1, fileName));
 	}
 
 	public void playSound(String fileName, Vector2D position) {
 	    String fullPath = AudioPlayer.SFX_DIRECTORY + fileName;
+	    
+	    int count = 0;
+	    for (AudioClip audio : audioClips) {
+	    	if(audio.getFileName().equals(fileName)) {
+	    		count++;
+	    	}
+	    }
+	    if(count >= 3) return;
+	    
 	    final Clip clip = getClip(fullPath);
+	    
 	    if (clip != null) {
-	        audioClips.add(new SoundClip(clip, game, position, 1));
+	        audioClips.add(new SoundClip(clip, game, position, 1, fileName));
 	    } else {
 	        Debug.log(this, "Failed to load sound: " + fullPath);
 	    }
@@ -56,14 +66,24 @@ public class AudioPlayer {
 	
 	public void playMusic(String fileName, float mult) {
 		final Clip clip = getClip(AudioPlayer.SFX_DIRECTORY + fileName);
-		audioClips.add(new MusicClip(clip, game, mult));
+		audioClips.add(new MusicClip(clip, game, mult, fileName));
 	}
 
 	public void playSound(String fileName, Vector2D position, float mult) {
 	    String fullPath = AudioPlayer.SFX_DIRECTORY + fileName;
+	    
+	    int count = 0;
+	    for (AudioClip audio : audioClips) {
+	    	if(audio.getFileName().equals(fileName)) {
+	    		count++;
+	    	}
+	    }
+	    if(count >= 3) return;
+	    
 	    final Clip clip = getClip(fullPath);
+	    
 	    if (clip != null) {
-	        audioClips.add(new SoundClip(clip, game, position, mult));
+	        audioClips.add(new SoundClip(clip, game, position, mult, fileName));
 	    } else {
 	        Debug.log(this, "Failed to load sound: " + fullPath);
 	    }

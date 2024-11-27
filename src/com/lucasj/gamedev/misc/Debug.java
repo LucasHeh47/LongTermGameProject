@@ -9,7 +9,6 @@ public class Debug {
 	}
 	
 	public static void log(Object obj, Object message) {
-		if(obj.getClass() != GameClient.class) return;
 		System.out.println("[" + obj.getClass().getSimpleName().toUpperCase() + "] " + message);
 	}
 	

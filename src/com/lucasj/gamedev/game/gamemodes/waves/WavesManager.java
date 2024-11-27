@@ -46,8 +46,8 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
     private final int BASE_ENEMIES = 7; // default: 7
 
     // Growth rates
-    private final double HEALTH_GROWTH_RATE = 0.15;
-    private final double ENEMY_GROWTH_RATE = 0.12;
+    public static final double HEALTH_GROWTH_RATE = 0.15;
+    public static final double ENEMY_GROWTH_RATE = 0.12;
 	
 	public WavesManager(Game game) {
 		this.game = game;
@@ -79,6 +79,7 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 		this.enemiesSpawnedThisWave = 0;
 		this.enemiesKilledThisWave = 0;
 		this.enemiesThisWave = getEnemyCount(wave);
+		this.missionManager.setCanStartMission(true);
 	}
 	
 	public void update(double deltaTime) {
