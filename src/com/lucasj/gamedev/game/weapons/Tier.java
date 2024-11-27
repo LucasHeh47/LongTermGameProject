@@ -1,5 +1,8 @@
 package com.lucasj.gamedev.game.weapons;
 
+import com.lucasj.gamedev.game.entities.player.Player;
+import com.lucasj.gamedev.misc.Debug;
+
 public enum Tier {
 	Common(1),
 	Uncommon(2),
@@ -11,19 +14,27 @@ public enum Tier {
 	Ethereal(8);
 	
 	private int tier;
-	
-	private static Tier lastTier = Legendary;
 
 	Tier(int i) {
 		this.tier = i;
 	}
 	
-	public static Tier lastTier() {
-		return lastTier;
+	private static Tier getLastTier() {
+		Tier result = Legendary;
+		if(Player.getGlobalStats().getLevel() >= 25) {
+			result = Mythic;
+		}
+		if(Player.getGlobalStats().getLevel() >= 40) {
+			result = Divine;
+		}
+		if(Player.getGlobalStats().getLevel() >= 65) {
+			result = Ethereal;
+		}
+		return result;
 	}
 	
-	public static void setLastTier(Tier tier) {
-		lastTier = tier;
+	public static Tier lastTier() {
+		return getLastTier();
 	}
 	
 	public float getDamageMultiplier() {

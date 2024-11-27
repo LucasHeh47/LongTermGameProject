@@ -20,6 +20,19 @@ public class Label extends UIComponent {
     
     public boolean adjustedPositionWithPanel = false;
     
+    /***
+     * 
+     * @param game
+     * @param menu
+     * @param state
+     * @param text
+     * @param wordWrap
+     * @param centered
+     * @param x
+     * @param y
+     * @param size
+     * @param textColor
+     */
     public Label(Game game, Menus menu, GameState state, String text, int wordWrap, boolean centered, int x, int y, int size, Color textColor) {
         this.text = text;
         this.game = game;

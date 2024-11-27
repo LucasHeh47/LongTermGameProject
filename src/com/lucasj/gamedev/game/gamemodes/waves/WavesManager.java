@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
@@ -194,10 +196,6 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 		}
 
 		g2d.setFont(game.font.deriveFont(58f)); // Derive the font size explicitly as a float
-		
-		// Measure the width of the money string to center it if needed
-	    int titleWidth = g2d.getFontMetrics().stringWidth("$" + Integer.toString(this.wave));
-
 	    g2d.setColor(Color.black);
 	    g2d.drawString("Wave: " + Integer.toString(this.wave), 520, game.getHeight() - 160);
 //	    g2d.drawString("Left: " + Integer.toString(enemiesThisWave - enemiesKilledThisWave), 520, game.getHeight() - 100);

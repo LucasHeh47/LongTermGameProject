@@ -9,7 +9,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Random;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
@@ -150,13 +152,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	public void update(double deltaTime) {
 		if(!game.getWavesManager().hasGameStarted()) return;
 		if(globalStats.addXP((int) xp)) {
-			game.addBroadcast(new Broadcast(game, "Level " + (globalStats.getLevel()-1) + " > " + globalStats.getLevel(), "", new Vector2D(-300, game.getHeight()/4),
-					new Vector2D(300, 75), 2)
-					.setBackgroundColor(new Color(255, 252, 82))
-					.setBorderColor(new Color(192, 190, 78))
-					.setTextColor(Color.DARK_GRAY.darker()));
-
-	        
 	        LevelUpEvent e = new LevelUpEvent(globalStats.getLevel());
 	        game.getEventManager().dispatchEvent(e);
 		}
@@ -450,7 +445,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		g2d.setFont(game.font.deriveFont(Font.PLAIN, 64f)); // Derive the font size explicitly as a float
 
 	    g2d.setColor(Color.black);
-	    g2d.drawString("$" + Integer.toString(this.money), game.getWidth()/2 - 200, game.getHeight() - 220);
+	    g2d.drawString("$" + NumberFormat.getInstance(Locale.US).format(this.money), game.getWidth()/2 - 200, game.getHeight() - 220);
 
 	    g2d.setColor(Color.black);
 	    g2d.drawImage(SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Currency/Gem.png", new Vector2D(0, 0), new Vector2D(32, 32)), 
@@ -835,7 +830,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	public void addXp(float num) {
-		this.xp += num;
+		this.xp += num*100;
 	}
 
 	@Override

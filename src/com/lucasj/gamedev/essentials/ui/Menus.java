@@ -5,8 +5,10 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
@@ -34,6 +36,8 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     private Tooltip activeTooltip = null;
     
     private Vector2D mousePos;
+    
+    private LevelUpShopCategories lvlUpShop = LevelUpShopCategories.None;
     
     private boolean hoverSoundPlayed = false;
     private String lastHoveredButton = null;
@@ -93,8 +97,8 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	    		100, game.getHeight() - 350, 200, 100, new Color(255, 252, 82), Color.black, () -> {
     	    			game.setGameState(GameState.levelmenu);
     	    		}, new Tooltip(game, "Level " + Integer.toString(Player.getGlobalStats().getLevel()), 
-    	    				"{LIGHT_GRAY}XP Needed until Level {YELLOW}" + Integer.toString(Player.getGlobalStats().getLevel()+1) + "{LIGHT_GRAY}: {WHITE}" + (Player.getGlobalStats().getXpToNextLevel() - Player.getGlobalStats().getCurrentXP())
-    	    				 + "{NL}{LIGHT_GRAY}Total XP: " + Player.getGlobalStats().getTotalXP(),
+    	    				"{LIGHT_GRAY}XP Needed until Level {YELLOW}" + Integer.toString(Player.getGlobalStats().getLevel()+1) + "{LIGHT_GRAY}: {WHITE}" + NumberFormat.getInstance(Locale.US).format((Player.getGlobalStats().getXpToNextLevel() - Player.getGlobalStats().getCurrentXP()))
+    	    				 + "{NL}{LIGHT_GRAY}Total XP: " + NumberFormat.getInstance(Locale.US).format(Player.getGlobalStats().getTotalXP()),
     	    				this.mousePos.getXint(),
     	    				this.mousePos.getYint(),
     	    				Color.DARK_GRAY,
@@ -132,7 +136,60 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	                    game.setGameState(GameState.wavesmenu);
     	                }, null).setBorderRadius(20));
     	    return buttons;
-    	}, null, null);
+    	}, null, () -> {
+    		List<Label> labels = new ArrayList<>();
+    		labels.add(new Label(game, this, GameState.levelmenu, "Tokens: " + Player.getGlobalStats().getLevelTokens(),
+    				50, false, game.getWidth()-300, 50, 64, Color.black));
+    		return labels;
+    	});
+
+    	GUI levelMenuShopTabs = new GUI(game, this, () -> {
+    		return game.getGameState() == GameState.levelmenu;
+    	}, () -> {
+    		List<Button> buttons = new ArrayList<>();
+    	        
+    	    buttons.add(new Button(game, this, GameState.levelmenu, "Ammo Mods", 20, 20, 360, 75,
+    	                Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	                    this.lvlUpShop = LevelUpShopCategories.AmmoMods;
+    	                }, null).setBorderRadius(20));
+    	    buttons.add(new Button(game, this, GameState.levelmenu, "Classes", 20, 100, 360, 75,
+	                Color.LIGHT_GRAY, Color.BLACK, () -> {
+	                    this.lvlUpShop = LevelUpShopCategories.Classes;
+	                }, null).setBorderRadius(20));
+    	    buttons.add(new Button(game, this, GameState.levelmenu, "Perks", 20, 180, 360, 75,
+	                Color.LIGHT_GRAY, Color.BLACK, () -> {
+	                    this.lvlUpShop = LevelUpShopCategories.Perks;
+	                }, null).setBorderRadius(20));
+    	    return buttons;
+    	}, null, null).setPanel(new Panel(50, 75, 400, game.getHeight()-350, Color.DARK_GRAY, Color.black, 20, 20));
+
+    	GUI levelMenuShop = new GUI(game, this, () -> {
+    		return game.getGameState() == GameState.levelmenu;
+    	}, () -> {
+    		List<Button> buttons = new ArrayList<>();
+    	        
+    	    buttons.add(new Button(game, this, GameState.levelmenu, "Flame", 20, 20, 360, 75,
+    	                Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	                    this.lvlUpShop = LevelUpShopCategories.AmmoMods;
+    	                }, null).setBorderRadius(20).setDecidingFactor(() -> {
+    	                	return this.lvlUpShop == LevelUpShopCategories.AmmoMods;
+    	                }));
+	        
+		    buttons.add(new Button(game, this, GameState.levelmenu, "Electric", 400, 20, 360, 75,
+		                Color.LIGHT_GRAY, Color.BLACK, () -> {
+		                    this.lvlUpShop = LevelUpShopCategories.AmmoMods;
+		                }, null).setBorderRadius(20).setDecidingFactor(() -> {
+		                	return this.lvlUpShop == LevelUpShopCategories.AmmoMods;
+		                }));
+	        
+		    buttons.add(new Button(game, this, GameState.levelmenu, "Mutant", 780, 20, 360, 75,
+		                Color.LIGHT_GRAY, Color.BLACK, () -> {
+		                    this.lvlUpShop = LevelUpShopCategories.AmmoMods;
+		                }, null).setBorderRadius(20).setDecidingFactor(() -> {
+		                	return this.lvlUpShop == LevelUpShopCategories.AmmoMods;
+		                }));
+    	    return buttons;
+    	}, null, null).setPanel(new Panel(500, 75, (int) (game.getWidth()/1.5), game.getHeight()-350, Color.DARK_GRAY, Color.black, 20, 20));
         
         GUI pausedGame = new GUI(game, this, () -> {
         	return game.getGameState() == GameState.waves && game.isPaused() && !game.settingsOpen;
@@ -583,7 +640,8 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     	});
                     	list.add(() -> {
                     		boolean weaponMaxedOut = game.getPlayer().getPrimaryGun().getTier() == Tier.lastTier();
-                    		return weaponMaxedOut ?  "{RED} Weapon Maxed Out!" : "{WHITE}Current Tier: {" + game.getPlayer().getPrimaryGun().getTier().toString().toUpperCase() + "} " + game.getPlayer().getPrimaryGun().getTier().toString();
+                    		if(weaponMaxedOut && Tier.lastTier() == Tier.Ethereal) return "";
+                    		return weaponMaxedOut ?  "{RED}(!) Unlock more tiers by levelling up!" : "{WHITE}Current Tier: {" + game.getPlayer().getPrimaryGun().getTier().toString().toUpperCase() + "} " + game.getPlayer().getPrimaryGun().getTier().toString();
                     	});
                     	return list;
                     })

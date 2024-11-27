@@ -3,6 +3,7 @@ package com.lucasj.gamedev.game.entities.player;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.game.weapons.AmmoMod;
 import com.lucasj.gamedev.game.weapons.Gun;
+import com.lucasj.gamedev.game.weapons.Tier;
 
 public class PlayerUpgrades {
     
@@ -145,10 +146,13 @@ public class PlayerUpgrades {
     	case Epic:
     		return 10000;
     	case Legendary:
+    		if(Tier.lastTier() == Tier.Legendary) return -1;
     		return 17500;
     	case Mythic:
+    		if(Tier.lastTier() == Tier.Mythic) return -1;
     		return 25000;
     	case Divine:
+    		if(Tier.lastTier() == Tier.Divine) return -1;
     		return 50000;
     	case Ethereal:
     		return -1;

@@ -10,6 +10,17 @@ public class Panel {
     private int borderRadius;
     private int padding;
 
+    /***
+     * 
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param bgColor
+     * @param borderColor
+     * @param borderRadius
+     * @param padding
+     */
     public Panel(int x, int y, int width, int height, Color bgColor, Color borderColor, int borderRadius, int padding) {
         this.x = x;
         this.y = y;
