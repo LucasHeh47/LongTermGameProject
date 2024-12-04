@@ -1,0 +1,13 @@
+if need to keep cursor centered:
+
+
+	    	    Robot robot;
+				try {
+					robot = new Robot();
+		    	    Point centerScreen = new Point(Toolkit.getDefaultToolkit().getScreenSize().width / 2,
+	                        Toolkit.getDefaultToolkit().getScreenSize().height / 2);
+		    	    robot.mouseMove(centerScreen.x, centerScreen.y);
+				} catch (AWTException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}

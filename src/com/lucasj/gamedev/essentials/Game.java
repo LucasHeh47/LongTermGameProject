@@ -28,6 +28,7 @@ import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.enemy.Skeleton;
 import com.lucasj.gamedev.game.entities.enemy.Slime;
 import com.lucasj.gamedev.game.entities.enemy.Zombie;
+import com.lucasj.gamedev.game.entities.particles.Particle;
 import com.lucasj.gamedev.game.entities.particles.ParticleGenerator;
 import com.lucasj.gamedev.game.entities.placeables.Landmine;
 import com.lucasj.gamedev.game.entities.player.Player;
@@ -37,7 +38,6 @@ import com.lucasj.gamedev.game.multiplayer.GameClient;
 import com.lucasj.gamedev.game.multiplayer.Party;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.os.GameData;
 import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.settings.SettingsManager;
@@ -52,6 +52,7 @@ public class Game {
     public ConcurrentList<Entity> instantiatedEntities;
     public ConcurrentList<Collectible> instantiatedCollectibles;
     public ConcurrentList<ParticleGenerator> instantiatedParticles;
+    public ConcurrentList<Particle> instantiatedSingleParticles;
     public List<Entity> instantiatedEntitiesOnScreen;
     private Quadtree<Entity> quadtree;
     private Quadtree<Entity> entityQuadtree;
@@ -141,18 +142,18 @@ public class Game {
         instantiatedEntities = new ConcurrentList<Entity>();
         instantiatedEntitiesOnScreen = new ArrayList<Entity>();
         instantiatedParticles = new ConcurrentList<ParticleGenerator>();
+        instantiatedSingleParticles = new ConcurrentList<Particle>();
         entityQuadtree = new Quadtree<>(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
         quadtree = new Quadtree<>(0, new Vector2D(0, 0), new Vector2D(screen.width, screen.height));
         
         instantiatedCollectibles = new ConcurrentList<Collectible>();
+        collisionSurfaces = new ConcurrentList<>();
         
         this.gUtils = gUtils;
         
         mapm = new MapManager(this);
         wavesManager = new WavesManager(this);
         
-        collisionSurfaces = new ConcurrentList<>();
-        CollisionSurface surface = new CollisionSurface(this, new Vector2D(300, 400), 100, 500, Color.DARK_GRAY);
     	
     	this.instantiatePlayer();
         
@@ -208,6 +209,9 @@ public class Game {
 			}
 		}
         
+		for (Particle particle : this.instantiatedSingleParticles) {
+			particle.update(deltaTime);
+		}
         
     	this.updateLists();
     }
@@ -227,6 +231,7 @@ public class Game {
     	this.instantiatedEntities.update();
     	this.instantiatedCollectibles.update();
     	this.instantiatedParticles.update();
+    	this.instantiatedSingleParticles.update();
     }
     
     public void instantiatePlayer() {
@@ -257,10 +262,6 @@ public class Game {
     	Graphics2D g2d = (Graphics2D) g;
     	mapm.render(g2d);
     	if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
-    		
-    		this.getCollisionSurfaces().forEach(surf -> {
-            	surf.render(g);
-            });
         	this.instantiatedCollectibles.forEach(collectible -> {
             	collectible.render(g);
             });
@@ -279,6 +280,11 @@ public class Game {
         	
         	this.getWavesManager().render(g);
         }
+    	
+		for (Particle particle : this.instantiatedSingleParticles) {
+			particle.render((Graphics2D) g);
+		}
+    	
     	menus.render(g2d);
  
     	if(broadcastQueue != null && broadcastQueue.peek() != null) broadcastQueue.peek().render(g2d);

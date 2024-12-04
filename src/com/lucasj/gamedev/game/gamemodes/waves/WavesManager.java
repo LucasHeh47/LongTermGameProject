@@ -4,11 +4,12 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.text.NumberFormat;
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDamagedEventListener;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
@@ -18,6 +19,7 @@ import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.npc.NPCManager;
 import com.lucasj.gamedev.game.gamemodes.waves.missions.Mission;
 import com.lucasj.gamedev.mathutils.Vector2D;
+import com.lucasj.gamedev.physics.CollisionSurface;
 
 public class WavesManager implements EntityDamagedEventListener, EntityDeathEventListener {
 
@@ -54,7 +56,7 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 	public WavesManager(Game game) {
 		this.game = game;
 		this.missionManager = new MissionManager(game, this);
-		spawnRate = 0.1f;
+		spawnRate = 0.5f;
 		game.getEventManager().addListener(this, EntityDamagedEvent.class);
 		game.getEventManager().addListener(this, EntityDeathEvent.class);
 	}
@@ -65,10 +67,10 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 		this.enemiesKilledThisWave = 0;
 		this.enemiesSpawnedThisWave = 0;
 		Mission.activeMission = null;
-		enemySpawner = new WavesEnemySpawner(game);
 		game.instantiatedEntities.clear();
 		game.instantiatedEntitiesOnScreen.clear();
 		game.instantiatedCollectibles.clear();
+		enemySpawner = new WavesEnemySpawner(game);
 		npcManager = new NPCManager(game, game.getPlayer());
 		npcManager.instantiateNPCs();
 	}
@@ -154,9 +156,30 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 		        game.getSocketClient().getPacketManager().syncEnemiesPacket();
 		        
 	        } else if (game.party == null) {
-		    	enemySpawner.spawnEnemy(getEnemyHealth(wave), new Vector2D(rand.nextInt(game.getWidth()), rand.nextInt(game.getHeight())));
-		        enemiesSpawnedThisWave++;
-		        lastSpawn = System.currentTimeMillis();
+	        	
+	        	List<Vector2D> spawnpoints = game.getMapManager().getSpawnpoints();
+	        	
+	        	Vector2D playerPosition = game.getPlayer().getPosition();
+	        	int minDistance = 750;
+	        	int maxDistance = 2000;
+
+	        	// Filter spawnpoints based on the distance criteria
+	        	List<Vector2D> validSpawnpoints = new ArrayList<>();
+	        	for (Vector2D spawnpoint : spawnpoints) {
+	        	    double distance = spawnpoint.distanceTo(playerPosition);
+	        	    if (distance >= minDistance && distance <= maxDistance) {
+	        	        validSpawnpoints.add(spawnpoint);
+	        	    }
+	        	}
+	        	if (!validSpawnpoints.isEmpty()) {
+	        	    // Select a random spawnpoint from the valid list
+	        	    Vector2D selectedSpawnpoint = validSpawnpoints.get(rand.nextInt(validSpawnpoints.size()));
+
+	        	    // Spawn the enemy at the selected spawnpoint
+	        	    enemySpawner.spawnEnemy(getEnemyHealth(wave), selectedSpawnpoint);
+	        	    enemiesSpawnedThisWave++;
+	        	    lastSpawn = System.currentTimeMillis();
+	        	}
 	        }
 	    }
 
@@ -164,6 +187,7 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 	    if (enemiesKilledThisWave >= enemiesThisWave) {
 	        WaveEndEvent e = new WaveEndEvent(wave);
 	        this.game.getEventManager().dispatchEvent(e);
+	        game.getPlayer().getWavesStats().wave = wave;
 	        newWave();
 	    }
 	    
@@ -173,7 +197,7 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 	public void render(Graphics g) {
 		Graphics2D g2d = (Graphics2D)g;
 		
-		if(!this.hasGameStarted && !game.getPlayer().isPickingClass()) {
+		if(game.party != null && !this.hasGameStarted && !game.getPlayer().isPickingClass()) {
 			g2d.setColor(Color.black);
 			g2d.setFont(game.font.deriveFont(256));
 			int titleWidth = g2d.getFontMetrics().stringWidth("Waiting For Party...");
@@ -206,6 +230,17 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 //	    g2d.drawString("Active: " + enemyCount, 520, game.getHeight() - 40);
 	    
 	    this.missionManager.render(g2d);
+	}
+	
+	public void endGame() {
+		this.hasGameStarted = false;
+		game.instantiatedEntities.clear();
+		game.instantiatedEntitiesOnScreen.clear();
+		game.instantiatedCollectibles.clear();
+		game.setGameState(GameState.wavesGameOver);
+		wave = 0;
+		this.enemiesKilledThisWave = 0;
+		this.enemiesSpawnedThisWave = 0;
 	}
 	
 	public void killedEnemy() {
@@ -256,6 +291,10 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 		if(e.getEntity() instanceof Enemy) {
 			game.getSocketClient().getPacketManager().playerKilledEnemyPacket((Enemy) e.getEntity());
 		}
+	}
+	
+	public void despawn() {
+		this.enemiesSpawnedThisWave--;
 	}
 
 }

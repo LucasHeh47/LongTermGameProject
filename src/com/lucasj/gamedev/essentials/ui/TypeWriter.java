@@ -1,6 +1,6 @@
 package com.lucasj.gamedev.essentials.ui;
 
-import com.lucasj.gamedev.misc.Debug;
+import com.lucasj.gamedev.essentials.Game;
 
 public class TypeWriter {
 	
@@ -13,8 +13,10 @@ public class TypeWriter {
 	private int index;
 	
 	private boolean done;
+	private Game game;
 	
-	public TypeWriter(String stringToType, float speed) {
+	public TypeWriter(Game game, String stringToType, float speed) {
+		this.game = game;
 		finalString = "";
 		this.stringToType = stringToType;
 		this.typingSpeed = speed;
@@ -43,6 +45,7 @@ public class TypeWriter {
                 finalString = finalString.concat(Character.toString(currentChar));
                 index++;
             }
+        	game.getAudioPlayer().playSound("UI/type.wav", null);
 
             lastType = System.currentTimeMillis(); // Reset typing timer
         }

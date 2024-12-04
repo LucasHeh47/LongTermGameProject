@@ -15,7 +15,7 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 public class Slime extends Enemy {
 	
 	public static void initializeClass(){
-		registerEnemyType(Slime.class, new EnemyWavesData(8, 4));
+		registerEnemyType(Slime.class, new EnemyWavesData(11, 4));
     }
 	private BufferedImage[][] walking;
 	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right

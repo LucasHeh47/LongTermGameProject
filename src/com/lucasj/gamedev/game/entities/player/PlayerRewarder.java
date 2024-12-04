@@ -34,6 +34,8 @@ public class PlayerRewarder implements EntityDeathEventListener, CoinCollectedEv
 	
 	@Override
 	public void onWaveEnd(WaveEndEvent e) {
+        if(e.getWaveEnded() == 0) return;
+        game.getPlayer().addMoney(100 + ((int) (e.getWaveEnded() * 1.5)));
 		if(e.getWaveEnded() % 5 == 0) game.getPlayer().addGem(2);
 		else game.getPlayer().addGem(1);
 	}

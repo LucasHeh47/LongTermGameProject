@@ -9,6 +9,7 @@ public class Panel {
     private Color bgColor, borderColor;
     private int borderRadius;
     private int padding;
+    private int opacity = -1;
 
     /***
      * 
@@ -35,7 +36,11 @@ public class Panel {
     // Render method for the panel
     public void render(Graphics2D g2d) {
         // Draw the background with rounded corners if borderRadius > 0
-        g2d.setColor(bgColor);
+    	if(opacity > 0) {
+    		g2d.setColor(new Color(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), opacity));
+    	} else {
+    		g2d.setColor(bgColor);
+    	}
         if (borderRadius > 0) {
             g2d.fill(new RoundRectangle2D.Float(x, y, width, height, borderRadius, borderRadius));
         } else {
@@ -95,5 +100,10 @@ public class Panel {
 
 	public int getX() {
 		return x;
+	}
+
+	public Panel setOpacity(int opacity) {
+		this.opacity = opacity;
+		return this;
 	}
 }

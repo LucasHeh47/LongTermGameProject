@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
+import com.lucasj.gamedev.mathutils.Vector2D;
 
 public class Slider extends UIComponent implements MouseClickEventListener, MouseMotionEventListener {
     private int x, y, width, height;
@@ -21,7 +22,24 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
     private Tooltip tooltip;
     private int mouseX, mouseY;
     private Supplier<Boolean> decidingFactor;
+    private boolean adjustedPositionWithPanel = false;
+    
+    private Color textColor;
+    private Color textShadowColor;
+    private Vector2D textShadowDistance;
 
+    /***
+     * 
+     * @param game
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param minValue
+     * @param maxValue
+     * @param setting
+     * @param userDefined
+     */
     public Slider(Game game, int x, int y, int width, int height, int minValue, int maxValue, String setting, boolean userDefined) {
     	this.game = game;
         this.x = x;
@@ -40,6 +58,18 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
         
     }
     
+    /***
+     * 
+     * @param game
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @param minValue
+     * @param maxValue
+     * @param initialValue
+     * @param userDefined
+     */
     public Slider(Game game, int x, int y, int width, int height, int minValue, int maxValue, int initialValue, boolean userDefined) {
     	this.game = game;
         this.x = x;
@@ -61,12 +91,33 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
     	if (setting != null) {
             // Replace underscores with spaces and capitalize each word
             String displayText = capitalizeWords(setting.replace("_", " "));
+
+            int textX = x + width / 2 - g.getFontMetrics().stringWidth(displayText) / 2;
+            int textY = y - 10;
             
+            if(this.textShadowColor != null) {
+            	g.setColor(this.textShadowColor);
+            	int shadowTextX = 0;
+            	int shadowTextY = 0;
+                if(this.textShadowDistance == null) {
+                	shadowTextX= textX + 3;
+                	shadowTextY = textY + 3;
+                } else {
+	                textX +=textShadowDistance.getXint();
+	                textY += textShadowDistance.getYint();
+                }
+                g.drawString(displayText, shadowTextX, shadowTextY);
+            	
+            }
             // Set the font color and draw the string
-            g.setColor(Color.BLACK);
-            int textX = x + width / 2 - g.getFontMetrics().stringWidth(displayText) / 2; // Center the text
-            int textY = y - 10; // Position above the slider
+            if(this.textColor != null) {
+            	g.setColor(textColor);
+            } else {
+            	g.setColor(Color.BLACK);
+            }
+            
             g.drawString(displayText, textX, textY);
+            
         }
     	
         // Draw the slider track
@@ -153,6 +204,18 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
         game.getAudioPlayer().playSound("UI/button_hover.wav", null);
         game.getSettings().setIntSetting(setting, currentValue);
     }
+    
+    public void updatePositionWithPanel(Panel panel) {
+        int newX = panel.getX() + x;
+        int newY = panel.getY() + y;
+        this.setPosition(newX, newY);
+        this.adjustedPositionWithPanel = true;
+    }
+    
+    public void setPosition(int x, int y) {
+    	this.x = x;
+    	this.y = y;
+    }
 
 	@Override
 	public void onMouseMoved(MouseEvent e) {
@@ -181,6 +244,21 @@ public class Slider extends UIComponent implements MouseClickEventListener, Mous
 
 	public void setDecidingFactor(Supplier<Boolean> decidingFactor) {
 		this.decidingFactor = decidingFactor;
+	}
+	
+	public Slider setTextColor(Color col) {
+		this.textColor = col;
+		return this;
+	}
+
+	public Slider setTextShadowColor(Color col) {
+		this.textShadowColor = col;
+		return this;
+	}
+	
+	public Slider setTextShadowDistance(Vector2D dist) {
+		this.textShadowDistance = dist;
+		return this;
 	}
 
 }

@@ -70,6 +70,11 @@ public class GUI {
 		for (Button button : buttons.get()) {
 			button.updatePositionWithPanel(panel);
 		}
+		if (sliders != null) {
+			for (Slider slider : sliders) {
+				slider.updatePositionWithPanel(panel);
+			}
+		}
 		return this;
 	}
 

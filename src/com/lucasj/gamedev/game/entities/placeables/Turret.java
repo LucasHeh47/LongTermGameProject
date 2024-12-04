@@ -13,6 +13,7 @@ import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
+import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 
@@ -47,6 +48,7 @@ public class Turret extends Placeable {
 	}
 	
 	public void update(double deltaTime) {
+		super.update(deltaTime);
 		this.takeDamage((float) ((System.currentTimeMillis() - lastTick) / 1000.0));
         lastTick = System.currentTimeMillis();
         if (nearestEnemy == null || !nearestEnemy.isAlive()) {
@@ -83,11 +85,12 @@ public class Turret extends Placeable {
 
 	    // Add the bloom to the normalized direction
 	    Vector2D bloomedVelocity = new Vector2D(vel.getX() + bloomX, vel.getY() + bloomY).normalize();
-	    Vector2D bulletVelocity = bloomedVelocity.multiply(bulletSpeed * 25 * deltaTime);
+	    Vector2D bulletVelocity = bloomedVelocity.multiply(bulletSpeed * 25);
 
-	    int damage = (int) (10 * player.getPlayerUpgrades().getDamageMultiplier());
+	    int damage = (int) (10 * player.getPlayerUpgrades().getDamageMultiplier() * 1 + (game.getWavesManager().getWave() * WavesManager.HEALTH_GROWTH_RATE));
 	    game.getAudioPlayer().playSound("GunFire/Turret/turret_shoot.wav", this.position);
 	    Bullet b = new Bullet(game, this, this.position.add(new Vector2D(this.getSize()).divide(3)), bulletVelocity, 10, null, 2, damage);
+	    b.setTag(tag);
 	    b.instantiate();
 	    
 	    PlayerAttackEvent e = new PlayerAttackEvent(b, damage);

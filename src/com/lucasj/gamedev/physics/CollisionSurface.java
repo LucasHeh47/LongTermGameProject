@@ -20,7 +20,6 @@ public class CollisionSurface {
         this.width = width;
         this.height = height;
         this.game = game;
-        this.color = color;
         this.screenPosition = game.getCamera().screenToWorldPosition(position);
         game.getCollisionSurfaces().add(this);
     }
@@ -28,14 +27,6 @@ public class CollisionSurface {
     public void update(double deltaTime) {
 		Vector2D cameraPos = game.getCamera().getWorldPosition();
 		screenPosition = this.position.subtract(cameraPos);
-    }
-    
-    public void render(Graphics g) {
-    	g.setColor(color);
-    	g.fillRect((int)this.getScreenPosition().getX(),
-    			(int)this.getScreenPosition().getY(),
-    			this.getWidth(),
-    			this.getHeight());
     }
     
     public Vector2D getScreenPosition() {
@@ -50,7 +41,15 @@ public class CollisionSurface {
         return width;
     }
     
+    public void setWidth(int width) {
+    	this.width = width;
+    }
+    
     public int getHeight() {
         return height;
+    }
+    
+    public void setHeight(int height) {
+    	this.height = height;
     }
 }

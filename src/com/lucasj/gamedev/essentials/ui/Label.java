@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
+import com.lucasj.gamedev.mathutils.Vector2D;
 
 public class Label extends UIComponent {
 	private String text;
@@ -17,6 +18,9 @@ public class Label extends UIComponent {
     private Supplier<Boolean> decidingFactor;
     private boolean centered;
     private Game game;
+    
+    private Vector2D shadowDistance;
+    private Color shadowColor;
     
     public boolean adjustedPositionWithPanel = false;
     
@@ -65,7 +69,7 @@ public class Label extends UIComponent {
 
         // Measure font metrics
         FontMetrics metrics = g.getFontMetrics();
-        int panelWidth = game.getWidth(); // Assume panel width is game's width
+        int panelWidth = game.getWidth();
         int lineHeight = metrics.getHeight();
 
         for (int i = 0; i < words.length; i++) {
@@ -81,6 +85,15 @@ public class Label extends UIComponent {
                 int textWidth = metrics.stringWidth(lineText);
                 int drawX = centered ? x - textWidth / 2 : x;
 
+                // Draw the shadow if it exists
+                if(shadowColor != null) {
+                	g.setColor(shadowColor);
+
+                    g.drawString(lineText, drawX+shadowDistance.getXint(), currentY+shadowDistance.getYint());
+                	
+                	g.setColor(textColor);
+                }
+                
                 // Draw the current line
                 g.drawString(lineText, drawX, currentY);
 
@@ -90,6 +103,12 @@ public class Label extends UIComponent {
                 lineCount++;
             }
         }
+    }
+    
+    public Label setShadow(Color color, Vector2D distance) {
+    	this.shadowColor = color;
+    	this.shadowDistance = distance;
+    	return this;
     }
 
 }

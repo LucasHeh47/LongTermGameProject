@@ -21,18 +21,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.GameColors;
 import com.lucasj.gamedev.essentials.ui.GameColors.colors;
 import com.lucasj.gamedev.events.entities.EntityAggroEvent;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.Breadcrumb;
 import com.lucasj.gamedev.game.entities.collectibles.Coin;
+import com.lucasj.gamedev.game.entities.particles.Particle;
 import com.lucasj.gamedev.game.entities.particles.ParticleGenerator;
 import com.lucasj.gamedev.game.entities.particles.ParticleShape;
 import com.lucasj.gamedev.game.entities.placeables.data.LandmineEnemyDistanceData;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
+import com.lucasj.gamedev.game.levels.LevelUpPerk;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
@@ -165,6 +168,8 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	private static final Map<Class<? extends Enemy>, EnemyWavesData> wavesDataMap = new HashMap<>();
 	private static List<Class<? extends Enemy>> enemyTypes = new ArrayList<>();
 
+	private float respawnTimer;
+	
 	private boolean isPathToPlayerClear = false;
 	protected float damageMultiplier = 1.0f;
 	private int aggroRange = 750;
@@ -262,7 +267,11 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 				fireTick++;
 				if(fireTick == 10) {
 					fireTick = 1;
-					this.takeDamage((float) ((10 * game.getPlayer().getPlayerUpgrades().getDamageMultiplier()) * (game.getWavesManager().getWave() * WavesManager.HEALTH_GROWTH_RATE)));
+					float damage = (float) ((10 * game.getPlayer().getPlayerUpgrades().getDamageMultiplier()) * (game.getWavesManager().getWave() * WavesManager.HEALTH_GROWTH_RATE));
+					if(Player.getGlobalStats().hasPerkUnlocked(LevelUpPerk.ExtraFlameWeaponTier)) {
+						damage *= game.getPlayer().getPrimaryGun().getTier().FlamePerkMultiplier();
+					}
+					this.takeDamage(damage);
 				}
 				this.lastFireTick = System.currentTimeMillis();
 			}
@@ -299,6 +308,17 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	
 	public boolean takeDamage(float damage) {
 		this.lastTimeHurt = System.currentTimeMillis();
+		
+		game.getPlayer().getWavesStats().damageDealt += damage;
+		
+		Random rand = new Random();
+		Color col = SpriteTools.createColorGradient(GameColors.colors.LIGHT_RED.getValue(), GameColors.colors.RED.getValue().darker(), 5).get(rand.nextInt(0, 4));
+
+		Particle particle = new Particle(game, null, new Vector2D(rand.nextInt(-100, 100), rand.nextInt(-100, 0)).normalize(),
+				0.5f, col, ParticleShape.Text, 12).setText(Integer.toString((int)damage));
+		
+		Particle.spawnSingleParticle(particle, this.screenPosition.add(new Vector2D(size/2)));
+		
 		return super.takeDamage(damage);
 	}
 	
@@ -308,6 +328,15 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	 */
 	public void update(double deltaTime) {
 		if(!isAlive) return;
+		
+		if(this.aggrod == null) {
+			this.respawnTimer += deltaTime;
+			if(this.respawnTimer >= 7.5) {
+				this.respawn();
+				this.respawnTimer = 0;
+			}
+		}
+		
 		super.update(deltaTime);
 		Vector2D oldPos = this.position.copy();
 		if(game.instantiatedEntitiesOnScreen.contains(this)) {
@@ -357,6 +386,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		Random rand = new Random();
 		Coin coin = new Coin(game, this.position, rand.nextInt(cashDrop[0], cashDrop[1]));
 		game.getPlayer().addXp(this.maxHealth/10);
+		game.getPlayer().getWavesStats().enemiesKilled++;
 	}
 	
 	public void attackPlayer() {
@@ -382,7 +412,7 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	    Vector2D alignmentForce = calculateAlignmentForce(deltaTime, nearbyEntities);
 	    Vector2D cohesionForce = calculateCohesionForce(deltaTime, nearbyEntities);
 
-	    double separationWeight = 100000.0; // Increased further to ensure enemies push apart
+	    double separationWeight = 100000.0;
 	    double alignmentWeight = 100.0;
 	    double cohesionWeight = 50;
 
@@ -393,9 +423,68 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	    Vector2D avoidanceForce = applyObstacleAvoidance();
 	    flockingForce = flockingForce.add(avoidanceForce).limit(MAX_FORCE);
 
+	    // Check if the enemy is on a collision surface
+	    Vector2D escapeDirection = checkIfOnCollisionSurface(deltaTime);
+	    if (escapeDirection != null) {
+	        flockingForce = flockingForce.add(escapeDirection.multiply(500)); // Weight for escaping the collision surface
+	    }
+
 	    this.velocity = this.velocity.add(flockingForce.multiply(deltaTime)).limit(movementSpeed);
 	    this.position = this.position.add(this.velocity.multiply(deltaTime));
 	}
+
+	/**
+	 * Checks if the entity is on a collision surface and calculates the direction to escape it.
+	 */
+	private Vector2D checkIfOnCollisionSurface(double deltaTime) {
+	    Vector2D newPosition = this.position.add(this.velocity.multiply(deltaTime));
+	    double entityWidth = this.size;
+	    double entityHeight = this.size;
+
+	    for (CollisionSurface surface : game.getCollisionSurfaces().toList()) {
+	        Vector2D surfacePos = surface.getPosition();
+	        int surfaceWidth = surface.getWidth();
+	        int surfaceHeight = surface.getHeight();
+
+	        // Check if the entity is on the collision surface
+	        if (newPosition.getX() < surfacePos.getX() + surfaceWidth &&
+	            newPosition.getX() + entityWidth > surfacePos.getX() &&
+	            newPosition.getY() < surfacePos.getY() + surfaceHeight &&
+	            newPosition.getY() + entityHeight > surfacePos.getY()) {
+	            
+	            // Calculate the nearest escape direction
+	            Vector2D escapePoint = calculateEscapePoint(newPosition, surfacePos, surfaceWidth, surfaceHeight, entityWidth, entityHeight);
+	            return escapePoint.subtract(this.position).normalize();
+	        }
+	    }
+
+	    return null; // Not on a collision surface
+	}
+
+	/**
+	 * Calculates the nearest position away from the collision surface.
+	 */
+	private Vector2D calculateEscapePoint(Vector2D entityPos, Vector2D surfacePos, int surfaceWidth, int surfaceHeight, double entityWidth, double entityHeight) {
+	    double escapeX = entityPos.getX();
+	    double escapeY = entityPos.getY();
+
+	    // Find the nearest X escape point
+	    if (entityPos.getX() + entityWidth / 2 < surfacePos.getX()) {
+	        escapeX = surfacePos.getX() - entityWidth; // Move left
+	    } else if (entityPos.getX() + entityWidth / 2 > surfacePos.getX() + surfaceWidth) {
+	        escapeX = surfacePos.getX() + surfaceWidth; // Move right
+	    }
+
+	    // Find the nearest Y escape point
+	    if (entityPos.getY() + entityHeight / 2 < surfacePos.getY()) {
+	        escapeY = surfacePos.getY() - entityHeight; // Move up
+	    } else if (entityPos.getY() + entityHeight / 2 > surfacePos.getY() + surfaceHeight) {
+	        escapeY = surfacePos.getY() + surfaceHeight; // Move down
+	    }
+
+	    return new Vector2D(escapeX, escapeY);
+	}
+
 
 
 	private Vector2D calculateSeparationForce(double deltaTime, List<Entity> nearbyEntities) {
@@ -502,8 +591,12 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	    isPathToPlayerClear = isLineOfSightClear(this.position, playerPosition);
 
 	    if (distanceToPlayer <= aggroRange && isPathToPlayerClear) {
-	        moveToPosition(playerPosition, deltaTime);
-	        return;
+	        this.aggrod = game.getPlayer();
+	        
+	        if(distanceToPlayer <= aggroRange/2) {
+		    	moveToPosition(playerPosition, deltaTime);
+		        return;
+	        }
 	    }
 
 	    Queue<Breadcrumb> breadcrumbsQueue = game.getPlayer().getCrumbManager().activeBreadcrumbs;
@@ -538,7 +631,6 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	private void performWanderOrIdleBehavior(double deltaTime) {
 	    // Add logic for wandering or waiting if no breadcrumb is available
 	    // For example, enemies could wander randomly or look for alternate routes
-	    this.velocity = this.velocity.multiply(0.8); // Slow down if idle
 	    
 	    // Reset aggrod when the enemy is idle
 	    this.aggrod = null;
@@ -608,9 +700,9 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	// Calculate the score of a breadcrumb based on its attributes
 	private double calculateBreadcrumbScore(Breadcrumb breadcrumb, double distanceToPlayer, double distanceToEnemy, int index, int totalBreadcrumbs) {
 	    // We use the index to determine age: the older the crumb (closer to 0), the higher the penalty
-	    double playerDistanceWeight = 1.0;
+	    double playerDistanceWeight = 4.0;
 	    double enemyDistanceWeight = 0.5; // Lower priority to enemy distance to encourage moving toward the player
-	    double ageWeight = 1.5; // Weight for older breadcrumbs
+	    double ageWeight = 5.5; // Weight for older breadcrumbs
 
 	    // Normalize the age as a value between 0 and 1 (0 is the oldest, 1 is the newest)
 	    double ageFactor = (double) index / totalBreadcrumbs;
@@ -884,6 +976,31 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	public void zap() {
 		this.isZapped = true;
 		this.zapStart = System.currentTimeMillis();
+	}
+	
+	public void respawn() {
+		Random rand = new Random();
+
+		List<Vector2D> spawnpoints = game.getMapManager().getSpawnpoints();
+    	
+    	Vector2D playerPosition = game.getPlayer().getPosition();
+    	int minDistance = 750;
+    	int maxDistance = 2000;
+
+    	// Filter spawnpoints based on the distance criteria
+    	List<Vector2D> validSpawnpoints = new ArrayList<>();
+    	for (Vector2D spawnpoint : spawnpoints) {
+    	    double distance = spawnpoint.distanceTo(playerPosition);
+    	    if (distance >= minDistance && distance <= maxDistance) {
+    	        validSpawnpoints.add(spawnpoint);
+    	    }
+    	}
+    	if (!validSpawnpoints.isEmpty()) {
+    	    // Select a random spawnpoint from the valid list
+    	    Vector2D selectedSpawnpoint = validSpawnpoints.get(rand.nextInt(validSpawnpoints.size()));
+
+    		this.position = selectedSpawnpoint;
+    	}
 	}
 
 }

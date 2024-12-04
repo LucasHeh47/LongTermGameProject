@@ -1,22 +1,32 @@
 package com.lucasj.gamedev.essentials.ui;
 
+import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Robot;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
 
+import javax.swing.SwingUtilities;
+
+import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.PlayerPlaceableManager;
+import com.lucasj.gamedev.game.entities.player.PlayerWavesStats;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.weapons.AmmoMod;
 import com.lucasj.gamedev.game.weapons.Tier;
@@ -38,6 +48,8 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     private Vector2D mousePos;
     
     private LevelUpShopCategories lvlUpShop = LevelUpShopCategories.None;
+    
+    private Point previousMousePosition = new Point();
     
     private boolean hoverSoundPlayed = false;
     private String lastHoveredButton = null;
@@ -62,20 +74,25 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     		return game.getGameState() == GameState.mainmenu && game.settingsOpen == false;
     	}, () -> {
     		List<Button> buttons = new ArrayList<>();
-    		buttons.add(new Button(game, this, GameState.mainmenu, "Play Waves", (game.getWidth() - 225) / 2, 200, 250, 50,
+    		buttons.add(new Button(game, this, GameState.mainmenu, "Play Waves", (game.getWidth() - game.getWidth()/3) / 2 - 200, game.getHeight()/2 - 125, 400, 50,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                game.setGameState(GameState.wavesmenu);
-    	                game.getMapManager().map.generateMap();
+    	                try {
+    	        			game.getMapManager().map.generateMap(SpriteTools.assetDirectory + "Art/Maps/" + game.getMapManager().selectedMap + ".png");
+    	        		} catch (IOException e) {
+    	        			e.printStackTrace();
+    	        		}
     	                game.getWavesManager().setHasGameStarted(false);
     	            }, null).setBorderRadius(20));
     		
-    	    buttons.add(new Button(game, this, GameState.mainmenu, "Settings", (game.getWidth() - 225) / 2, 300, 250, 50,
+    	    buttons.add(new Button(game, this, GameState.mainmenu, "Settings", (game.getWidth() - game.getWidth()/3) / 2 - 200, game.getHeight()/2 - 25, 400, 50,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> game.settingsOpen = true, null).setBorderRadius(20));
 
-    	    buttons.add(new Button(game, this, GameState.mainmenu, "Exit", (game.getWidth() - 225) / 2, 400, 250, 50,
+    	    buttons.add(new Button(game, this, GameState.mainmenu, "Exit", (game.getWidth() - game.getWidth()/3) / 2 - 200, game.getHeight()/2 + 75, 400, 50,
     	            Color.LIGHT_GRAY, Color.BLACK, () -> System.exit(0), null).setBorderRadius(20));
     	    return buttons;
-    	}, null, null);
+    	}, null, null).setPanel(new Panel(game.getWidth()/6, 50, (int) (game.getWidth() - game.getWidth()/3), 380, 
+        		Color.GRAY.darker(), Color.black, 20, 20));
     	
     
     	GUI wavesMenu = new GUI(game, this, () -> {
@@ -87,7 +104,11 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	            Color.LIGHT_GRAY, Color.BLACK, () -> {
     	            	if(game.party != null && game.party.getHost().getUsername().equals(game.username)) game.getSocketClient().getPacketManager().partyGoingIntoGamePacket();
     	                game.setGameState(GameState.waves);
-    	                game.getMapManager().map.generateMap();
+    	                try {
+    	        			game.getMapManager().map.generateMap(SpriteTools.assetDirectory + "Art/Maps/Map1.png");
+    	        		} catch (IOException e) {
+    	        			e.printStackTrace();
+    	        		}
     	                //game.instantiatePlayer();
     	                this.createGUIs();
     	            }, null).setBorderRadius(20));
@@ -98,7 +119,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	    			game.setGameState(GameState.levelmenu);
     	    		}, new Tooltip(game, "Level " + Integer.toString(Player.getGlobalStats().getLevel()), 
     	    				"{LIGHT_GRAY}XP Needed until Level {YELLOW}" + Integer.toString(Player.getGlobalStats().getLevel()+1) + "{LIGHT_GRAY}: {WHITE}" + NumberFormat.getInstance(Locale.US).format((Player.getGlobalStats().getXpToNextLevel() - Player.getGlobalStats().getCurrentXP()))
-    	    				 + "{NL}{LIGHT_GRAY}Total XP: " + NumberFormat.getInstance(Locale.US).format(Player.getGlobalStats().getTotalXP()),
+    	    				 + "{NL}{LIGHT_GRAY}Total XP: {WHITE}" + NumberFormat.getInstance(Locale.US).format(Player.getGlobalStats().getTotalXP()),
     	    				this.mousePos.getXint(),
     	    				this.mousePos.getYint(),
     	    				Color.DARK_GRAY,
@@ -121,7 +142,11 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	    buttons.add(new Button(game, this, GameState.wavesmenu, "Back", (game.getWidth() - 450), (game.getHeight() - 150), 400, 100,
     	                Color.LIGHT_GRAY, Color.BLACK, () -> {
     	                    game.setGameState(GameState.mainmenu);
-    	                    game.getMapManager().map.generateMap();
+        	                try {
+        	        			game.getMapManager().map.generateMap(SpriteTools.assetDirectory + "Art/Maps/Map1.png");
+        	        		} catch (IOException e) {
+        	        			e.printStackTrace();
+        	        		}
     	                }, null).setBorderRadius(20));
     	    return buttons;
     	}, null, null);
@@ -196,31 +221,37 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Back to Menu", (game.getWidth() - 225) / 2, 400, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Back to Menu", 125, 400, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         game.getPlayer().die();
     	                this.createGUIs();
                         game.setPaused(false);
                     }, null));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Settings", (game.getWidth() - 225) / 2, 300, 250, 50,
+        	buttons.add(new Button(game, this, GameState.waves, "Settings", 125, 300, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         game.settingsOpen = true;
                     }, null));
             
-            buttons.add(new Button(game, this, GameState.waves, "Resume Game", (game.getWidth() - 225) / 2, 200, 250, 50,
+            buttons.add(new Button(game, this, GameState.waves, "Resume Game", 125, 200, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         game.setPaused(false);
                     }, null));
             return buttons;
-        }, null, null);
+        }, null, () -> {
+        	List<Label> labels = new ArrayList<>();
+        	
+        	labels.add(new Label(game, this, GameState.waves, "Paused", 20, true, (game.getWidth())/2, 200, 48, Color.white).setShadow(Color.black, new Vector2D(5)));
+        	
+        	return labels;
+        }).setPanel(new Panel((game.getWidth()-500)/2, 100, 500, 1000, new Color(20, 20, 20, 150), Color.black, 20, 20));
         
         
         GUI settingsMenu = new GUI(game, this, () -> {
         	return (game.getGameState() == GameState.waves || game.getGameState() == GameState.mainmenu) && game.settingsOpen;
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
-        	buttons.add(new Button(game, this, null, "Back", (game.getWidth() - 225) / 2, 400, 250, 50,
+        	buttons.add(new Button(game, this, null, "Back", 125, 900, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                     	game.settingsOpen = false;
                     }, null));
@@ -228,13 +259,32 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         }, () -> {
         	List<Slider> sliders = new ArrayList<>();
         	
-        	sliders.add(new Slider(game, (game.getWidth() - 600), (int) (game.getHeight() - (game.getHeight() * (0.75))), 200, 25, 0, 100, "master_volume", true));
-        	sliders.add(new Slider(game, (game.getWidth() - 600), (int) (game.getHeight() - (game.getHeight() * (0.5))), 200, 25, 0, 100, "sound_volume", true));
-        	sliders.add(new Slider(game, (game.getWidth() - 600), (int) (game.getHeight() - (game.getHeight() * (0.25))), 200, 25, 0, 100, "music_volume", true));
+        	sliders.add(new Slider(game, 150, 100, 200, 25, 0, 100, "master_volume", true)
+        			.setTextColor(GameColors.colors.WHITE.getValue())
+        			.setTextShadowColor(Color.DARK_GRAY.darker()));
+        	sliders.add(new Slider(game, 150, 225, 200, 25, 0, 100, "sound_volume", true)
+        			.setTextColor(GameColors.colors.WHITE.getValue())
+        			.setTextShadowColor(Color.DARK_GRAY.darker()));
+        	sliders.add(new Slider(game, 150, 350, 200, 25, 0, 100, "music_volume", true)
+        			.setTextColor(GameColors.colors.WHITE.getValue())
+        			.setTextShadowColor(Color.DARK_GRAY.darker()));
+        	sliders.add(new Slider(game, 150, 450, 200, 25, 0, 165, "fpslimit", true)
+        			.setTextColor(GameColors.colors.WHITE.getValue())
+        			.setTextShadowColor(Color.DARK_GRAY.darker()));
         	
         	return sliders;
-        }, null);
+        }, null).setPanel(new Panel((game.getWidth()-500)/2, 100, 500, 1000, new Color(20, 20, 20, 150), Color.black, 20, 20));
         
+        GUI gameOverMenu = new GUI(game, this, () -> {
+        	return (game.getGameState() == GameState.wavesGameOver);
+        }, () -> {
+        	List<Button> buttons = new ArrayList<>();
+        	buttons.add(new Button(game, this, null, "Back", game.getWidth() / 2 - 125, game.getHeight()-200, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                    	game.setGameState(GameState.wavesmenu);
+                    }, null));
+        	return buttons;
+        }, null, null);
         
         if(game.getGameState() != GameState.waves) return;
         
@@ -245,7 +295,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Commando", this.game.getWidth()/3 - 250, this.game.getHeight()/5 + (this.game.getHeight()/4), 500, 150,
+        	buttons.add(new Button(game, this, GameState.waves, "Commando", 250, 750, 500, 150,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                     	if(game.getWavesManager().hasGameStarted()) {
                     		if(!(game.getPlayer().getPrimaryGun() instanceof AssaultRifle)) {
@@ -276,7 +326,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     	return list;
                     })).setBorderRadius(10));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Vanguard", this.game.getWidth()/3 - 250, this.game.getHeight()/3 + (this.game.getHeight()/4), 500, 150,
+        	buttons.add(new Button(game, this, GameState.waves, "Vanguard", 1250, 500, 500, 150,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                     	if(game.getWavesManager().hasGameStarted()) {
                     		if(!(game.getPlayer().getPrimaryGun() instanceof SMG)) {
@@ -307,7 +357,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     	return list;
                     })).setBorderRadius(10));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Breaker", (int) (this.game.getWidth()/1.5) - 250, this.game.getHeight()/3 + (this.game.getHeight()/4), 500, 150,
+        	buttons.add(new Button(game, this, GameState.waves, "Breaker", (int) 1250, 750, 500, 150,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                     	if(game.getWavesManager().hasGameStarted()) {
                     		if(!(game.getPlayer().getPrimaryGun() instanceof Shotgun)) {
@@ -338,7 +388,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
                     	return list;
                     })).setBorderRadius(10));
         	
-        	buttons.add(new Button(game, this, GameState.waves, "Rifleman", (int) (this.game.getWidth()/1.5) - 250, this.game.getHeight()/5 + (this.game.getHeight()/4), 500, 150,
+        	buttons.add(new Button(game, this, GameState.waves, "Rifleman", (int) 250, 500, 500, 150,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                     	if(game.getWavesManager().hasGameStarted()) {
                     		if(!(game.getPlayer().getPrimaryGun() instanceof Sniper)) {
@@ -372,9 +422,10 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	return buttons;
         }, null, () -> {
         	List<Label> labels = new ArrayList<>();
-        	labels.add(new Label(game, this, GameState.waves, "Select Your Class", 10, true, this.game.getWidth()/2, this.game.getHeight()/6, 156, Color.black));
+        	labels.add(new Label(game, this, GameState.waves, "Select Your Class", 10, true, this.game.getWidth()/2, this.game.getHeight()/6, 156, GameColors.colors.WHITE.getValue()).setShadow(Color.DARK_GRAY, new Vector2D(5)));
         	return labels;
-        });
+        }).setPanel(new Panel(game.getWidth()/8, 50, (int) (game.getWidth() - game.getWidth()/4), (int) (game.getHeight()/1.4), 
+        		Color.black.brighter(), Color.black, 20, 20).setOpacity(140));
             
         // NPCS ------------
         
@@ -738,10 +789,14 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
             activeTooltip.render(g2d);
         }
         
-        if(game.getGameState() == GameState.mainmenu) {
-        	String title = "Game";
+        if(game.getGameState() == GameState.mainmenu && !game.settingsOpen) {
+        	String title = "Shooter Dude";
+            g2d.setFont(game.font.deriveFont(256f));
             int titleWidth = g2d.getFontMetrics().stringWidth(title);
-            g2d.drawString(title, (game.getWidth() - titleWidth) / 2, 100);
+            g.setColor(Color.DARK_GRAY.darker());
+            g2d.drawString(title, (game.getWidth() - titleWidth)/2, 300);
+            g2d.setColor(new Color(240, 240, 240));
+            g2d.drawString(title, (game.getWidth() - titleWidth)/2 + 7, 300 + 7);
         }
         if(game.getGameState() == GameState.wavesmenu) {
         	
@@ -796,6 +851,59 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     				(int)(XpBarSize - (XpBarSize * 0.2)));
         	
         }
+        if(game.getGameState() == GameState.wavesGameOver) {
+        	
+        	PlayerWavesStats stats = game.getPlayer().getWavesStats();
+
+            // Draw "Game Over" title
+            g2d.setFont(game.font.deriveFont(128f));
+            int titleWidth = g2d.getFontMetrics().stringWidth("Game Over");
+            g2d.drawString("Game Over", (game.getWidth() - titleWidth) / 2, 150);
+
+            // Draw Wave information
+            g2d.setFont(game.font.deriveFont(64f));
+            String waveText = "Wave " + stats.wave;
+            int waveWidth = g2d.getFontMetrics().stringWidth(waveText);
+            int center = (game.getWidth() - waveWidth) / 2;
+            g2d.setColor(Color.black);
+            g2d.drawString(waveText, center, 350);
+
+            // Draw all stats dynamically
+            g2d.setFont(game.font.deriveFont(48f));
+            int yPosition = 450; // Starting y position for stats
+            int lineHeight = 60; // Space between lines
+
+            Field[] fields = PlayerWavesStats.class.getDeclaredFields();
+            for (Field field : fields) {
+                try {
+                    field.setAccessible(true); // Allow access to private fields if any
+                    Object value = field.get(stats); // Get the value of the field
+
+                    String fieldName = field.getName();
+                    fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+
+	                StringBuilder formattedName = new StringBuilder();
+	                for (int i = 0; i < fieldName.length(); i++) {
+	                    char c = fieldName.charAt(i);
+	                    if (Character.isUpperCase(c)) {
+	                        formattedName.append(" ");
+	                    }
+	                    formattedName.append(c);
+	                }
+	                String finalName = formattedName.substring(0, 1).toUpperCase() + formattedName.substring(1).toLowerCase();
+                    String fieldValue = value.toString();
+                    String statText = formattedName + ": " + fieldValue;
+
+                    g2d.setColor(Color.black);
+                    int statWidth = g2d.getFontMetrics().stringWidth(statText);
+                    g2d.drawString(statText, (game.getWidth() - statWidth) / 2, yPosition);
+
+                    yPosition += lineHeight; // Move to the next line
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 	
 	@Override
@@ -836,12 +944,52 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 
 	@Override
 	public void onMouseDragged(MouseEvent e) {
-		// TODO Auto-generated method stub
+		
+		if(game.getGameState().is(GameState.mainmenu, GameState.wavesmenu)) {
+			if (SwingUtilities.isRightMouseButton(e)) { // Check for right mouse button
+	            Point currentMousePosition = e.getPoint();
+	            
+	            // Calculate the difference between the current and previous mouse positions
+	            int dx = currentMousePosition.x - previousMousePosition.x;
+	            int dy = currentMousePosition.y - previousMousePosition.y;
+
+	            // Adjust the camera's world position based on the mouse drag
+	            Vector2D currentWorldPosition = game.getCamera().getWorldPosition();
+	            
+	            Vector2D viewport = game.getCamera().getViewport();
+	            Vector2D newCamPos = (currentWorldPosition.subtract(new Vector2D(dx, dy)));
+	    	    Vector2D worldSize = game.getMapManager().getWorldSize();
+	            
+	            boolean cameraAtLeft = newCamPos.getX() <= 0;
+	    	    boolean cameraAtTop = newCamPos.getY() <= 0;
+	    	    boolean cameraAtRight = newCamPos.getX() + viewport.getX() >= worldSize.getX();
+	    	    boolean cameraAtBottom = newCamPos.getY() + viewport.getY() >= worldSize.getY();
+
+	    	    // Update the camera's position while respecting the boundaries
+	    	    double newCamX = currentWorldPosition.getX();
+	    	    double newCamY = currentWorldPosition.getY();
+
+	    	    // If the camera is not bounded on the left or right, update its X position
+	    	    if (!cameraAtLeft && !cameraAtRight) {
+	    	        newCamX = newCamPos.getX();
+	    	    }
+
+	    	    // If the camera is not bounded on the top or bottom, update its Y position
+	    	    if (!cameraAtTop && !cameraAtBottom) {
+	    	        newCamY = newCamPos.getY();
+	    	    }
+	    	    game.getCamera().setWorldPosition(new Vector2D(newCamX, newCamY));
+	            
+	            // Update the previous mouse position
+	            previousMousePosition = currentMousePosition;
+	        }
+		}
 		
 	}
 
 	@Override
 	public void onMouseMoved(MouseEvent e) {
+        previousMousePosition = e.getPoint();
 	    int mouseX = e.getX();
 	    int mouseY = e.getY();
 	    boolean currentlyOverButton = false;

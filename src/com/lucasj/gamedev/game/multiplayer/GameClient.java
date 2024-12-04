@@ -15,6 +15,7 @@ import java.util.List;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
 import com.lucasj.gamedev.essentials.ui.broadcast.Broadcast;
@@ -209,8 +210,11 @@ public class GameClient extends Thread {
             // Example: Update player positions
             
             if(data.has("ingame")) {
-                game.setGameState(GameState.waves);
-                game.getMapManager().map.generateMap();
+                game.setGameState(GameState.waves);try {
+        			game.getMapManager().map.generateMap(SpriteTools.assetDirectory + "Art/Maps/" + game.getMapManager().selectedMap + ".png");
+        		} catch (IOException e) {
+        			e.printStackTrace();
+        		}
                 //game.instantiatePlayer();
                 game.getMenus().createGUIs();
             }

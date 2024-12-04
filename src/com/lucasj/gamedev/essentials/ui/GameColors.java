@@ -15,7 +15,7 @@ public class GameColors {
 		GREEN(Color.GREEN),
 		YELLOW(Color.YELLOW),
 		GOLD(new Color(235, 182, 49)),
-		WHITE(Color.WHITE),
+		WHITE(new Color(240, 240, 240)),
 		BLACK(Color.BLACK),
 		PINK(Color.PINK),
 		PURPLE(Color.MAGENTA),

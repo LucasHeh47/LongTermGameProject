@@ -39,6 +39,40 @@ public class Missions {
 
 	}
 	
+	public static class Terminator extends Mission {
+		
+		private int baseAmount = 5;
+		
+		private int amountKilled = 0;
+	
+		public Terminator(Game game) {
+			super(game, "Terminator", "{LIGHT_GRAY}Kill {RED}{X} {LIGHT_GRAY}Enemies with a {YELLOW}Turret {LIGHT_GRAY}In " + 30 + " Seconds.", "$4000", 30);
+		}
+		
+		public void update(double deltaTime) {
+			this.descriptionToDisplay = this.description.replace("{X}", String.valueOf(baseAmount - amountKilled));
+
+			super.update(deltaTime);
+		}
+	
+		public boolean isAccomplished() {
+			
+			if(amountKilled >= baseAmount) return true;
+			
+			return false;
+		}
+	
+		@Override
+		public void reward() {
+			game.getPlayer().addMoney(4000);
+		}
+		
+		public void increment() {
+			this.amountKilled += 1;
+		}
+
+	}
+	
 	public static class Businessman extends Mission {
 		
 		private int baseAmount = 10;

@@ -147,12 +147,12 @@ public class ParticleGenerator extends Entity {
         Vector2D velocity = new Vector2D(vx, vy).normalize().multiply(speed);
 		Color col = color.get(rand.nextInt(0, color.size()-1));
 		if(image.size() == 0) {
-			particles.add(new Particle(this, velocity, particleTime, col, shape, size).setDisplayStatic());
+			particles.add(new Particle(game, this, velocity, particleTime, col, shape, size).setDisplayStatic());
 		} else {
 			
 			Image img = image.get(rand.nextInt(0, image.size()-1));
 			
-			particles.add(new Particle(this, velocity, particleTime, col, img, size).setDisplayStatic());
+			particles.add(new Particle(game, this, velocity, particleTime, col, img, size).setDisplayStatic());
 		}
 	}
 	
@@ -173,6 +173,62 @@ public class ParticleGenerator extends Entity {
 	public ParticleGenerator setStaticParticles() {
 		staticParticles = true;
 		return this;
+	}
+	
+	public Game getGame() {
+		return game;
+	}
+
+	public ConcurrentList<Particle> getParticles() {
+		return particles;
+	}
+
+	public float getTimeAlive() {
+		return timeAlive;
+	}
+
+	public long getSpawnTime() {
+		return spawnTime;
+	}
+
+	public float getParticleTime() {
+		return particleTime;
+	}
+
+	public float getAngle() {
+		return angle;
+	}
+
+	public float getAngleWidth() {
+		return angleWidth;
+	}
+
+	public float getSpeed() {
+		return speed;
+	}
+
+	public long getLastSpawn() {
+		return lastSpawn;
+	}
+
+	public float getDensity() {
+		return density;
+	}
+
+	public List<Color> getColor() {
+		return color;
+	}
+
+	public ParticleShape getShape() {
+		return shape;
+	}
+
+	public List<Image> getImage() {
+		return image;
+	}
+
+	public boolean isStaticParticles() {
+		return staticParticles;
 	}
 
 }

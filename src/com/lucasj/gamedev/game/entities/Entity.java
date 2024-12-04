@@ -28,6 +28,7 @@ public abstract class Entity implements EntityCollisionEventListener {
 	protected boolean isAlive;
 	private float lastHealth;
 	
+	private Entity projectileKilledBy = null;
 	private Entity killer;
 	
 	protected Game game;
@@ -179,7 +180,7 @@ public abstract class Entity implements EntityCollisionEventListener {
 		}
 		entityDeath();
 		isAlive = false;
-		EntityDeathEvent e = new EntityDeathEvent(this, killer);
+		EntityDeathEvent e = new EntityDeathEvent(this, killer, projectileKilledBy);
 		game.getEventManager().dispatchEvent(e);
 		game.instantiatedEntities.remove(this);
 	}
@@ -280,5 +281,13 @@ public abstract class Entity implements EntityCollisionEventListener {
 	
 	public float getLastHealth() {
 		return this.lastHealth;
+	}
+
+	public Entity getProjectileKilledBy() {
+		return projectileKilledBy;
+	}
+
+	public void setProjectileKilledBy(Entity projectileKilledBy) {
+		this.projectileKilledBy = projectileKilledBy;
 	}
 }

@@ -4,6 +4,8 @@ import com.lucasj.gamedev.essentials.Window;
 import com.lucasj.gamedev.settings.SettingsManager;
 
 public class Main {
+	
+	public static String version = "0.1-Alpha";
 
 	public static void main(String[] args) {
 		SettingsManager settings = new SettingsManager();

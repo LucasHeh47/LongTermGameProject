@@ -14,7 +14,7 @@ public class PlayerStats implements Serializable{
 	private int totalEnemiesKilled;
 	private int totalDamageDealt;
 	
-	private List<LevelUpPerk> perksUnlocked;
+	private List<LevelUpPerk> perksUnlocked = new ArrayList<>();
 	
 	private int currentXP;
 	private int xpToNextLevel = 200;
@@ -75,6 +75,7 @@ public class PlayerStats implements Serializable{
             this.xpMultiplier = loadedStats.xpMultiplier;
             this.levelTokens = loadedStats.levelTokens;
             this.perksUnlocked = loadedStats.perksUnlocked;
+            if(this.perksUnlocked == null) this.perksUnlocked = new ArrayList<>();
             System.out.println("Player stats loaded successfully.");
         }
     }
@@ -117,6 +118,18 @@ public class PlayerStats implements Serializable{
 
 	public void setLevelTokens(int levelTokens) {
 		this.levelTokens = levelTokens;
+	}
+
+	public List<LevelUpPerk> getPerksUnlocked() {
+		return perksUnlocked;
+	}
+
+	public void setPerksUnlocked(List<LevelUpPerk> perksUnlocked) {
+		this.perksUnlocked = perksUnlocked;
+	}
+	
+	public boolean hasPerkUnlocked(LevelUpPerk perk) {
+		return this.perksUnlocked.contains(perk);
 	}
 
 }

@@ -15,7 +15,7 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 public class Skeleton extends Enemy {
 	
 	public static void initializeClass(){
-		registerEnemyType(Skeleton.class, new EnemyWavesData(3, 10));
+		registerEnemyType(Skeleton.class, new EnemyWavesData(6, 10));
     }
 	private BufferedImage[][] walking;
 	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right

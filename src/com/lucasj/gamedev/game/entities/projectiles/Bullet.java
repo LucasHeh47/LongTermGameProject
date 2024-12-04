@@ -18,6 +18,7 @@ import com.lucasj.gamedev.game.entities.particles.ParticleShape;
 import com.lucasj.gamedev.game.entities.placeables.Turret;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.projectiles.data.BulletMutantModData;
+import com.lucasj.gamedev.game.levels.LevelUpPerk;
 import com.lucasj.gamedev.game.weapons.AmmoMod;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
@@ -84,7 +85,10 @@ public class Bullet extends Projectile {
 			died = e.getCollider().takeDamage(this.getDamage());
 		}
 		if(e.getCollider() instanceof Enemy) {
-
+	        if(this.getSender() instanceof Player) {
+	        	((Player) this.getSender()).getWavesStats().shotLanded();
+	        }
+			((Enemy) e.getCollider()).setProjectileKilledBy(this);
 			float dx = (float) (velocity.getX() - this.getScreenPosition().getX());
 			float dy = (float) (velocity.getY() - this.getScreenPosition().getY());
 	
@@ -123,42 +127,17 @@ public class Bullet extends Projectile {
 		if (!this.entitiesPierced.contains(e.getCollider())) {
 		    if (pierce <= 1) {
 		        die();
-
+		        
 				if(ammoMod == AmmoMod.Mutant) {
-					Player p;
-					if(this.getSender() instanceof Player) {
-						p = (Player) this.getSender();
-					} else {
-						return;
-					}
-					if(!this.getMutantData().willSplit()) return;
-					int damage = this.getDamage();
-					Bullet b = new Bullet(game, this.getSender(), this.position, 
-							this.velocity.rotate(45), 
-							size, 
-							null, 
-				            (int) this.timeToLive, 
-							damage);
-					b.setPierce(this.initialPierce/2);
-					b.entitiesPierced.add(e.getEntity());
-					b.setAmmoMod(AmmoMod.Mutant);
-					b.getMutantData().setGeneration(this.getMutantData().getGeneration()+1);
-					b.instantiate();
-					Bullet b2 = new Bullet(game, this, this.position, 
-							this.velocity.rotate(-45), 
-							size, 
-							null, 
-				            (int) this.timeToLive, 
-							damage);
-					b2.setPierce(this.initialPierce/2);
-					b.entitiesPierced.add(e.getEntity());  
-					b2.setAmmoMod(AmmoMod.Mutant);
-					b2.getMutantData().setGeneration(this.getMutantData().getGeneration()+1);
-					b2.instantiate();
+					this.mutantSplit(e);
 				}
 		    } else {
 		        pierce -= 1;
-		        Debug.log(this, pierce);
+		        if(this.getSender() instanceof Player) {
+		        	if(Player.getGlobalStats().hasPerkUnlocked(LevelUpPerk.SniperMutantModOnPierce)) {
+		        		this.mutantSplit(e);
+		        	}
+		        }
 		        if (!died) {
 		            this.entitiesPierced.add(e.getCollider());
 		        }
@@ -168,6 +147,40 @@ public class Bullet extends Projectile {
 		if(this.playerAttackEvent != null) {
 			this.playerAttackEvent.registerHit();
 		}
+	}
+	
+	private void mutantSplit(EntityCollisionEvent e) {
+		Player p;
+		if(this.getSender() instanceof Player) {
+			p = (Player) this.getSender();
+		} else {
+			return;
+		}
+		if(!this.getMutantData().willSplit()) return;
+		int damage = this.getDamage();
+		if(Player.getGlobalStats().hasPerkUnlocked(LevelUpPerk.MutantModChance)) damage = this.getDamage() / this.getMutantData().getGeneration();
+		Bullet b = new Bullet(game, this.getSender(), this.position, 
+				this.velocity.rotate(45), 
+				size, 
+				null, 
+	            (int) this.timeToLive, 
+				damage);
+		b.setPierce(this.initialPierce/2);
+		b.entitiesPierced.add(e.getEntity());
+		b.setAmmoMod(AmmoMod.Mutant);
+		b.getMutantData().setGeneration(this.getMutantData().getGeneration()+1);
+		b.instantiate();
+		Bullet b2 = new Bullet(game, this, this.position, 
+				this.velocity.rotate(-45), 
+				size, 
+				null, 
+	            (int) this.timeToLive, 
+				damage);
+		b2.setPierce(this.initialPierce/2);
+		b.entitiesPierced.add(e.getEntity());  
+		b2.setAmmoMod(AmmoMod.Mutant);
+		b2.getMutantData().setGeneration(this.getMutantData().getGeneration()+1);
+		b2.instantiate();
 	}
 
 	@Override

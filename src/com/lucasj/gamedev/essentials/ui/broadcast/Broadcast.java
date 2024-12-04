@@ -62,7 +62,7 @@ public class Broadcast {
 		this.timerColor = Color.yellow;
 		
 		if(this.hasTypeWriter) {
-			typeWriter = new TypeWriter(subText, 0.05f);
+			typeWriter = new TypeWriter(game, subText, 0.05f);
 			subText = "";
 		}
 		

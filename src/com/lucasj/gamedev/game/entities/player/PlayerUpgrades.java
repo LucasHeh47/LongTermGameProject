@@ -19,10 +19,10 @@ public class PlayerUpgrades {
     private float upgradedMovementSpeedMultiplier = 0;
     
     // How much you get from each upgrade
-    private int maxHealthUpgrade = 10;
+    private int maxHealthUpgrade = 25;
     private float healthRegenUpgrade = 0.03f;
     private float damageMultiplierUpgrade = 0.33f;
-    private float movementSpeedMultiplier = 0.05f;
+    private float movementSpeedMultiplier = 0.1f;
     
     private int regenUpgradeCount = 0;
     private int damageUpgradeCount = 0;
@@ -40,6 +40,13 @@ public class PlayerUpgrades {
     	this.upgradedDamageMultiplier = DEFAULT_DAMAGE_MULTIPLIER;
     	this.upgradedMovementSpeedMultiplier = DEFAULT_MOVEMENT_SPEED_MULTIPLIER;
     	
+    }
+    
+    public void reset() {
+    	this.upgradedMaxHealth = DEFAULT_MAX_HEALTH;
+    	this.upgradedHealthRegen = DEFAULT_HEALTH_REGEN;
+    	this.upgradedDamageMultiplier = DEFAULT_DAMAGE_MULTIPLIER;
+    	this.upgradedMovementSpeedMultiplier = DEFAULT_MOVEMENT_SPEED_MULTIPLIER;
     }
 
     public boolean upgrade(String type) {

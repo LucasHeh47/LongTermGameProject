@@ -11,6 +11,7 @@ import java.awt.image.BufferStrategy;
 import javax.swing.JFrame;
 
 import com.lucasj.gamedev.game.multiplayer.GameClient;
+import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.settings.SettingsManager;
 import com.lucasj.gamedev.utils.GraphicUtils;
 
@@ -35,6 +36,7 @@ public class Window extends Canvas implements Runnable {
     Game game;
 
     public Window(String title, int width, int height, SettingsManager settings) {
+    	Debug.initializeLogging();
         this.settings = settings;
         fpslimit = settings.getIntSetting("fpslimit");
     	frame = new JFrame(title);
@@ -91,6 +93,7 @@ public class Window extends Canvas implements Runnable {
         long lastCheck = System.currentTimeMillis();
         
         while (true ) {
+            timePerFrame = 1000000000 / game.getSettings().getIntSetting("fpslimit");
         	
         	now = System.nanoTime();
     		double deltaTime = (now - lastFrame) / 1_000_000_000.0;
@@ -134,6 +137,7 @@ public class Window extends Canvas implements Runnable {
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
         game.render(g);
+        
         g.dispose();
         bs.show();
 

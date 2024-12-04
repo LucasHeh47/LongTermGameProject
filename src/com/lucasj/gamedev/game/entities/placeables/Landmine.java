@@ -12,6 +12,7 @@ import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.placeables.data.LandmineEnemyDistanceData;
 import com.lucasj.gamedev.game.entities.player.Player;
+import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 
@@ -62,7 +63,7 @@ public class Landmine extends Placeable {
 
 	            // Scale damage based on distance from the landmine center
 	            double distanceFactor = (radius - distance) / (double) radius;
-	            int baseDamage = (int) (10 * player.getPlayerUpgrades().getDamageMultiplier() * 5);
+	            int baseDamage = (int) (10 * player.getPlayerUpgrades().getDamageMultiplier() * 5 * 1 + (game.getWavesManager().getWave() * WavesManager.HEALTH_GROWTH_RATE));
 	            int damage = (int) (baseDamage * distanceFactor);
 
 	            Debug.log(this, "Distance: " + distance + " Damage: " + damage);

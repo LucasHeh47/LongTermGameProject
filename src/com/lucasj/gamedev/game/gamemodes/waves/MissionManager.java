@@ -46,11 +46,13 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		if(Mission.activeMission != null) {
 			if(!Mission.activeMission.isAccomplished() && Mission.activeMission.getBroadcast().finished) {
 				Mission.activeMission = null;
+				return;
 			}
 			if(Mission.activeMission.getBroadcast() != null && Mission.activeMission.getBroadcast().finished) {
 				if(Mission.activeMission.getName().equals("Invulnerable") || Mission.activeMission.getName().equals("Frenzy")) {
 					Mission.activeMission.reward();
 					Mission.activeMission = null;
+					return;
 				}
 			}
 			Mission.activeMission.update(deltaTime);
@@ -92,12 +94,22 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 	public void onEntityDeath(EntityDeathEvent e) {
 		if(Mission.activeMission == null) return;
 
-		if(Mission.activeMission.getName().equals("Slayer")) {
-			if(e.getEntity() instanceof Enemy) {
-				Missions.Slayer mission = (Missions.Slayer) Mission.activeMission;
-				mission.increment();
+		if(e.getEntity() instanceof Enemy) {
+			if(Mission.activeMission.getName().equals("Slayer")) {
+					Missions.Slayer mission = (Missions.Slayer) Mission.activeMission;
+					mission.increment();
+			}
+	
+			if(Mission.activeMission.getName().equals("Terminator")) {
+				if(e.getProjectile() != null) {
+					if(e.getProjectile().getTag().equals("TurretBullet")) {
+						Missions.Terminator mission = (Missions.Terminator) Mission.activeMission;
+						mission.increment();
+					}
+				}
 			}
 		}
+		
 	}
 
 	@Override
@@ -126,6 +138,7 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 				((Missions.Invulnerable) Mission.activeMission).fail();
 			}
 		}
+		
 	}
 
 	@Override

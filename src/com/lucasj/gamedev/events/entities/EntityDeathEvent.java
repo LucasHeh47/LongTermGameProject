@@ -7,11 +7,13 @@ public class EntityDeathEvent implements GameEvent {
 
 	private Entity killer;
 	private Entity entity;
+	private Entity projectile;
 	
 	
-	public EntityDeathEvent(Entity entity, Entity killer) {
+	public EntityDeathEvent(Entity entity, Entity killer, Entity projectile) {
 		this.setEntity(entity);
 		this.setKiller(killer);
+		this.setProjectile(projectile);
 	}
 	
 	
@@ -39,6 +41,16 @@ public class EntityDeathEvent implements GameEvent {
 
 	public void setKiller(Entity killer) {
 		this.killer = killer;
+	}
+
+
+	public Entity getProjectile() {
+		return projectile;
+	}
+
+
+	public void setProjectile(Entity projectile) {
+		this.projectile = projectile;
 	}
 	
 }

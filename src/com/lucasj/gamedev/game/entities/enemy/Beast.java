@@ -15,7 +15,7 @@ import com.lucasj.gamedev.mathutils.Vector2D;
 public class Beast extends Enemy {
 	
 	public static void initializeClass(){
-		registerEnemyType(Beast.class, new EnemyWavesData(12, 3));
+		registerEnemyType(Beast.class, new EnemyWavesData(17, 3));
     }
 	private BufferedImage[][] walking;
 	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right
@@ -141,7 +141,7 @@ public class Beast extends Enemy {
 
 	@Override
 	void setDamageMultiplier() {
-		this.damageMultiplier = 5f;
+		this.damageMultiplier = 2.75f;
 	}
 
 	@Override
@@ -152,7 +152,7 @@ public class Beast extends Enemy {
 
 	@Override
 	public void setMovementSpeedMultiplier() {
-		this.movementSpeed = (int) (this.movementSpeed * 1.5f);
+		this.movementSpeed = (int) (this.movementSpeed * 1.3f);
 		
 	}
 
