@@ -114,7 +114,7 @@ public class Map {
 	                    int screenX = (x * tileSize) - (int) cameraWorldPos.getX() - (tileSize / 2);
 	                    int screenY = (y * tileSize) - (int) cameraWorldPos.getY();
 	                    int size = (int) (tileSize * 1.5f);
-	                    g2d.drawImage(tile.getTile(), screenX, screenY, size, size, null);
+	                    g2d.drawImage(tile.getTile(), screenX + (size/6), screenY, size, size, null);
 	                }
 	            }
 	        }
@@ -141,7 +141,7 @@ public class Map {
 	                    int screenX = (x * tileSize) - (int) cameraWorldPos.getX() - (tileSize / 2);
 	                    int screenY = (y * tileSize) - (int) cameraWorldPos.getY();
 	                    int size = (int) (tileSize * 1.5f);
-	                    g2d.drawImage(tile.getTile(), screenX, screenY, size, size, null);
+	                    g2d.drawImage(tile.getTile(), screenX + (size/6), screenY, size, size, null);
 	                }
 	            }
 	        }
