@@ -62,7 +62,7 @@ public class MiniMap {
 		game.instantiatedEntities.forEach(entity -> {
 			if(entity instanceof Enemy) {
 				
-				Vector2D pos = new Vector2D(clamp(entity.getPosition().getXint(), game.getMapManager().getWorldSize().getXint(), 240), clamp(entity.getPosition().getYint(), game.getMapManager().getWorldSize().getYint(), 200));
+				Vector2D pos = new Vector2D(clamp(entity.getPosition().getXint(), game.getMapManager().getWorldSize().getXint(), 250), clamp(entity.getPosition().getYint(), game.getMapManager().getWorldSize().getYint(), 250));
 				//Debug.log(this, game.getMapManager().getWorldSize());
 				//Debug.log(this, pos.toString());
 				entityPositions.add(pos);
