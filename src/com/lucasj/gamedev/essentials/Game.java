@@ -18,6 +18,7 @@ import java.util.Queue;
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.audio.AudioPlayer;
 import com.lucasj.gamedev.essentials.ui.Menus;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.essentials.ui.broadcast.Broadcast;
 import com.lucasj.gamedev.events.EventManager;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
@@ -258,9 +259,12 @@ public class Game {
         }
     }
 
-    public void render(Graphics g) {
+    public List<Render> render(Graphics g) {
     	Graphics2D g2d = (Graphics2D) g;
-    	mapm.render(g2d);
+    	List<Render> renders = new ArrayList<Render>();
+    	renders.addAll(mapm.render(g));
+    	
+    	
     	if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
         	this.instantiatedCollectibles.forEach(collectible -> {
             	collectible.render(g);
@@ -289,6 +293,7 @@ public class Game {
  
     	if(broadcastQueue != null && broadcastQueue.peek() != null) broadcastQueue.peek().render(g2d);
         //this.getGraphicUtils().drawVignette(g2d, this.getWidth(), this.getHeight(), 0, 0, 0, 160);
+    	return renders;
     }
     
     private void renderSurface(Graphics g, CollisionSurface surface) {

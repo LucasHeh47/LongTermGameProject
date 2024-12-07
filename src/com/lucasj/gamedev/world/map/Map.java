@@ -13,7 +13,7 @@ import javax.imageio.ImageIO;
 
 import com.lucasj.gamedev.essentials.Camera;
 import com.lucasj.gamedev.essentials.Game;
-import com.lucasj.gamedev.mathutils.PerlinNoise;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.physics.CollisionSurface;
 
@@ -66,32 +66,35 @@ public class Map {
 	    return Math.min((int) (adjustedValue * arrayLength), arrayLength - 1);
 	}
 	
-	public void render(Graphics g) {
-	    Graphics2D g2d = (Graphics2D) g;
-	    int tileSize = mapm.getTileSize();
+	public Render render() {
+		Render render = new Render(1, g -> {
+			Graphics2D g2d = (Graphics2D) g;
+		    int tileSize = mapm.getTileSize();
 
-	    Camera camera = game.getCamera();
-	    Vector2D cameraWorldPos = camera.getWorldPosition();
-	    Vector2D viewport = camera.getViewport();
+		    Camera camera = game.getCamera();
+		    Vector2D cameraWorldPos = camera.getWorldPosition();
+		    Vector2D viewport = camera.getViewport();
 
-	    int startX = Math.max((int) (cameraWorldPos.getX() / tileSize), 0);
-	    int endX = Math.min((int) ((cameraWorldPos.getX() + viewport.getX()) / tileSize) + 1, width);
-	    int startY = Math.max((int) (cameraWorldPos.getY() / tileSize), 0);
-	    int endY = Math.min((int) ((cameraWorldPos.getY() + viewport.getY()) / tileSize) + 1, height);
+		    int startX = Math.max((int) (cameraWorldPos.getX() / tileSize), 0);
+		    int endX = Math.min((int) ((cameraWorldPos.getX() + viewport.getX()) / tileSize) + 1, width);
+		    int startY = Math.max((int) (cameraWorldPos.getY() / tileSize), 0);
+		    int endY = Math.min((int) ((cameraWorldPos.getY() + viewport.getY()) / tileSize) + 1, height);
 
-	    for (int i = 0; i < 2; i++) {
-		    for (int x = startX; x < endX; x++) {
-		        for (int y = startY; y < endY; y++) {
-		            Tile tile = mapTiles[i][x][y];
-		            if (tile != null) {
-			            int screenX = i == 0 ? (x * tileSize) - (int) cameraWorldPos.getX() : (x * tileSize) - (int) cameraWorldPos.getX() - (tileSize/2);
-			            int screenY = (y * tileSize) - (int) cameraWorldPos.getY();
-			            int size = i == 0 ? tileSize : (int) (tileSize * 1.5f);
-			            g2d.drawImage(tile.getTile(), screenX, screenY, size, size, null);
-		            }
-		        }
+		    for (int i = 0; i < 2; i++) {
+			    for (int x = startX; x < endX; x++) {
+			        for (int y = startY; y < endY; y++) {
+			            Tile tile = mapTiles[i][x][y];
+			            if (tile != null) {
+				            int screenX = i == 0 ? (x * tileSize) - (int) cameraWorldPos.getX() : (x * tileSize) - (int) cameraWorldPos.getX() - (tileSize/2);
+				            int screenY = (y * tileSize) - (int) cameraWorldPos.getY();
+				            int size = i == 0 ? tileSize : (int) (tileSize * 1.5f);
+				            g2d.drawImage(tile.getTile(), screenX, screenY, size, size, null);
+			            }
+			        }
+			    }
 		    }
-	    }
+		});
+		return render;
 	}
 	
 	public int[][] generateGrayscaleArray(String filePath) throws IOException {

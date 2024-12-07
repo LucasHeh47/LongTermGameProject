@@ -1,12 +1,12 @@
 package com.lucasj.gamedev.world.map;
 
-import java.awt.Graphics;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
 public class MapManager {
@@ -50,8 +50,8 @@ public class MapManager {
 		}
 	}
 	
-	public void render(Graphics g) {
-		map.render(g);
+	public Render render() {
+		return map.render();
 	}
 
 	public int getTileSize() {
