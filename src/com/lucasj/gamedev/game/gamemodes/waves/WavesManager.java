@@ -2,7 +2,6 @@ package com.lucasj.gamedev.game.gamemodes.waves;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +9,8 @@ import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.GameState;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDamagedEventListener;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
@@ -19,7 +20,6 @@ import com.lucasj.gamedev.game.entities.enemy.Enemy;
 import com.lucasj.gamedev.game.entities.npc.NPCManager;
 import com.lucasj.gamedev.game.gamemodes.waves.missions.Mission;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.physics.CollisionSurface;
 
 public class WavesManager implements EntityDamagedEventListener, EntityDeathEventListener {
 
@@ -194,42 +194,47 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 	    this.missionManager.update(deltaTime);
 	}
 	
-	public void render(Graphics g) {
-		Graphics2D g2d = (Graphics2D)g;
-		
-		if(game.party != null && !this.hasGameStarted && !game.getPlayer().isPickingClass()) {
-			g2d.setColor(Color.black);
-			g2d.setFont(game.font.deriveFont(256));
-			int titleWidth = g2d.getFontMetrics().stringWidth("Waiting For Party...");
-	        g2d.drawString("Waiting For Party...", (game.getWidth() - titleWidth) / 2, 100);
-	        return;
-		}
-		if(game.getPlayer().isPickingClass()) return;
-		
-		if(betweenWaves) {
-			int titleWidth = g2d.getFontMetrics().stringWidth(Integer.toString(intermissionLength-intermissionTick));
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		Render render = new Render(Layer.UI, g -> {
+			Graphics2D g2d = (Graphics2D)g;
 			
-			g2d.setColor(Color.black);
-			Font currentFont = g2d.getFont(); // Get the current font
-	        Font newFont = new Font(currentFont.getName(), currentFont.getStyle(), 50); // Increase size to 20
-
-	        // Set the new font for the Graphics2D object
-	        g2d.setFont(newFont);
+			if(game.party != null && !this.hasGameStarted && !game.getPlayer().isPickingClass()) {
+				g2d.setColor(Color.black);
+				g2d.setFont(game.font.deriveFont(256));
+				int titleWidth = g2d.getFontMetrics().stringWidth("Waiting For Party...");
+		        g2d.drawString("Waiting For Party...", (game.getWidth() - titleWidth) / 2, 100);
+		        return;
+			}
+			if(game.getPlayer().isPickingClass()) return;
 			
-	        g2d.drawString(Integer.toString(intermissionLength-intermissionTick), (game.getWidth() - titleWidth) / 2, 100);
-		}
-
-		g2d.setFont(game.font.deriveFont(58f)); // Derive the font size explicitly as a float
-	    g2d.setColor(Color.black);
-	    g2d.drawString("Wave: " + Integer.toString(this.wave), 520, game.getHeight() - 160);
-//	    g2d.drawString("Left: " + Integer.toString(enemiesThisWave - enemiesKilledThisWave), 520, game.getHeight() - 100);
-//	    int enemyCount = (int) game.instantiatedEntities.stream()
-//                .filter(entity -> entity instanceof Enemy)
-//                .count();
-//
-//	    g2d.drawString("Active: " + enemyCount, 520, game.getHeight() - 40);
-	    
-	    this.missionManager.render(g2d);
+			if(betweenWaves) {
+				int titleWidth = g2d.getFontMetrics().stringWidth(Integer.toString(intermissionLength-intermissionTick));
+				
+				g2d.setColor(Color.black);
+				Font currentFont = g2d.getFont(); // Get the current font
+		        Font newFont = new Font(currentFont.getName(), currentFont.getStyle(), 50); // Increase size to 20
+	
+		        // Set the new font for the Graphics2D object
+		        g2d.setFont(newFont);
+				
+		        g2d.drawString(Integer.toString(intermissionLength-intermissionTick), (game.getWidth() - titleWidth) / 2, 100);
+			}
+	
+			g2d.setFont(game.font.deriveFont(58f)); // Derive the font size explicitly as a float
+		    g2d.setColor(Color.black);
+		    g2d.drawString("Wave: " + Integer.toString(this.wave), 520, game.getHeight() - 160);
+	//	    g2d.drawString("Left: " + Integer.toString(enemiesThisWave - enemiesKilledThisWave), 520, game.getHeight() - 100);
+	//	    int enemyCount = (int) game.instantiatedEntities.stream()
+	//                .filter(entity -> entity instanceof Enemy)
+	//                .count();
+	//
+	//	    g2d.drawString("Active: " + enemyCount, 520, game.getHeight() - 40);
+		});
+		renders.add(render);
+	    render = this.missionManager.render();
+	    if(render != null) renders.add(render);
+		return renders;
 	}
 	
 	public void endGame() {

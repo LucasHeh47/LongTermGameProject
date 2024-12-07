@@ -7,9 +7,13 @@ import java.awt.Image;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
@@ -98,16 +102,20 @@ public class Zombie extends Enemy {
 		if(!isMoving) animationTick = 1;
 	}
 	
-	public void render(Graphics g) {
-		Graphics2D g2d = (Graphics2D) g;
-		
-		Image img = walking[currentWalkingImage-1][animationTick-1];
-	    
-	    int x = (int) this.getScreenPosition().getX();
-	    int y = (int) this.getScreenPosition().getY();
-		
-		g2d.drawImage(img, x, y, this.size, this.size, null);
-		super.render(g);
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		renders.add(new Render(Layer.Enemy, g -> {
+			Graphics2D g2d = (Graphics2D) g;
+			
+			Image img = walking[currentWalkingImage-1][animationTick-1];
+		    
+		    int x = (int) this.getScreenPosition().getX();
+		    int y = (int) this.getScreenPosition().getY();
+			
+			g2d.drawImage(img, x, y, this.size, this.size, null);
+		}));
+		renders.addAll(super.render());
+		return renders;
 	}
 
 	public void entityDeath() {

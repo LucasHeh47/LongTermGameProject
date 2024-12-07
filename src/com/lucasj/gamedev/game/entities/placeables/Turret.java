@@ -89,8 +89,7 @@ public class Turret extends Placeable {
 
 	    int damage = (int) (10 * player.getPlayerUpgrades().getDamageMultiplier() * 1 + (game.getWavesManager().getWave() * WavesManager.HEALTH_GROWTH_RATE));
 	    game.getAudioPlayer().playSound("GunFire/Turret/turret_shoot.wav", this.position);
-	    Bullet b = new Bullet(game, this, this.position.add(new Vector2D(this.getSize()).divide(3)), bulletVelocity, 10, null, 2, damage);
-	    b.setTag(tag);
+	    Bullet b = new Bullet(game, this, this.position.add(new Vector2D(this.getSize()).divide(3)), bulletVelocity, 10, "TurretBullet", 2, damage);
 	    b.instantiate();
 	    
 	    PlayerAttackEvent e = new PlayerAttackEvent(b, damage);

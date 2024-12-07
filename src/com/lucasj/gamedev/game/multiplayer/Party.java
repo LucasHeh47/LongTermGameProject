@@ -1,11 +1,12 @@
 package com.lucasj.gamedev.game.multiplayer;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.game.entities.player.multiplayer.OnlinePlayer;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
@@ -56,13 +57,15 @@ public class Party {
 		});
 	}
 	
-	public void render(Graphics2D g2d) {
-		if(host != game.getPlayer()) ((OnlinePlayer) host).render(g2d);
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		if(host != game.getPlayer()) renders.addAll(((OnlinePlayer) host).render());
 		players.forEach(player -> {
 			if(player != game.getPlayer()) {
-				((OnlinePlayer) player).render(g2d);
+				renders.addAll(((OnlinePlayer) player).render());
 			}
 		});
+		return renders;
 	}
 	
 	public Color getColor(PlayerMP player) {

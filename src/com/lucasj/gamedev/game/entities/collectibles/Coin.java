@@ -1,15 +1,16 @@
 package com.lucasj.gamedev.game.entities.collectibles;
 
-import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEvent;
-import com.lucasj.gamedev.events.entities.EntityAggroEvent;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 
 public class Coin extends Collectible {
 
@@ -47,11 +48,13 @@ public class Coin extends Collectible {
 		
 	}
 	
-	public void render(Graphics g) {
-		//super.render(g);
-		
-		g.drawImage(coinImages[currentFrame], (int) screenPosition.getX(), (int) screenPosition.getY(), 30, 30, null);
-		
+	@Override
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		renders.add(new Render(Layer.Collectible, g -> {
+			g.drawImage(coinImages[currentFrame], (int) screenPosition.getX(), (int) screenPosition.getY(), 30, 30, null);
+		}));
+		return renders;
 	}
 
 	@Override

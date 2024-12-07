@@ -1,18 +1,20 @@
 package com.lucasj.gamedev.world.map;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 import com.lucasj.gamedev.essentials.Camera;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
 import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.physics.CollisionSurface;
@@ -52,7 +54,6 @@ public class Map {
 	            mapTiles[0][x][y] = mapm.getGrass()[rand.nextInt(mapm.getGrass().length)];
 	            if (terrainType == 100) {
 	                tile = mapm.getTrees();
-	                addCollisionSurface(x, y);
 	            }
 
 	            mapTiles[1][x][y] = tile; // Store the selected tile in the 2D array
@@ -66,8 +67,9 @@ public class Map {
 	    return Math.min((int) (adjustedValue * arrayLength), arrayLength - 1);
 	}
 	
-	public Render render() {
-		Render render = new Render(1, g -> {
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		renders.add(new Render(Layer.Background, g -> {
 			Graphics2D g2d = (Graphics2D) g;
 		    int tileSize = mapm.getTileSize();
 
@@ -79,22 +81,72 @@ public class Map {
 		    int endX = Math.min((int) ((cameraWorldPos.getX() + viewport.getX()) / tileSize) + 1, width);
 		    int startY = Math.max((int) (cameraWorldPos.getY() / tileSize), 0);
 		    int endY = Math.min((int) ((cameraWorldPos.getY() + viewport.getY()) / tileSize) + 1, height);
-
-		    for (int i = 0; i < 2; i++) {
-			    for (int x = startX; x < endX; x++) {
-			        for (int y = startY; y < endY; y++) {
-			            Tile tile = mapTiles[i][x][y];
-			            if (tile != null) {
-				            int screenX = i == 0 ? (x * tileSize) - (int) cameraWorldPos.getX() : (x * tileSize) - (int) cameraWorldPos.getX() - (tileSize/2);
-				            int screenY = (y * tileSize) - (int) cameraWorldPos.getY();
-				            int size = i == 0 ? tileSize : (int) (tileSize * 1.5f);
-				            g2d.drawImage(tile.getTile(), screenX, screenY, size, size, null);
-			            }
-			        }
-			    }
+		    for (int x = startX; x < endX; x++) {
+		        for (int y = startY; y < endY; y++) {
+		            Tile tile = mapTiles[0][x][y];
+		            if (tile != null) {
+			            int screenX = (x * tileSize) - (int) cameraWorldPos.getX();
+			            int screenY = (y * tileSize) - (int) cameraWorldPos.getY();
+			            int size = tileSize;
+			            g2d.drawImage(tile.getTile(), screenX, screenY, size, size, null);
+		            }
+		        }
 		    }
-		});
-		return render;
+		}));
+		// Trees above the player's position (Background)
+	    renders.add(new Render(Layer.Background, g -> {
+	        Graphics2D g2d = (Graphics2D) g;
+	        int tileSize = mapm.getTileSize();
+
+	        Camera camera = game.getCamera();
+	        Vector2D cameraWorldPos = camera.getWorldPosition();
+	        Vector2D viewport = camera.getViewport();
+
+	        int startX = Math.max((int) (cameraWorldPos.getX() / tileSize), 0);
+	        int endX = Math.min((int) ((cameraWorldPos.getX() + viewport.getX()) / tileSize) + 1, width);
+	        int startY = Math.max((int) (cameraWorldPos.getY() / tileSize)-1, 0);
+	        int endY = Math.min((int) ((game.getPlayer().getPosition().getY() + (game.getPlayer().getSize()/2)) / tileSize), height); // Trees above player
+
+	        for (int y = startY; y < endY; y++) {
+	            for (int x = startX; x < endX; x++) {
+	                Tile tile = mapTiles[1][x][y];
+	                if (tile != null) {
+	                    int screenX = (x * tileSize) - (int) cameraWorldPos.getX() - (tileSize / 2);
+	                    int screenY = (y * tileSize) - (int) cameraWorldPos.getY();
+	                    int size = (int) (tileSize * 1.5f);
+	                    g2d.drawImage(tile.getTile(), screenX, screenY, size, size, null);
+	                }
+	            }
+	        }
+	    }));
+
+	    // Trees below the player's position (Foreground)
+	    renders.add(new Render(Layer.Foreground, g -> {
+	        Graphics2D g2d = (Graphics2D) g;
+	        int tileSize = mapm.getTileSize();
+
+	        Camera camera = game.getCamera();
+	        Vector2D cameraWorldPos = camera.getWorldPosition();
+	        Vector2D viewport = camera.getViewport();
+
+	        int startX = Math.max((int) (cameraWorldPos.getX() / tileSize), 0);
+	        int endX = Math.min((int) ((cameraWorldPos.getX() + viewport.getX()) / tileSize) + 1, width);
+	        int startY = Math.max((int) ((game.getPlayer().getPosition().getY() + (game.getPlayer().getSize()/2)) / tileSize), 0); // Trees below player
+	        int endY = Math.min((int) ((cameraWorldPos.getY() + viewport.getY()) / tileSize) + 1, height);
+
+	        for (int y = startY; y < endY; y++) {
+	            for (int x = startX; x < endX; x++) {
+	                Tile tile = mapTiles[1][x][y];
+	                if (tile != null) {
+	                    int screenX = (x * tileSize) - (int) cameraWorldPos.getX() - (tileSize / 2);
+	                    int screenY = (y * tileSize) - (int) cameraWorldPos.getY();
+	                    int size = (int) (tileSize * 1.5f);
+	                    g2d.drawImage(tile.getTile(), screenX, screenY, size, size, null);
+	                }
+	            }
+	        }
+	    }));
+		return renders;
 	}
 	
 	public int[][] generateGrayscaleArray(String filePath) throws IOException {
@@ -119,7 +171,9 @@ public class Map {
                 int green = (rgb >> 8) & 0xFF;
                 int blue = rgb & 0xFF;
                 
-
+                if (red == 0 && green == 0 && blue == 0) {
+                    addCollisionSurface(x, y);
+                }
                 if (red == 66 && green == 245 && blue == 72) {
                 	mapm.addSpawnpoint(new Vector2D(x * mapm.getTileSize() + mapm.getTileSize()/2, y * mapm.getTileSize() + mapm.getTileSize()/2));
                 	red = 255;

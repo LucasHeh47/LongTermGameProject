@@ -17,6 +17,7 @@ import java.util.Queue;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.audio.AudioPlayer;
+import com.lucasj.gamedev.essentials.ui.Layer;
 import com.lucasj.gamedev.essentials.ui.Menus;
 import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.essentials.ui.broadcast.Broadcast;
@@ -259,39 +260,38 @@ public class Game {
         }
     }
 
-    public List<Render> render(Graphics g) {
-    	Graphics2D g2d = (Graphics2D) g;
+    public List<Render> render() {
     	List<Render> renders = new ArrayList<Render>();
-    	renders.addAll(mapm.render(g));
+    	renders.addAll(mapm.render());
     	
     	
     	if (gameState == GameState.waves) { // -------------------------------------------------------------------------------- Game State
         	this.instantiatedCollectibles.forEach(collectible -> {
-            	collectible.render(g);
+            	renders.addAll(collectible.render());
             });
 
         	this.instantiatedEntitiesOnScreen.forEach(entity -> {
         		if(!(entity instanceof Player)) {
-        			entity.render(g);
+        			renders.addAll(entity.render());
         		}
         		
             });
-        	if(p != null) p.render(g);
+        	if(p != null) renders.addAll(p.render());
         	
         	instantiatedParticles.forEach(generator -> {
-        		generator.render(g);
+        		renders.addAll(generator.render());
         	});
         	
-        	this.getWavesManager().render(g);
+        	renders.addAll(this.getWavesManager().render());
         }
     	
 		for (Particle particle : this.instantiatedSingleParticles) {
-			particle.render((Graphics2D) g);
+    		renders.add(particle.render());
 		}
     	
-    	menus.render(g2d);
- 
-    	if(broadcastQueue != null && broadcastQueue.peek() != null) broadcastQueue.peek().render(g2d);
+    	renders.add(menus.render());
+    	
+    	renders.add(new Render(Layer.UI, g -> { if(broadcastQueue != null && broadcastQueue.peek() != null) broadcastQueue.peek().render(); }));
         //this.getGraphicUtils().drawVignette(g2d, this.getWidth(), this.getHeight(), 0, 0, 0, 160);
     	return renders;
     }

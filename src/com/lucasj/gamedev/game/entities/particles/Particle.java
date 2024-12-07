@@ -6,6 +6,8 @@ import java.awt.Image;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
 public class Particle {
@@ -59,32 +61,35 @@ public class Particle {
 		}
 	}
 	
-	public void render(Graphics2D g2d) {
-		if(this.color != null) g2d.setColor(color);
-		
-		if(shape == null) {
+	public Render render() {
+		Render render = new Render(Layer.Player, g -> {
+			Graphics2D g2d = (Graphics2D) g;
+			if(this.color != null) g2d.setColor(color);
 			
-			if(this.color != null ) {
-				g2d.drawImage(SpriteTools.tintImage(SpriteTools.toBufferedImage(image), color), getPosition().getXint(), getPosition().getYint(), size, size, null);
-			} else {
-				g2d.drawImage(image, getPosition().getXint(), getPosition().getYint(), size, size, null);
+			if(shape == null) {
+				
+				if(this.color != null ) {
+					g2d.drawImage(SpriteTools.tintImage(SpriteTools.toBufferedImage(image), color), getPosition().getXint(), getPosition().getYint(), size, size, null);
+				} else {
+					g2d.drawImage(image, getPosition().getXint(), getPosition().getYint(), size, size, null);
+				}
+				
 			}
 			
-		}
-		
-		if(shape != null) {
-			if(shape == ParticleShape.Circle) {
-				g2d.fillOval(getPosition().getXint(), getPosition().getYint(), size, size);
-			} else if (shape == ParticleShape.Square) {
-				g2d.fillRect(getPosition().getXint(), getPosition().getYint(), size, size);
-			} else if (shape == ParticleShape.Text) {
-				if(text != null) {
-					g2d.setFont(game.font.deriveFont(size));
-					g2d.drawString(text, this.getPosition().getXint(), this.getPosition().getYint());
+			if(shape != null) {
+				if(shape == ParticleShape.Circle) {
+					g2d.fillOval(getPosition().getXint(), getPosition().getYint(), size, size);
+				} else if (shape == ParticleShape.Square) {
+					g2d.fillRect(getPosition().getXint(), getPosition().getYint(), size, size);
+				} else if (shape == ParticleShape.Text) {
+					if(text != null) {
+						g2d.setFont(game.font.deriveFont(size));
+						g2d.drawString(text, this.getPosition().getXint(), this.getPosition().getYint());
+					}
 				}
 			}
-		}
-		
+		});
+		return render;
 	}
 	
 	private Vector2D getPosition() {

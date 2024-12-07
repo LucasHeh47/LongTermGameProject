@@ -1,7 +1,6 @@
 package com.lucasj.gamedev.game.entities.projectiles;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.util.ArrayList;
@@ -9,6 +8,8 @@ import java.util.List;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.enemy.Enemy;
@@ -21,7 +22,6 @@ import com.lucasj.gamedev.game.entities.projectiles.data.BulletMutantModData;
 import com.lucasj.gamedev.game.levels.LevelUpPerk;
 import com.lucasj.gamedev.game.weapons.AmmoMod;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 
 public class Bullet extends Projectile {
 
@@ -53,12 +53,15 @@ public class Bullet extends Projectile {
 	}
 
 	@Override
-	public void render(Graphics g) {
-		Graphics2D g2d = (Graphics2D)g;
-		g2d.setColor(Color.blue);
-		g2d.fillOval((int)screenPosition.getX(), (int)screenPosition.getY(), 
-				size, size);
-		
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		renders.add(new Render(Layer.Collectible, g -> {
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.setColor(Color.blue);
+			g2d.fillOval((int)screenPosition.getX(), (int)screenPosition.getY(), 
+					size, size);
+		}));
+		return renders;
 	}
 	
 	@Override
@@ -122,6 +125,7 @@ public class Bullet extends Projectile {
 			
 			if(died) {
 				e.getCollider().setKiller(this.getSender());
+				e.getCollider().setProjectileKilledBy(this);
 			}
 		}
 		if (!this.entitiesPierced.contains(e.getCollider())) {

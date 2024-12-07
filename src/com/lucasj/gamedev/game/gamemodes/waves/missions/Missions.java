@@ -122,6 +122,7 @@ public class Missions {
 		}
 	
 		public boolean isAccomplished() {
+			if(this.getBroadcast() == null) return false;
 			return this.getBroadcast().finished;
 		}
 	

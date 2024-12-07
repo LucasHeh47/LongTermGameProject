@@ -1,8 +1,9 @@
 package com.lucasj.gamedev.game.gamemodes.waves.missions;
 
-import java.awt.Graphics2D;
+import java.util.ArrayList;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.essentials.ui.broadcast.Broadcast;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
@@ -51,11 +52,11 @@ public abstract class Mission {
 		}
 	}
 	
-	public void render(Graphics2D g2d) {
+	public Render render() {
 		if(broadcast != null) {
-			broadcast.render(g2d);
+			return broadcast.render();
 		} else {
-			Debug.log(this, "Rendered before instance");
+			return null;
 		}
 	}
 	

@@ -50,7 +50,7 @@ public class MapManager {
 		}
 	}
 	
-	public Render render() {
+	public List<Render> render() {
 		return map.render();
 	}
 

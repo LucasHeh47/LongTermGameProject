@@ -1,14 +1,17 @@
 package com.lucasj.gamedev.game.entities.player.multiplayer;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.mathutils.Vector2D;
@@ -47,39 +50,45 @@ public class OnlinePlayer extends Entity implements PlayerMP {
 	}
 	
 	@Override
-	public void render(Graphics g) {
-		super.render(g);
-		Graphics2D g2d = (Graphics2D) g;
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		renders.addAll(super.render());
 		
-		
-		// Health bar
-		g.setColor(Color.black);
-		int barWidth = (int) (size + (size * 0.075));
-		int barHeight = (int) (size * 0.05);
-		int barX = (int) (screenPosition.getX()+(size/2) - (barWidth / 2));
-		int barY = (int) (screenPosition.getY() - (size * 0.2));
-		g.fillRect(barX, barY, barWidth, barHeight);
-
-		// Health portion of the bar
-		g.setColor(this.color);
-		int healthWidth = (int) (barWidth * ((double) health / maxHealth));
-		g.fillRect(barX, barY, healthWidth, barHeight);
-		
-		
-		// Load the image you want to render (e.g., walking sprite)
-	    Image img = walking[currentWalkingImage-1][animationTick-1];
-	    
-	    int imageWidth = img.getWidth(null);
-	    int imageHeight = img.getHeight(null);
-	    
-	    double x = this.getPosition().getX();
-	    double y = this.getPosition().getY();
-
-	    AffineTransform transform = new AffineTransform();
-	    transform.translate(x - imageWidth / 2.0, y - imageHeight / 2.0);
-	    
-	    g2d.drawImage(img, (int) this.screenPosition.getX(), (int) this.screenPosition.getY(), size, size, null);
-        Debug.log(this, screenPosition);
+		renders.add(new Render(Layer.Player, g -> {
+			
+			Graphics2D g2d = (Graphics2D) g;
+			
+			
+			// Health bar
+			g.setColor(Color.black);
+			int barWidth = (int) (size + (size * 0.075));
+			int barHeight = (int) (size * 0.05);
+			int barX = (int) (screenPosition.getX()+(size/2) - (barWidth / 2));
+			int barY = (int) (screenPosition.getY() - (size * 0.2));
+			g.fillRect(barX, barY, barWidth, barHeight);
+	
+			// Health portion of the bar
+			g.setColor(this.color);
+			int healthWidth = (int) (barWidth * ((double) health / maxHealth));
+			g.fillRect(barX, barY, healthWidth, barHeight);
+			
+			
+			// Load the image you want to render (e.g., walking sprite)
+		    Image img = walking[currentWalkingImage-1][animationTick-1];
+		    
+		    int imageWidth = img.getWidth(null);
+		    int imageHeight = img.getHeight(null);
+		    
+		    double x = this.getPosition().getX();
+		    double y = this.getPosition().getY();
+	
+		    AffineTransform transform = new AffineTransform();
+		    transform.translate(x - imageWidth / 2.0, y - imageHeight / 2.0);
+		    
+		    g2d.drawImage(img, (int) this.screenPosition.getX(), (int) this.screenPosition.getY(), size, size, null);
+	        Debug.log(this, screenPosition);
+		}));
+		return renders;
 	}
 
 	@Override

@@ -10,6 +10,8 @@ import java.util.Random;
 import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.mathutils.Vector2D;
@@ -125,10 +127,12 @@ public class ParticleGenerator extends Entity {
 	}
 	
 	@Override
-	public void render(Graphics g) {
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
 		particles.forEach(particle -> {
-			particle.render((Graphics2D) g);
+			renders.add(particle.render());
 		});
+		return renders;
 	}
 	
 	public void stop() {

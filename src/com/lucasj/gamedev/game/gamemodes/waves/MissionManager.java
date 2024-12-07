@@ -1,12 +1,12 @@
 package com.lucasj.gamedev.game.gamemodes.waves;
 
-import java.awt.Graphics2D;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEvent;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEventListener;
 import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
@@ -59,8 +59,9 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		}
 	}
 	
-	public void render(Graphics2D g2d) {
-		if(Mission.activeMission != null) Mission.activeMission.render(g2d);
+	public Render render() {
+		if(Mission.activeMission != null) return Mission.activeMission.render();
+		return null;
 	}
 	
 	public void startMission() {
@@ -88,6 +89,7 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		}
 		this.setCanStartMission(false);
 		Debug.log(this, "starting mission");
+        Mission.activeMission = new Missions.Terminator(game);
 	}
 
 	@Override

@@ -1,13 +1,14 @@
 package com.lucasj.gamedev.game.entities.npc;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.ui.Button;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
@@ -26,10 +27,16 @@ public class NPC extends Entity implements MouseClickEventListener{
 	}
 
 	@Override
-	public void render(Graphics g) {
-		g.setColor(Color.CYAN);
-		g.fillRect((int)screenPosition.getX(), (int) screenPosition.getY(), 
-				size, size);
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		renders.addAll(super.render());
+		
+		renders.add(new Render(Layer.Enemy, g -> {
+			g.setColor(Color.CYAN);
+			g.fillRect((int)screenPosition.getX(), (int) screenPosition.getY(), 
+					size, size);
+		}));
+		return renders;
 	}
 
 	@Override
@@ -60,14 +67,11 @@ public class NPC extends Entity implements MouseClickEventListener{
 	        
 	        
 	    	Vector2D mousePos = new Vector2D(e.getX(), e.getY());
-	        System.out.println("Mouse Position: " + mousePos.toString());
-	        System.out.println("NPC Position: " + position);
 	        
 	        // Check collision
 	        if (this.isCollidingWithScreen(mousePos)) {
 	        	game.getWavesManager().getNPCManager().closeAll();
 	            isOpen = true;
-	            System.out.println("NPC clicked!");
 	        }
 	    }
 	}

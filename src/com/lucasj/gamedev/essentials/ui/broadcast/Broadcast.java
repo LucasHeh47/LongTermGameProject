@@ -5,15 +5,13 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.RoundRectangle2D;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.ui.GameColors;
-import com.lucasj.gamedev.essentials.ui.GameColors.colors;
+import com.lucasj.gamedev.essentials.ui.Layer;
 import com.lucasj.gamedev.essentials.ui.Panel;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.essentials.ui.TypeWriter;
-import com.lucasj.gamedev.game.weapons.Tier;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.misc.Debug;
 
@@ -74,60 +72,64 @@ public class Broadcast {
 		if( time <= 0 ) finished = true;
 	}
 	
-	public void render(Graphics2D g2d) {
-		if(typeWriter != null) {
-			typeWriter.setStringToType(setSubText);
-			subText = typeWriter.getCurrentString();
-		}
-        // Render the background panel
-        Panel panel = new Panel((int) position.getX(), (int) position.getY(), size.getXint(), size.getYint(), backgroundColor, borderColor, 20, 10);
-        panel.render(g2d);
-        
-        g2d.setColor(timerColor);
-        g2d.fill(new RoundRectangle2D.Float((int) position.getX(), (int) position.getY(), (int) (size.getXint() * (time / setTime)), 5, 10, 10));
-        g2d.setColor(this.textColor);
-        
-        g2d.setFont(game.font.deriveFont(1f));
-        FontMetrics titleMetrics = g2d.getFontMetrics();
-        int panelCenterX = (int) position.getX() + panel.getWidth() / 2;
-        int titleY = (int) position.getY() + 50; // Adjust as needed for spacing
-        
-        // Draw the title with colors
-        drawTextWithColors(g2d, title, panelCenterX, titleY, game.font.deriveFont(48f), true);
-        
-        // Set font and process subText for {NL} and word wrapping
-        g2d.setFont(game.font.deriveFont(32f));
-        FontMetrics subTextMetrics = g2d.getFontMetrics();
-        int subTextY = titleY + 60; // Adjust spacing below the title
-        int panelPadding = 20; // Padding on the sides of the panel
-        int availableWidth = panel.getWidth() - 2 * panelPadding;
-        
-        // Split subText into lines based on {NL}
-        String[] lines = subText.split("\\{NL\\}");
-        for (String line : lines) {
-            String[] words = line.split(" ");
-            StringBuilder currentLine = new StringBuilder();
-            
-            for (String word : words) {
-                String testLine = currentLine + word + " ";
-                if (subTextMetrics.stringWidth(testLine.replaceAll("\\{\\w+\\}", "")) > availableWidth) {
-                    // Draw the current line
-                    drawTextWithColors(g2d, currentLine.toString(), panelCenterX, subTextY, game.font.deriveFont(32f), true);
-                    
-                    // Start a new line
-                    currentLine = new StringBuilder(word + " ");
-                    subTextY += subTextMetrics.getHeight();
-                } else {
-                    currentLine.append(word).append(" ");
-                }
-            }
-            
-            // Draw the last part of the current line
-            if (currentLine.length() > 0) {
-                drawTextWithColors(g2d, currentLine.toString(), panelCenterX, subTextY, game.font.deriveFont(32f), true);
-                subTextY += subTextMetrics.getHeight();
-            }
-        }
+	public Render render() {
+		Render render = new Render(Layer.UI, g -> {
+			Graphics2D g2d = (Graphics2D) g;
+			if(typeWriter != null) {
+				typeWriter.setStringToType(setSubText);
+				subText = typeWriter.getCurrentString();
+			}
+	        // Render the background panel
+	        Panel panel = new Panel((int) position.getX(), (int) position.getY(), size.getXint(), size.getYint(), backgroundColor, borderColor, 20, 10);
+	        panel.render(g2d);
+	        
+	        g2d.setColor(timerColor);
+	        g2d.fill(new RoundRectangle2D.Float((int) position.getX(), (int) position.getY(), (int) (size.getXint() * (time / setTime)), 5, 10, 10));
+	        g2d.setColor(this.textColor);
+	        
+	        g2d.setFont(game.font.deriveFont(1f));
+	        FontMetrics titleMetrics = g2d.getFontMetrics();
+	        int panelCenterX = (int) position.getX() + panel.getWidth() / 2;
+	        int titleY = (int) position.getY() + 50; // Adjust as needed for spacing
+	        
+	        // Draw the title with colors
+	        drawTextWithColors(g2d, title, panelCenterX, titleY, game.font.deriveFont(48f), true);
+	        
+	        // Set font and process subText for {NL} and word wrapping
+	        g2d.setFont(game.font.deriveFont(32f));
+	        FontMetrics subTextMetrics = g2d.getFontMetrics();
+	        int subTextY = titleY + 60; // Adjust spacing below the title
+	        int panelPadding = 20; // Padding on the sides of the panel
+	        int availableWidth = panel.getWidth() - 2 * panelPadding;
+	        
+	        // Split subText into lines based on {NL}
+	        String[] lines = subText.split("\\{NL\\}");
+	        for (String line : lines) {
+	            String[] words = line.split(" ");
+	            StringBuilder currentLine = new StringBuilder();
+	            
+	            for (String word : words) {
+	                String testLine = currentLine + word + " ";
+	                if (subTextMetrics.stringWidth(testLine.replaceAll("\\{\\w+\\}", "")) > availableWidth) {
+	                    // Draw the current line
+	                    drawTextWithColors(g2d, currentLine.toString(), panelCenterX, subTextY, game.font.deriveFont(32f), true);
+	                    
+	                    // Start a new line
+	                    currentLine = new StringBuilder(word + " ");
+	                    subTextY += subTextMetrics.getHeight();
+	                } else {
+	                    currentLine.append(word).append(" ");
+	                }
+	            }
+	            
+	            // Draw the last part of the current line
+	            if (currentLine.length() > 0) {
+	                drawTextWithColors(g2d, currentLine.toString(), panelCenterX, subTextY, game.font.deriveFont(32f), true);
+	                subTextY += subTextMetrics.getHeight();
+	            }
+	        }
+		});
+		return render;
     }
     
     private void drawTextWithColors(Graphics2D g2d, String text, int x, int y, Font font, boolean centered) {
@@ -158,8 +160,6 @@ public class Broadcast {
     }
 
 	public void setSubText(String subText) {
-		
-		Debug.log(this, subText);
 		this.setSubText = subText;
 	}
 	

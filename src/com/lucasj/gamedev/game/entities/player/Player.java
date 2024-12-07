@@ -2,7 +2,6 @@ package com.lucasj.gamedev.game.entities.player;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
@@ -11,6 +10,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
@@ -19,6 +19,8 @@ import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.InputHandler;
 import com.lucasj.gamedev.essentials.ui.GameColors;
 import com.lucasj.gamedev.essentials.ui.GameColors.colors;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
 import com.lucasj.gamedev.events.input.KeyboardEventListener;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
@@ -208,60 +210,67 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 
 	@Override
-	public void render(Graphics g) {
-		if(!game.getWavesManager().hasGameStarted()) return;
-		super.render(g);
-		Graphics2D g2d = (Graphics2D) g;
-
-		this.activePlaceables.forEach(placeable -> {
-			placeable.render(g);
-		});
-		
-		if(game.testing) {
-			g2d.setColor(new Color(255, 150, 150, 77));
-			crumbManager.activeBreadcrumbs.forEach(crumb -> {
-				g2d.fillRect((int) crumb.getScreenPosition().getX(), (int) crumb.getScreenPosition().getY(),
-					25, 25);
+	public List<Render> render() {
+		if(!game.getWavesManager().hasGameStarted()) return new ArrayList<>();
+		List<Render> renders = new ArrayList<>();
+		renders.addAll(super.render());
+		renders.add(new Render(Layer.Player, g -> {
+			Graphics2D g2d = (Graphics2D) g;
+	
+			this.activePlaceables.forEach(placeable -> {
+				placeable.render(g);
 			});
-		}
 			
-
-	    // Create a rectangle representing the player's body
-//	    Rectangle rect = new Rectangle((int) this.getPosition().getX() - size, 
-//	                                   (int) this.getPosition().getY() - size, 
-//	                                   size * 2, size * 2);
+			if(game.testing) {
+				g2d.setColor(new Color(255, 150, 150, 77));
+				crumbManager.activeBreadcrumbs.forEach(crumb -> {
+					g2d.fillRect((int) crumb.getScreenPosition().getX(), (int) crumb.getScreenPosition().getY(),
+						25, 25);
+				});
+			}
+				
+	
+		    // Create a rectangle representing the player's body
+	//	    Rectangle rect = new Rectangle((int) this.getPosition().getX() - size, 
+	//	                                   (int) this.getPosition().getY() - size, 
+	//	                                   size * 2, size * 2);
+			
+			// Load the image you want to render (e.g., walking sprite)
+		    Image img = walking[currentWalkingImage-1][animationTick-1];
+		    
+		    int imageWidth = img.getWidth(null);
+		    int imageHeight = img.getHeight(null);
+		    
+		    double x = this.getPosition().getX();
+		    double y = this.getPosition().getY();
+	
+		    AffineTransform transform = new AffineTransform();
+		    transform.translate(x - imageWidth / 2.0, y - imageHeight / 2.0);
+		    //transform.rotate(playerRotation, imageWidth / 2.0, imageHeight / 2.0);
+	
+		    // Draw the transformed image
+	//	    g2d.drawImage(img, transform, null);
+		    
+		    g2d.drawImage(img, (int) this.screenPosition.getX(), (int) this.screenPosition.getY(), size, size, null);
+		    
+		}));
 		
-		// Load the image you want to render (e.g., walking sprite)
-	    Image img = walking[currentWalkingImage-1][animationTick-1];
-	    
-	    int imageWidth = img.getWidth(null);
-	    int imageHeight = img.getHeight(null);
-	    
-	    double x = this.getPosition().getX();
-	    double y = this.getPosition().getY();
+		renders.add(new Render(Layer.UI, g-> {
+			Graphics2D g2d = (Graphics2D)g;
+		    renderHealthBar(g2d);
+		    renderMoney(g2d);
+		    renderStaminaBar(g2d);
+		    renderPlaceable(g2d);
+		    renderEquippedGun(g2d);
+		    renderAmmo(g2d);
+		}));
 
-	    AffineTransform transform = new AffineTransform();
-	    transform.translate(x - imageWidth / 2.0, y - imageHeight / 2.0);
-	    //transform.rotate(playerRotation, imageWidth / 2.0, imageHeight / 2.0);
-
-	    // Draw the transformed image
-//	    g2d.drawImage(img, transform, null);
-	    
-	    g2d.drawImage(img, (int) this.screenPosition.getX(), (int) this.screenPosition.getY(), size, size, null);
-        
-	    renderHealthBar(g2d);
-	    renderMoney(g2d);
-	    renderStaminaBar(g2d);
-	    renderPlaceable(g2d);
-	    renderEquippedGun(g2d);
-	    renderAmmo(g2d);
-	    
-	    if(minimap != null) minimap.render(g2d);
-	    
+	    if(minimap != null) renders.add(minimap.render());
 	    
 	    if(game.party != null) {
-	    	game.party.render(g2d);
+	    	renders.addAll(game.party.render());
 	    }
+		return renders;
 	}
 	
 	private void renderAmmo(Graphics2D g2d) {

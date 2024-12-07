@@ -1,10 +1,13 @@
 package com.lucasj.gamedev.game.entities;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityCollisionEventListener;
 import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
@@ -63,7 +66,7 @@ public abstract class Entity implements EntityCollisionEventListener {
 		this.movementSpeed = movementSpeed * 1000;
 		this.size = size;
 		this.screenPosition = new Vector2D(0, 0);
-		if(tag == null) tag = RandomStringGenerator.generateRandomString(32, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
+		if(tag == null || tag == "") tag = RandomStringGenerator.generateRandomString(32, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
 		this.tag = tag;
 		isAlive = true;
 	}
@@ -157,20 +160,24 @@ public abstract class Entity implements EntityCollisionEventListener {
 		screenPosition = game.getCamera().worldToScreenPosition(position);
 	}
 	
-	public void render(Graphics g) {
-		 Graphics2D g2d = (Graphics2D) g; // Cast to Graphics2D for better rendering control
-
-	    // Set the shadow color with transparency
-	    g2d.setColor(new Color(56, 56, 56, 120));
-
-	    // Calculate shadow size and position based on entity size and position
-	    int shadowWidth = (int) (this.size * 0.8); // Shadow slightly smaller than entity size
-	    int shadowHeight = (int) (this.size * 0.2); // Flattened shadow
-	    int shadowX = (int) this.screenPosition.getX() + (this.size - shadowWidth) / 2; // Centered under entity
-	    int shadowY = (int) (this.screenPosition.getY() + this.size * 0.9); // Slightly below the entity
-
-	    // Draw the shadow
-	    g2d.fillOval(shadowX, shadowY, shadowWidth, shadowHeight);
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		renders.add(new Render(Layer.Enemy, g -> {
+			Graphics2D g2d = (Graphics2D) g; // Cast to Graphics2D for better rendering control
+	
+		    // Set the shadow color with transparency
+		    g2d.setColor(new Color(56, 56, 56, 120));
+	
+		    // Calculate shadow size and position based on entity size and position
+		    int shadowWidth = (int) (this.size * 0.8); // Shadow slightly smaller than entity size
+		    int shadowHeight = (int) (this.size * 0.2); // Flattened shadow
+		    int shadowX = (int) this.screenPosition.getX() + (this.size - shadowWidth) / 2; // Centered under entity
+		    int shadowY = (int) (this.screenPosition.getY() + this.size * 0.9); // Slightly below the entity
+	
+		    // Draw the shadow
+		    g2d.fillOval(shadowX, shadowY, shadowWidth, shadowHeight);
+		}));
+		return renders;
 	}
 	public abstract void entityDeath();
 	

@@ -772,138 +772,141 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         
     }
 	
-	public void render(Graphics g) {
-		Graphics2D g2d = (Graphics2D) g;
-        Font font = game.font;
-        g2d.setFont(font);
-        
-        //if(playerUpgradeMenu != null) Debug.log(this, this.playerUpgradeMenu.getDecider());
-
-        // Render buttons
-        for (GUI gui : GUIs) {
-            gui.render(g2d);
-        }
-        
-     // Render tooltip if active
-        if (activeTooltip != null) {
-            activeTooltip.render(g2d);
-        }
-        
-        if(game.getGameState() == GameState.mainmenu && !game.settingsOpen) {
-        	String title = "Shooter Dude";
-            g2d.setFont(game.font.deriveFont(256f));
-            int titleWidth = g2d.getFontMetrics().stringWidth(title);
-            g.setColor(Color.DARK_GRAY.darker());
-            g2d.drawString(title, (game.getWidth() - titleWidth)/2, 300);
-            g2d.setColor(new Color(240, 240, 240));
-            g2d.drawString(title, (game.getWidth() - titleWidth)/2 + 7, 300 + 7);
-        }
-        if(game.getGameState() == GameState.wavesmenu) {
-        	
-        	
-        	if(game.party != null && game.party.getHost() != null) {
-        		g2d.setFont(game.font.deriveFont(128));
-        		
-        		g2d.drawString("Party", 50, 50);
-
-        		g2d.setFont(game.font.deriveFont(72));
-        		g2d.drawString(game.party.getHost().getUsername(), 50, 75);
-        		
-        		int count = 25;
-        		for(PlayerMP player : game.party.getPlayers()) {
-        			g2d.drawString(player.getUsername(), 50, 75+count);
-        			count += 25;
-        		}
-        		
-        	}
-        	
-        	
-        	int margin = 100;
-    		int XpBarSize = 100;
-    		int XpBarLength = 4; //length x size = actual length
-    		
-    		g2d.setFont(game.font.deriveFont(Font.PLAIN, 64f));
-    	    
-    		g2d.setColor(Color.black);
-    		g2d.fillRect(margin, game.getHeight()-(margin*2), XpBarLength * XpBarSize, XpBarSize);
-    		
-    		g2d.setColor(Color.green);
-    		g2d.fillRect((int)(margin + (margin*0.1))
-    				, (int) (game.getHeight() - margin*2 + margin*0.1), 
-    				(int) (((XpBarSize * XpBarLength) - (margin*0.2)) * ((double) Player.getGlobalStats().getCurrentXP()/Player.getGlobalStats().getXpToNextLevel())), 
-    				(int)(XpBarSize - (XpBarSize * 0.2)));
-        }
-        if(game.getGameState() == GameState.levelmenu) {
-        	
-        	int margin = 100;
-    		int XpBarSize = 100;
-    		int XpBarLength = 4; //length x size = actual length
-    		
-    		g2d.setFont(game.font.deriveFont(Font.PLAIN, 64f)); // Derive the font size explicitly as a float
-    	    
-    		g2d.setColor(Color.black);
-    		g2d.fillRect(margin, game.getHeight()-(margin*2), XpBarLength * XpBarSize, XpBarSize);
-    		
-    		g2d.setColor(Color.green);
-    		g2d.fillRect((int)(margin + (margin*0.1))
-    				, (int) (game.getHeight() - margin*2 + margin*0.1), 
-    				(int) (((XpBarSize * XpBarLength) - (margin*0.2)) * ((double) Player.getGlobalStats().getCurrentXP()/Player.getGlobalStats().getXpToNextLevel())), 
-    				(int)(XpBarSize - (XpBarSize * 0.2)));
-        	
-        }
-        if(game.getGameState() == GameState.wavesGameOver) {
-        	
-        	PlayerWavesStats stats = game.getPlayer().getWavesStats();
-
-            // Draw "Game Over" title
-            g2d.setFont(game.font.deriveFont(128f));
-            int titleWidth = g2d.getFontMetrics().stringWidth("Game Over");
-            g2d.drawString("Game Over", (game.getWidth() - titleWidth) / 2, 150);
-
-            // Draw Wave information
-            g2d.setFont(game.font.deriveFont(64f));
-            String waveText = "Wave " + stats.wave;
-            int waveWidth = g2d.getFontMetrics().stringWidth(waveText);
-            int center = (game.getWidth() - waveWidth) / 2;
-            g2d.setColor(Color.black);
-            g2d.drawString(waveText, center, 350);
-
-            // Draw all stats dynamically
-            g2d.setFont(game.font.deriveFont(48f));
-            int yPosition = 450; // Starting y position for stats
-            int lineHeight = 60; // Space between lines
-
-            Field[] fields = PlayerWavesStats.class.getDeclaredFields();
-            for (Field field : fields) {
-                try {
-                    field.setAccessible(true); // Allow access to private fields if any
-                    Object value = field.get(stats); // Get the value of the field
-
-                    String fieldName = field.getName();
-                    fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-
-	                StringBuilder formattedName = new StringBuilder();
-	                for (int i = 0; i < fieldName.length(); i++) {
-	                    char c = fieldName.charAt(i);
-	                    if (Character.isUpperCase(c)) {
-	                        formattedName.append(" ");
-	                    }
-	                    formattedName.append(c);
+	public Render render() {
+		Render render = new Render(Layer.UI, g -> {
+			Graphics2D g2d = (Graphics2D) g;
+	        Font font = game.font;
+	        g2d.setFont(font);
+	        
+	        //if(playerUpgradeMenu != null) Debug.log(this, this.playerUpgradeMenu.getDecider());
+	
+	        // Render buttons
+	        for (GUI gui : GUIs) {
+	            gui.render(g2d);
+	        }
+	        
+	     // Render tooltip if active
+	        if (activeTooltip != null) {
+	            activeTooltip.render(g2d);
+	        }
+	        
+	        if(game.getGameState() == GameState.mainmenu && !game.settingsOpen) {
+	        	String title = "Shooter Dude";
+	            g2d.setFont(game.font.deriveFont(256f));
+	            int titleWidth = g2d.getFontMetrics().stringWidth(title);
+	            g.setColor(Color.DARK_GRAY.darker());
+	            g2d.drawString(title, (game.getWidth() - titleWidth)/2, 300);
+	            g2d.setColor(new Color(240, 240, 240));
+	            g2d.drawString(title, (game.getWidth() - titleWidth)/2 + 7, 300 + 7);
+	        }
+	        if(game.getGameState() == GameState.wavesmenu) {
+	        	
+	        	
+	        	if(game.party != null && game.party.getHost() != null) {
+	        		g2d.setFont(game.font.deriveFont(128));
+	        		
+	        		g2d.drawString("Party", 50, 50);
+	
+	        		g2d.setFont(game.font.deriveFont(72));
+	        		g2d.drawString(game.party.getHost().getUsername(), 50, 75);
+	        		
+	        		int count = 25;
+	        		for(PlayerMP player : game.party.getPlayers()) {
+	        			g2d.drawString(player.getUsername(), 50, 75+count);
+	        			count += 25;
+	        		}
+	        		
+	        	}
+	        	
+	        	
+	        	int margin = 100;
+	    		int XpBarSize = 100;
+	    		int XpBarLength = 4; //length x size = actual length
+	    		
+	    		g2d.setFont(game.font.deriveFont(Font.PLAIN, 64f));
+	    	    
+	    		g2d.setColor(Color.black);
+	    		g2d.fillRect(margin, game.getHeight()-(margin*2), XpBarLength * XpBarSize, XpBarSize);
+	    		
+	    		g2d.setColor(Color.green);
+	    		g2d.fillRect((int)(margin + (margin*0.1))
+	    				, (int) (game.getHeight() - margin*2 + margin*0.1), 
+	    				(int) (((XpBarSize * XpBarLength) - (margin*0.2)) * ((double) Player.getGlobalStats().getCurrentXP()/Player.getGlobalStats().getXpToNextLevel())), 
+	    				(int)(XpBarSize - (XpBarSize * 0.2)));
+	        }
+	        if(game.getGameState() == GameState.levelmenu) {
+	        	
+	        	int margin = 100;
+	    		int XpBarSize = 100;
+	    		int XpBarLength = 4; //length x size = actual length
+	    		
+	    		g2d.setFont(game.font.deriveFont(Font.PLAIN, 64f)); // Derive the font size explicitly as a float
+	    	    
+	    		g2d.setColor(Color.black);
+	    		g2d.fillRect(margin, game.getHeight()-(margin*2), XpBarLength * XpBarSize, XpBarSize);
+	    		
+	    		g2d.setColor(Color.green);
+	    		g2d.fillRect((int)(margin + (margin*0.1))
+	    				, (int) (game.getHeight() - margin*2 + margin*0.1), 
+	    				(int) (((XpBarSize * XpBarLength) - (margin*0.2)) * ((double) Player.getGlobalStats().getCurrentXP()/Player.getGlobalStats().getXpToNextLevel())), 
+	    				(int)(XpBarSize - (XpBarSize * 0.2)));
+	        	
+	        }
+	        if(game.getGameState() == GameState.wavesGameOver) {
+	        	
+	        	PlayerWavesStats stats = game.getPlayer().getWavesStats();
+	
+	            // Draw "Game Over" title
+	            g2d.setFont(game.font.deriveFont(128f));
+	            int titleWidth = g2d.getFontMetrics().stringWidth("Game Over");
+	            g2d.drawString("Game Over", (game.getWidth() - titleWidth) / 2, 150);
+	
+	            // Draw Wave information
+	            g2d.setFont(game.font.deriveFont(64f));
+	            String waveText = "Wave " + stats.wave;
+	            int waveWidth = g2d.getFontMetrics().stringWidth(waveText);
+	            int center = (game.getWidth() - waveWidth) / 2;
+	            g2d.setColor(Color.black);
+	            g2d.drawString(waveText, center, 350);
+	
+	            // Draw all stats dynamically
+	            g2d.setFont(game.font.deriveFont(48f));
+	            int yPosition = 450; // Starting y position for stats
+	            int lineHeight = 60; // Space between lines
+	
+	            Field[] fields = PlayerWavesStats.class.getDeclaredFields();
+	            for (Field field : fields) {
+	                try {
+	                    field.setAccessible(true); // Allow access to private fields if any
+	                    Object value = field.get(stats); // Get the value of the field
+	
+	                    String fieldName = field.getName();
+	                    fieldName = fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+	
+		                StringBuilder formattedName = new StringBuilder();
+		                for (int i = 0; i < fieldName.length(); i++) {
+		                    char c = fieldName.charAt(i);
+		                    if (Character.isUpperCase(c)) {
+		                        formattedName.append(" ");
+		                    }
+		                    formattedName.append(c);
+		                }
+		                String finalName = formattedName.substring(0, 1).toUpperCase() + formattedName.substring(1).toLowerCase();
+	                    String fieldValue = value.toString();
+	                    String statText = formattedName + ": " + fieldValue;
+	
+	                    g2d.setColor(Color.black);
+	                    int statWidth = g2d.getFontMetrics().stringWidth(statText);
+	                    g2d.drawString(statText, (game.getWidth() - statWidth) / 2, yPosition);
+	
+	                    yPosition += lineHeight; // Move to the next line
+	                } catch (IllegalAccessException e) {
+	                    e.printStackTrace();
 	                }
-	                String finalName = formattedName.substring(0, 1).toUpperCase() + formattedName.substring(1).toLowerCase();
-                    String fieldValue = value.toString();
-                    String statText = formattedName + ": " + fieldValue;
-
-                    g2d.setColor(Color.black);
-                    int statWidth = g2d.getFontMetrics().stringWidth(statText);
-                    g2d.drawString(statText, (game.getWidth() - statWidth) / 2, yPosition);
-
-                    yPosition += lineHeight; // Move to the next line
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+	            }
+	        }
+		});
+		return render;
     }
 	
 	@Override

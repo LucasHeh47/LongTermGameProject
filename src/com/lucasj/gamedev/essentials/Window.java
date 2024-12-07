@@ -7,10 +7,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferStrategy;
+import java.util.Comparator;
+import java.util.List;
 
 import javax.swing.JFrame;
 
-import com.lucasj.gamedev.game.multiplayer.GameClient;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.settings.SettingsManager;
 import com.lucasj.gamedev.utils.GraphicUtils;
@@ -136,7 +138,13 @@ public class Window extends Canvas implements Runnable {
         g2d.setColor(Color.GRAY);
         g2d.fillRect(0, 0, getWidth(), getHeight());
 
-        game.render(g);
+        List<Render> renders = game.render();
+        
+        renders.sort(Comparator.comparingInt(Render::getLayerValue).reversed());
+        
+        for(Render render : renders) {
+        	render.render(g);
+        }
         
         g.dispose();
         bs.show();

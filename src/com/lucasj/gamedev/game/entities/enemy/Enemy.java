@@ -23,6 +23,8 @@ import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.ui.GameColors;
 import com.lucasj.gamedev.essentials.ui.GameColors.colors;
+import com.lucasj.gamedev.essentials.ui.Layer;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.events.entities.EntityAggroEvent;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
@@ -38,7 +40,6 @@ import com.lucasj.gamedev.game.gamemodes.waves.WavesManager;
 import com.lucasj.gamedev.game.levels.LevelUpPerk;
 import com.lucasj.gamedev.mathutils.Quadtree;
 import com.lucasj.gamedev.mathutils.Vector2D;
-import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.physics.CollisionSurface;
 
 // This file is gonna get messy
@@ -235,75 +236,80 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 
 	
 	/**
-	 * Do not override as it will remove healthbar
+	 * Do not override as it will remove shadow
 	 */
-	public void render(Graphics g) {
-		if(!isAlive) return;
-		super.render(g);
-		// Health bar
-		g.setColor(Color.black);
-		int barWidth = (int) (size + (size * 0.075));
-		int barHeight = (int) (size * 0.05);
-		int barX = (int) (screenPosition.getX()+(size/2) - (barWidth / 2));
-		int barY = (int) (screenPosition.getY() - (size * 0.2));
-		g.fillRect(barX, barY, barWidth, barHeight);
-
-		// Health portion of the bar
-		g.setColor(colors.LIGHT_RED.getValue());
-		int healthWidth = (int) (barWidth * ((double) this.healthUnderlayLength / maxHealth));
-		g.fillRect(barX, barY, healthWidth, barHeight);
-
-		// Health portion of the bar
-		g.setColor(Color.red);
-		healthWidth = (int) (barWidth * ((double) health / maxHealth));
-		g.fillRect(barX, barY, healthWidth, barHeight);
+	public List<Render> render() {
+		if(!isAlive) return new ArrayList<>();;
+		List<Render> renders = new ArrayList<>();
+		renders.addAll(super.render());
 		
-		if(this.onFire) {
-			Image fire = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Fire/EntityOnFire/" + fireTick + ".png", 
-					new Vector2D(), new Vector2D(16, 16));
-			g.drawImage(fire, this.getScreenPosition().getXint(), this.getScreenPosition().getYint(), 
-					this.size, this.size, null);
-			if((System.currentTimeMillis() - lastFireTick)/1000.0 >= fireSpeed) {
-				fireTick++;
-				if(fireTick == 10) {
-					fireTick = 1;
-					float damage = (float) ((10 * game.getPlayer().getPlayerUpgrades().getDamageMultiplier()) * (game.getWavesManager().getWave() * WavesManager.HEALTH_GROWTH_RATE));
-					if(Player.getGlobalStats().hasPerkUnlocked(LevelUpPerk.ExtraFlameWeaponTier)) {
-						damage *= game.getPlayer().getPrimaryGun().getTier().FlamePerkMultiplier();
-					}
-					this.takeDamage(damage);
-				}
-				this.lastFireTick = System.currentTimeMillis();
-			}
-		}
-		
-	    Graphics2D g2d = (Graphics2D) g;
-	 // Render the ray if it exists
-	    if(game.testing) {
-		    rays.parallelStream().forEach(ray -> { 
-		        if (ray.isBlocked) {
-		            g2d.setColor(new Color(255, 0, 0, 77)); // Red with 30% opacity
-		        } else {
-		            g2d.setColor(new Color(0, 255, 0, 77)); // Green with 30% opacity
-		        }
-		        g2d.draw(ray.rayShape);
-		    });
+		renders.add(new Render(Layer.Enemy, g-> {
+			// Health bar
+			g.setColor(Color.black);
+			int barWidth = (int) (size + (size * 0.075));
+			int barHeight = (int) (size * 0.05);
+			int barX = (int) (screenPosition.getX()+(size/2) - (barWidth / 2));
+			int barY = (int) (screenPosition.getY() - (size * 0.2));
+			g.fillRect(barX, barY, barWidth, barHeight);
 	
-		    // Render the intersection point if it exists
-		    if (this.intersectionPoint != null) {
-		        g2d.setColor(Color.RED);
-		        g2d.fillOval((int) this.intersectionPoint.getX() - 3, (int) this.intersectionPoint.getY() - 3, 6, 6);
+			// Health portion of the bar
+			g.setColor(colors.LIGHT_RED.getValue());
+			int healthWidth = (int) (barWidth * ((double) this.healthUnderlayLength / maxHealth));
+			g.fillRect(barX, barY, healthWidth, barHeight);
+	
+			// Health portion of the bar
+			g.setColor(Color.red);
+			healthWidth = (int) (barWidth * ((double) health / maxHealth));
+			g.fillRect(barX, barY, healthWidth, barHeight);
+			
+			if(this.onFire) {
+				Image fire = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Fire/EntityOnFire/" + fireTick + ".png", 
+						new Vector2D(), new Vector2D(16, 16));
+				g.drawImage(fire, this.getScreenPosition().getXint(), this.getScreenPosition().getYint(), 
+						this.size, this.size, null);
+				if((System.currentTimeMillis() - lastFireTick)/1000.0 >= fireSpeed) {
+					fireTick++;
+					if(fireTick == 10) {
+						fireTick = 1;
+						float damage = (float) ((10 * game.getPlayer().getPlayerUpgrades().getDamageMultiplier()) * (game.getWavesManager().getWave() * WavesManager.HEALTH_GROWTH_RATE));
+						if(Player.getGlobalStats().hasPerkUnlocked(LevelUpPerk.ExtraFlameWeaponTier)) {
+							damage *= game.getPlayer().getPrimaryGun().getTier().FlamePerkMultiplier();
+						}
+						this.takeDamage(damage);
+					}
+					this.lastFireTick = System.currentTimeMillis();
+				}
+			}
+			
+		    Graphics2D g2d = (Graphics2D) g;
+		 // Render the ray if it exists
+		    if(game.testing) {
+			    rays.parallelStream().forEach(ray -> { 
+			        if (ray.isBlocked) {
+			            g2d.setColor(new Color(255, 0, 0, 77)); // Red with 30% opacity
+			        } else {
+			            g2d.setColor(new Color(0, 255, 0, 77)); // Green with 30% opacity
+			        }
+			        g2d.draw(ray.rayShape);
+			    });
+		
+			    // Render the intersection point if it exists
+			    if (this.intersectionPoint != null) {
+			        g2d.setColor(Color.RED);
+			        g2d.fillOval((int) this.intersectionPoint.getX() - 3, (int) this.intersectionPoint.getY() - 3, 6, 6);
+			    }
+			    rays.clear();
+			    g2d.setColor(new Color(128, 0, 128, 5)); // Purple with 12% opacity (out of 255)
+			    int diameter = (int) (aggroRange * 2);
+			    g2d.fillOval((int) (screenPosition.getX() - aggroRange), (int) (screenPosition.getY() - aggroRange), diameter, diameter);
+			    
+			    g2d.setColor(new Color(128, 0, 128, 10)); // Purple with 12% opacity (out of 255)
+			    diameter = (int) (attackRange * 2);
+			    g2d.fillOval((int) (screenPosition.getX() - attackRange), (int) (screenPosition.getY() - attackRange), diameter, diameter);
+	
 		    }
-		    rays.clear();
-		    g2d.setColor(new Color(128, 0, 128, 5)); // Purple with 12% opacity (out of 255)
-		    int diameter = (int) (aggroRange * 2);
-		    g2d.fillOval((int) (screenPosition.getX() - aggroRange), (int) (screenPosition.getY() - aggroRange), diameter, diameter);
-		    
-		    g2d.setColor(new Color(128, 0, 128, 10)); // Purple with 12% opacity (out of 255)
-		    diameter = (int) (attackRange * 2);
-		    g2d.fillOval((int) (screenPosition.getX() - attackRange), (int) (screenPosition.getY() - attackRange), diameter, diameter);
-
-	    }
+		}));
+	    return renders;
 	}
 	
 	public boolean takeDamage(float damage) {

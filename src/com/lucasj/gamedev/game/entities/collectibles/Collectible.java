@@ -1,8 +1,11 @@
 package com.lucasj.gamedev.game.entities.collectibles;
 
 import java.awt.Graphics;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.lucasj.gamedev.essentials.Game;
+import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.game.entities.player.Player;
 import com.lucasj.gamedev.mathutils.Vector2D;
 
@@ -30,8 +33,9 @@ public abstract class Collectible{
 		playerCollisionCheck();
 	}
 
-	public void render(Graphics g) {
-		
+	public List<Render> render() {
+		List<Render> renders = new ArrayList<>();
+		return renders;
 	}
 	
 	abstract void collect(Player p);
