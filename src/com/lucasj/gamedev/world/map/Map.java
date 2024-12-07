@@ -6,16 +6,21 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
 import com.lucasj.gamedev.essentials.Camera;
 import com.lucasj.gamedev.essentials.Game;
-import com.lucasj.gamedev.mathutils.PerlinNoise;
+import com.lucasj.gamedev.mathutils.SimplexNoise;
 import com.lucasj.gamedev.mathutils.Vector2D;
 import com.lucasj.gamedev.physics.CollisionSurface;
+import com.lucasj.gamedev.world.tiles.Biome;
+import com.lucasj.gamedev.world.tiles.Tile;
 
 public class Map {
 
@@ -25,6 +30,7 @@ public class Map {
 	private Game game;
 	private MapManager mapm;
 	private Tile[][][] mapTiles;
+	private double[][] biomeNoise;
 	
 	public Map(Game game, MapManager mapm, int width, int height) {
 		this.game = game;
@@ -40,7 +46,7 @@ public class Map {
 	    int terrainData[][] = generateGrayscaleArray(mapDirectory);
 	    
 	    // Biomes
-//	    float[][] noise = PerlinNoise.generatePerlinNoise(width, height, 6, 0.4f);
+	    biomeNoise = SimplexNoise.generateNoise(width, height, 10, 0.1f, 0.0056);
 
 	    for (int x = 0; x < width; x++) {
 	        for (int y = 0; y < height; y++) {
@@ -48,16 +54,39 @@ public class Map {
 
 	            // Check the value from the terrainData array
 	            int terrainType = terrainData[y][x]; // Note: Use y as the row index and x as the column index
-
-	            mapTiles[0][x][y] = mapm.getGrass()[rand.nextInt(mapm.getGrass().length)];
+	            
+	            mapTiles[0][x][y] = mapm.getGrass(x, y)[rand.nextInt(mapm.getGrass(x, y).length)];
 	            if (terrainType == 100) {
-	                tile = mapm.getTrees();
+	                tile = mapm.getTrees(x, y)[rand.nextInt(mapm.getTrees(x, y).length)];
 	                addCollisionSurface(x, y);
 	            }
 
 	            mapTiles[1][x][y] = tile; // Store the selected tile in the 2D array
 	        }
 	    }
+	}
+	
+	/***
+	 * 
+	 * Take in a world position and gives a Biome
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public Biome getBiome(int x, int y) {
+		double noiseValue = biomeNoise[x][y]; // Retrieve the noise value for this position
+		List<Biome> sortedBiomes = new ArrayList<>(mapm.getBiomes());
+	    sortedBiomes.sort(Comparator.comparingInt(Biome::getHeight)); // Sort by height (low to high)
+
+		for (Biome biome : sortedBiomes) {
+	        if (noiseValue <= (float) biome.getHeight()/100) {
+	            return biome;
+	        }
+	    }
+
+	    // Default biome in case no match (e.g., highest terrain)
+	    return mapm.getBiomes().get(mapm.getBiomes().size() - 1);
 	}
 
 	private int mapNoiseToIndex(float noiseValue, float bias, int arrayLength) {
@@ -101,7 +130,7 @@ public class Map {
         // Get the dimensions
         int width = image.getWidth();
         int height = image.getHeight();
-
+        
         // Create the 2D array
         int[][] grayscaleArray = new int[height][width];
 

@@ -329,12 +329,12 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	public void update(double deltaTime) {
 		if(!isAlive) return;
 		
-		if(this.aggrod == null) {
+		if(this.aggrod == null || !isMoving) {
 			this.respawnTimer += deltaTime;
-			if(this.respawnTimer >= 7.5) {
-				this.respawn();
-				this.respawnTimer = 0;
-			}
+		}
+		if(this.respawnTimer >= 7.5) {
+			this.respawn();
+			this.respawnTimer = 0;
 		}
 		
 		super.update(deltaTime);

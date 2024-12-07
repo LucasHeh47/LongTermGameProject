@@ -33,7 +33,7 @@ public class MiniMap {
 		Image frame = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/UI/frame.png", new Vector2D(0, 0), new Vector2D(32, 32));
 		
 		g2d.setColor(Color.DARK_GRAY.darker());
-		Image img = SpriteTools.getSprite((SpriteTools.assetDirectory + "Art/Maps/Map1.png"), new Vector2D(0, 0), new Vector2D(100));
+		Image img = SpriteTools.getSprite((SpriteTools.assetDirectory + "Art/Maps/" + game.getMapManager().selectedMap +".png"), new Vector2D(0, 0), new Vector2D(200));
 		img = SpriteTools.tintGrayscaleImage(SpriteTools.toBufferedImage(img), new Color(50, 50, 50, 10));
 		img = SpriteTools.setOpacity(SpriteTools.toBufferedImage(img), 0.75f);
 		g2d.drawImage(img, game.getWidth()-300, 50, 250, 250, null);

@@ -1,4 +1,4 @@
-package com.lucasj.gamedev.world.map;
+package com.lucasj.gamedev.world.tiles;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;

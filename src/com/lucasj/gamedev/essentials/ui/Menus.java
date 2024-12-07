@@ -105,7 +105,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	            	if(game.party != null && game.party.getHost().getUsername().equals(game.username)) game.getSocketClient().getPacketManager().partyGoingIntoGamePacket();
     	                game.setGameState(GameState.waves);
     	                try {
-    	        			game.getMapManager().map.generateMap(SpriteTools.assetDirectory + "Art/Maps/Map1.png");
+    	        			game.getMapManager().map.generateMap(SpriteTools.assetDirectory + "Art/Maps/" + game.getMapManager().selectedMap + ".png");
     	        		} catch (IOException e) {
     	        			e.printStackTrace();
     	        		}
