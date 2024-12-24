@@ -21,13 +21,13 @@ public class NPCManager {
 	}
 	
 	public void instantiateNPCs() {
-		playerUpgradeNPC = new NPC(game, new Vector2D(53*game.getMapManager().getTileSize(), 8 * game.getMapManager().getTileSize()), 50);
+		playerUpgradeNPC = new NPC(game, new Vector2D(53*game.getMapManager().getTileSize(), 8 * game.getMapManager().getTileSize()), 50, "Player Upgrader");
 		playerUpgradeNPC.instantiate();
-		craftingTable = new NPC(game, new Vector2D(91*game.getMapManager().getTileSize(), 46 * game.getMapManager().getTileSize()), 50);
+		craftingTable = new NPC(game, new Vector2D(91*game.getMapManager().getTileSize(), 46 * game.getMapManager().getTileSize()), 50, "Crafting Dude");
 		craftingTable.instantiate();
-		gunsmith = new NPC(game, new Vector2D(14*game.getMapManager().getTileSize(), 50 * game.getMapManager().getTileSize()), 50);
+		gunsmith = new NPC(game, new Vector2D(14*game.getMapManager().getTileSize(), 50 * game.getMapManager().getTileSize()), 50, "Gunsmith");
 		gunsmith.instantiate();
-		mission = new NPC(game, new Vector2D(14*game.getMapManager().getTileSize(), 14 * game.getMapManager().getTileSize()), 50);
+		mission = new NPC(game, new Vector2D(14*game.getMapManager().getTileSize(), 14 * game.getMapManager().getTileSize()), 50, "Mission Guy");
 		mission.instantiate();
 	}
 

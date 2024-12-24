@@ -12,6 +12,7 @@ public class GameColors {
 		RED(Color.RED),
 		LIGHT_RED(new Color(255, 140, 140)),
 		BLUE(Color.BLUE),
+		LIGHT_BLUE(new Color(43, 202, 255)),
 		GREEN(Color.GREEN),
 		YELLOW(Color.YELLOW),
 		GOLD(new Color(235, 182, 49)),

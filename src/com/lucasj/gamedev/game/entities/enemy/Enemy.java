@@ -1,7 +1,6 @@
 package com.lucasj.gamedev.game.entities.enemy;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Shape;
@@ -30,6 +29,7 @@ import com.lucasj.gamedev.events.input.MouseMotionEventListener;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.Breadcrumb;
 import com.lucasj.gamedev.game.entities.collectibles.Coin;
+import com.lucasj.gamedev.game.entities.collectibles.Mana;
 import com.lucasj.gamedev.game.entities.particles.Particle;
 import com.lucasj.gamedev.game.entities.particles.ParticleGenerator;
 import com.lucasj.gamedev.game.entities.particles.ParticleShape;
@@ -284,29 +284,27 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		    Graphics2D g2d = (Graphics2D) g;
 		 // Render the ray if it exists
 		    if(game.testing) {
-			    rays.parallelStream().forEach(ray -> { 
-			        if (ray.isBlocked) {
-			            g2d.setColor(new Color(255, 0, 0, 77)); // Red with 30% opacity
-			        } else {
-			            g2d.setColor(new Color(0, 255, 0, 77)); // Green with 30% opacity
-			        }
-			        g2d.draw(ray.rayShape);
+		    	game.getEnemyMovementExecutor().submit(() -> {
+				    rays.forEach(ray -> { 
+				        if (ray.isBlocked) {
+				            g2d.setColor(new Color(255, 0, 0, 77)); // Red with 30% opacity
+				        } else {
+				            g2d.setColor(new Color(0, 255, 0, 77)); // Green with 30% opacity
+				        }
+				        g2d.draw(ray.rayShape);
+				    });
+			
+				    // Render the intersection point if it exists
+				    if (this.intersectionPoint != null) {
+				        g2d.setColor(Color.RED);
+				        g2d.fillOval((int) this.intersectionPoint.getX() - 3, (int) this.intersectionPoint.getY() - 3, 6, 6);
+				    }
+				    rays.clear();
+//				    g2d.setColor(new Color(128, 0, 128, 5)); // Purple with 12% opacity (out of 255)
+//				    int diameter = (int) (aggroRange * 2);
+//				    g2d.fillOval((int) (screenPosition.getX() - aggroRange), (int) (screenPosition.getY() - aggroRange), diameter, diameter);
+//		
 			    });
-		
-			    // Render the intersection point if it exists
-			    if (this.intersectionPoint != null) {
-			        g2d.setColor(Color.RED);
-			        g2d.fillOval((int) this.intersectionPoint.getX() - 3, (int) this.intersectionPoint.getY() - 3, 6, 6);
-			    }
-			    rays.clear();
-			    g2d.setColor(new Color(128, 0, 128, 5)); // Purple with 12% opacity (out of 255)
-			    int diameter = (int) (aggroRange * 2);
-			    g2d.fillOval((int) (screenPosition.getX() - aggroRange), (int) (screenPosition.getY() - aggroRange), diameter, diameter);
-			    
-			    g2d.setColor(new Color(128, 0, 128, 10)); // Purple with 12% opacity (out of 255)
-			    diameter = (int) (attackRange * 2);
-			    g2d.fillOval((int) (screenPosition.getX() - attackRange), (int) (screenPosition.getY() - attackRange), diameter, diameter);
-	
 		    }
 		}));
 	    return renders;
@@ -347,8 +345,10 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 		Vector2D oldPos = this.position.copy();
 		if(game.instantiatedEntitiesOnScreen.contains(this)) {
 			if(!this.isZapped) {
-		        applyFlockingBehavior(deltaTime);
-			    findNearestBreadcrumbToPlayer(deltaTime);
+				game.getEnemyMovementExecutor().submit(() -> { // probably not synchronized ???
+			        applyFlockingBehavior(deltaTime);
+				    findNearestBreadcrumbToPlayer(deltaTime);
+				});
 			}
 		}
 		this.isMoving = (this.position != oldPos);
@@ -391,6 +391,13 @@ public abstract class Enemy extends Entity implements MouseMotionEventListener {
 	public void entityDeath() {
 		Random rand = new Random();
 		Coin coin = new Coin(game, this.position, rand.nextInt(cashDrop[0], cashDrop[1]));
+		if(rand.nextInt(0, 4) == 1) {
+			int maxManaDrops = (int) (15 * game.getPlayer().getPlayerUpgrades().getManaDropMultiplier());
+			int manaCount = rand.nextInt(5, maxManaDrops);
+			for(int i = 0; i < manaCount; i++ ) {
+				Mana mana = new Mana(game, this.position, new Vector2D(15));
+			}
+		}
 		game.getPlayer().addXp(this.maxHealth/10);
 		game.getPlayer().getWavesStats().enemiesKilled++;
 	}

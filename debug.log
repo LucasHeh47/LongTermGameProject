@@ -1,0 +1,612 @@
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Player stats saved successfully.
+[INFO] Logging initialized.
+Game data directory already exists: /home/lucas/.projectgame
+Player stats loaded successfully.
+[GameClient] Client started.
+Initialzing enemy types...
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Zombie
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Skeleton
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Slime
+Adding enemy type: com.lucasj.gamedev.game.entities.enemy.Beast
+[EventManager] Adding MissionManager to EntityDeathEvent
+[EventManager] Adding MissionManager to CoinCollectedEvent
+[EventManager] Adding MissionManager to EntityDamagedEvent
+[EventManager] Adding MissionManager to WeaponTierUpgradeEvent
+[EventManager] Adding MissionManager to SwapWeaponEvent
+[EventManager] Adding WavesManager to EntityDamagedEvent
+[EventManager] Adding WavesManager to EntityDeathEvent
+[EventManager] Adding LevelUpManager to LevelUpEvent
+[EventManager] Adding PlayerRewarder to EntityDeathEvent
+[EventManager] Adding PlayerRewarder to CoinCollectedEvent
+[EventManager] Adding PlayerRewarder to WaveEndEvent
+This is a constructor
+[EventManager] Adding Player to ControllerEvent
+Hit player: 80.0/100.0
+Hit player: 60.0/100.0
+Hit player: 34.0/100.0
+[MissionManager] starting mission
+Purchasing: damage
+Purchasing: damage
+Exception in thread "Thread-1" java.util.ConcurrentModificationException
+	at java.base/java.util.ArrayList$Itr.checkForComodification(ArrayList.java:1095)
+	at java.base/java.util.ArrayList$Itr.remove(ArrayList.java:1063)
+	at Project/com.lucasj.gamedev.essentials.audio.AudioPlayer.update(AudioPlayer.java:37)
+	at Project/com.lucasj.gamedev.essentials.Game.update(Game.java:177)
+	at Project/com.lucasj.gamedev.essentials.Window.update(Window.java:125)
+	at Project/com.lucasj.gamedev.essentials.Window.run(Window.java:107)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Player stats saved successfully.

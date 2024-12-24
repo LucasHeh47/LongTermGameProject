@@ -21,6 +21,8 @@ public abstract class Mission {
 	
 	protected Broadcast broadcast;
 	
+	protected int waveStart = 0;
+	
 	public Mission (Game game, String name, String description, String rewards, float length) {
 		this.game = game;
 		this.name = name;
@@ -69,5 +71,13 @@ public abstract class Mission {
 	
 	public Broadcast getBroadcast() {
 		return this.broadcast;
+	}
+
+	public int getWaveStart() {
+		return waveStart;
+	}
+
+	public void setWaveStart(int waveStart) {
+		this.waveStart = waveStart;
 	}
 }

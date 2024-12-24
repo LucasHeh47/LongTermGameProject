@@ -6,12 +6,15 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.KeyboardFocusManager;
 import java.awt.image.BufferStrategy;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JFrame;
 
+import com.lucasj.gamedev.essentials.ui.Layer;
 import com.lucasj.gamedev.essentials.ui.Render;
 import com.lucasj.gamedev.misc.Debug;
 import com.lucasj.gamedev.settings.SettingsManager;
@@ -26,6 +29,7 @@ public class Window extends Canvas implements Runnable {
 	
 	private Thread gameThread;
     private boolean running = false;
+    private Dimension size;
     
     private JFrame frame;
     private InputHandler inputHandler;
@@ -43,6 +47,7 @@ public class Window extends Canvas implements Runnable {
         fpslimit = settings.getIntSetting("fpslimit");
     	frame = new JFrame(title);
         Dimension size = new Dimension(width, height);
+        this.size = size;
         setPreferredSize(size);
         
         gUtils = new GraphicUtils();
@@ -50,6 +55,7 @@ public class Window extends Canvas implements Runnable {
         frame.add(this);
         inputHandler = new InputHandler();
         
+        frame.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, Collections.emptySet());
         frame.pack();
         frame.setMinimumSize(new Dimension(1920, 1080));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -119,6 +125,19 @@ public class Window extends Canvas implements Runnable {
     }
 
     private void update(double deltaTime) {
+//    	Runtime runtime = Runtime.getRuntime();
+//    	long totalMemory = runtime.totalMemory();
+//
+//        // Get the maximum heap size in bytes
+//        long maxMemory = runtime.maxMemory();
+//
+//        // Get the free memory in bytes
+//        long freeMemory = runtime.freeMemory();
+//
+//        System.out.println("Total Memory: " + totalMemory / 1024 / 1024 + " MB");
+//        System.out.println("Max Memory: " + maxMemory / 1024 / 1024 + " MB");
+//        System.out.println("Free Memory: " + freeMemory / 1024 / 1024 + " MB");
+//    
     	game.update(deltaTime);
     }
 
@@ -141,6 +160,7 @@ public class Window extends Canvas implements Runnable {
         List<Render> renders = game.render();
         
         renders.sort(Comparator.comparingInt(Render::getLayerValue).reversed());
+        
         
         for(Render render : renders) {
         	render.render(g);

@@ -13,6 +13,8 @@ public class PlayerBreadcrumbManager {
 	private Game game;
 	private Player player;
 	
+	private int breadcrumbAmount = 10;
+	
 	private double spawnTime;
 	private long lastSpawn;
 	
@@ -24,7 +26,7 @@ public class PlayerBreadcrumbManager {
 	
 	public void update(double deltaTime) {
 		if((System.currentTimeMillis() - lastSpawn)/1000.0 >= spawnTime && player.isMoving()) {
-			if(activeBreadcrumbs.size() >= 6) {
+			if(activeBreadcrumbs.size() >= breadcrumbAmount) {
 				removeLast();
 			}
 			dropCrumb();

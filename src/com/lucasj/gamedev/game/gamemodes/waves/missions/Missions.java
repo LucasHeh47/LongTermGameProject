@@ -6,7 +6,7 @@ import com.lucasj.gamedev.misc.Debug;
 public class Missions {
 
 	public static class Slayer extends Mission {
-	
+		
 		private int baseAmount = 5;
 		
 		private int amountKilled = 0;
@@ -47,6 +47,7 @@ public class Missions {
 	
 		public Terminator(Game game) {
 			super(game, "Terminator", "{LIGHT_GRAY}Kill {RED}{X} {LIGHT_GRAY}Enemies with a {YELLOW}Turret {LIGHT_GRAY}In " + 30 + " Seconds.", "$4000", 30);
+			this.waveStart = 7;
 		}
 		
 		public void update(double deltaTime) {
@@ -113,6 +114,7 @@ public class Missions {
 	
 		public Invulnerable(Game game) {
 			super(game, "Invulnerable", "{LIGHT_GRAY}Do Not Take Damage for {GOLD}" + 10 + " {LIGHT_GRAY}Seconds.", "$5000", 10);
+			this.waveStart = 5;
 		}
 		
 		public void update(double deltaTime) {
@@ -146,6 +148,7 @@ public class Missions {
 		public Frenzy(Game game) {
 			super(game, "Frenzy", "{LIGHT_GRAY}Earn Cash For Every {X} {LIGHT_GRAY}Damage Dealt in 30 Seconds.", "$0", 30);
 			dividend = game.getPlayer().getPrimaryGun().getTier().MissionFrenzyDividend();
+			this.waveStart = 3;
 		}
 		
 		public void update(double deltaTime) {

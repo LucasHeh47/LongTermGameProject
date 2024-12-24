@@ -1,5 +1,6 @@
 package com.lucasj.gamedev.game.gamemodes.waves;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +74,14 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		for (Class<?> nested : Missions.class.getDeclaredClasses()) {
 			if (Modifier.isStatic(nested.getModifiers())) {
 				if(Mission.class.isAssignableFrom(nested)) {
-					missions.add((Class<? extends Mission>) nested);
+					try {
+						if(nested.getField("waveStart").getInt(nested.getConstructor(Game.class).newInstance(game)) >= game.getWavesManager().getWave()) {
+							missions.add((Class<? extends Mission>) nested);
+						}
+					} catch (NoSuchFieldException | IllegalAccessException | NoSuchMethodException | InvocationTargetException | InstantiationException e) {
+						Debug.log(this, "Developer is a retard... but if it works, it works"); // it doesnt work
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -89,7 +97,6 @@ public class MissionManager implements EntityDeathEventListener, CoinCollectedEv
 		}
 		this.setCanStartMission(false);
 		Debug.log(this, "starting mission");
-        Mission.activeMission = new Missions.Terminator(game);
 	}
 
 	@Override

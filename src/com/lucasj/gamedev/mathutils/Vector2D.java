@@ -61,6 +61,16 @@ public class Vector2D {
     public Vector2D subtract(Vector2D v) {
         return new Vector2D(this.x - v.x, this.y - v.y);
     }
+    
+    // Subtract two vectors
+    public void subtractX(float x) {
+        this.x -= x;
+    }
+
+    // Subtract two vectors
+    public void subtractY(float y) {
+        this.y -= y;
+    }
 
     // Multiply vector by a scalar
     public Vector2D multiply(double scalar) {
@@ -163,6 +173,13 @@ public class Vector2D {
         // Return a new vector with the same magnitude as the original
         float magnitude = (float) this.magnitude();
         return new Vector2D(newX, newY).normalize().multiply(magnitude);
+    }
+	
+	public static Vector2D fromAngleDegrees(double degrees) {
+        double radians = Math.toRadians(degrees);
+        double x = Math.cos(radians);
+        double y = Math.sin(radians);
+        return new Vector2D(x, y);
     }
 }
 

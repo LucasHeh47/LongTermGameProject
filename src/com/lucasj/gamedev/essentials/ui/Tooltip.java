@@ -136,9 +136,19 @@ public class Tooltip {
             subTextHeight = wrappedSubTextLines.size() * g2d.getFontMetrics().getHeight();
             g2d.setFont(font);
         }
+        
+        int longestLine = g2d.getFontMetrics().stringWidth(text);
+        
+        for(String str : wrappedSubTextLines) {
+        	String comparing = str.replaceAll("\\{[^}]*\\}", "");
+        	Debug.log(this, comparing);
+        	if(g2d.getFontMetrics().stringWidth(comparing) > longestLine) {
+        		longestLine = g2d.getFontMetrics().stringWidth(comparing);
+        	}
+        }
 
         // Calculate the final box dimensions
-        int boxWidth = subText != "" ? Math.max(textWidth, 400) + padding * 2 : Math.min(textWidth, 400) + padding * 2;
+        int boxWidth = longestLine;
         int boxHeight = textHeight + (subText.isEmpty() ? 0 : subTextHeight) + padding * 2;
 
         // Draw the background box with padding
@@ -214,5 +224,9 @@ public class Tooltip {
 
 	public void setRequirements(List<Supplier<String>> requirements) {
 		this.requirements = requirements;
+	}
+	
+	public String getTitle() {
+		return this.text;
 	}
 }

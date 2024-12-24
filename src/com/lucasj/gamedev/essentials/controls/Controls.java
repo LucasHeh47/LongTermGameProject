@@ -9,4 +9,9 @@ public enum Controls {
 	PRIMARY(),
 	SECONDARY(),
 	SWAP(),
+	PLACE(),
+	MAP(),
+	PAUSE(),
+	SPECIAL(),
+	RELOAD()
 }

@@ -1,13 +1,9 @@
 package com.lucasj.gamedev.essentials.ui;
 
-import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Robot;
-import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -75,7 +71,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     	}, () -> {
     		List<Button> buttons = new ArrayList<>();
     		buttons.add(new Button(game, this, GameState.mainmenu, "Play Waves", (game.getWidth() - game.getWidth()/3) / 2 - 200, game.getHeight()/2 - 125, 400, 50,
-    	            Color.LIGHT_GRAY, Color.BLACK, () -> {
+    	            Color.DARK_GRAY, Color.WHITE, () -> {
     	                game.setGameState(GameState.wavesmenu);
     	                try {
     	        			game.getMapManager().map.generateMap(SpriteTools.assetDirectory + "Art/Maps/" + game.getMapManager().selectedMap + ".png");
@@ -439,7 +435,7 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         }, () -> {
         	List<Button> buttons = new ArrayList<>();
         	
-        	Button regen = (new Button(game, this, GameState.waves, "Unlock Health Regen", 50, 400, 250, 50,
+        	Button regen = (new Button(game, this, GameState.waves, "Unlock Health Regen", 50, 675, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                     	Debug.log("DEBUG", "Unlocking Health Regen");
                         boolean success = game.getPlayer().getPlayerUpgrades().unlockHealthRegen();
@@ -504,12 +500,25 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
         	buttons.add(new Button(game, this, GameState.waves, "Upgrade Movement", 50, 325, 250, 50,
                     Color.LIGHT_GRAY, Color.BLACK, () -> {
                         boolean success = game.getPlayer().getPlayerUpgrades().upgrade("movement");
-                        System.out.println("Got movement");
                     }, 
                     new Tooltip(game, game.getPlayer().getPlayerUpgrades().getCost("movement") + " Gem(s)", "Purchasing will upgrade your movement speed.",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
                     	List<Supplier<String>> list = new ArrayList<>();
                     	list.add(() -> {
                     		boolean hasGems = game.getPlayer().getGems() >= game.getPlayer().getPlayerUpgrades().getCost("movement");
+                    		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
+                    	});
+                    	return list;
+                    })
+                    ));
+        	
+        	buttons.add(new Button(game, this, GameState.waves, "Upgrade Mana Drop", 50, 400, 250, 50,
+                    Color.LIGHT_GRAY, Color.BLACK, () -> {
+                        boolean success = game.getPlayer().getPlayerUpgrades().upgrade("mana");
+                    }, 
+                    new Tooltip(game, game.getPlayer().getPlayerUpgrades().getCost("mana") + " Gem(s)", "Purchasing will increase mana drops from enemies",(int) this.mousePos.getX(), (int) this.mousePos.getY(), Color.DARK_GRAY, Color.WHITE, () -> {
+                    	List<Supplier<String>> list = new ArrayList<>();
+                    	list.add(() -> {
+                    		boolean hasGems = game.getPlayer().getGems() >= game.getPlayer().getPlayerUpgrades().getCost("mana");
                     		return hasGems ? "" : "{RED}(!) Not Enough Gems!";
                     	});
                     	return list;
@@ -773,6 +782,9 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
     }
 	
 	public Render render() {
+		if(game.getPlayer().getActiveTooltip() != null) {
+			this.activeTooltip = game.getPlayer().getActiveTooltip();
+		}
 		Render render = new Render(Layer.UI, g -> {
 			Graphics2D g2d = (Graphics2D) g;
 	        Font font = game.font;
@@ -992,6 +1004,11 @@ public class Menus implements MouseClickEventListener, MouseMotionEventListener 
 
 	@Override
 	public void onMouseMoved(MouseEvent e) {
+		this.activeTooltip = null;
+		if(game.getPlayer().getActiveTooltip() != null) {
+			this.activeTooltip = game.getPlayer().getActiveTooltip();
+			return;
+		}
         previousMousePosition = e.getPoint();
 	    int mouseX = e.getX();
 	    int mouseY = e.getY();

@@ -20,6 +20,8 @@ public class MiniMap {
 	private float updateTick = 1;
 	private long lastUpdate;
 	
+	private boolean minimized = true;
+	
 	private List<Vector2D> entityPositions;
 	
 	public MiniMap(Game game) {
@@ -37,22 +39,37 @@ public class MiniMap {
 			Graphics2D g2d = (Graphics2D) g;
 			Image frame = SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/UI/frame.png", new Vector2D(0, 0), new Vector2D(32, 32));
 			
-			g2d.setColor(Color.DARK_GRAY.darker());
-			Image img = SpriteTools.getSprite((SpriteTools.assetDirectory + "Art/Maps/" + game.getMapManager().selectedMap + ".png"), new Vector2D(0, 0), new Vector2D(100));
-			img = SpriteTools.tintGrayscaleImage(SpriteTools.toBufferedImage(img), new Color(50, 50, 50, 10));
-			img = SpriteTools.setOpacity(SpriteTools.toBufferedImage(img), 0.75f);
-			g2d.drawImage(img, game.getWidth()-300, 50, 250, 250, null);
-			
-			g2d.setColor(Color.red);
-			entityPositions.forEach(entity -> {
-				g2d.fillOval((int) (game.getWidth()-300 + entity.getX()), (int) (50 + entity.getY()), 1, 1);
-			});
-			
-			g2d.setColor(Color.green);
-			Vector2D pos = new Vector2D(clamp(game.getPlayer().getPosition().getXint(), game.getMapManager().getWorldSize().getXint(), 250), clamp(game.getPlayer().getPosition().getYint(), game.getMapManager().getWorldSize().getYint(), 250));
-			g2d.fillOval(game.getWidth()-300 + pos.getXint(), (50 + pos.getYint()), 3, 3);
-			
-			//g2d.drawImage(frame, game.getWidth()-300, 50, 250, 250, null);
+			if(this.minimized) {
+				g2d.setColor(Color.DARK_GRAY.darker());
+				Image img = SpriteTools.getSprite((SpriteTools.assetDirectory + "Art/Maps/" + game.getMapManager().selectedMap + ".png"), new Vector2D(0, 0), new Vector2D(100));
+				img = SpriteTools.tintGrayscaleImage(SpriteTools.toBufferedImage(img), new Color(50, 50, 50, 10));
+				img = SpriteTools.setOpacity(SpriteTools.toBufferedImage(img), 0.75f);
+				g2d.drawImage(img, game.getWidth()-300, 50, 250, 250, null);
+				
+				g2d.setColor(Color.red);
+				entityPositions.forEach(entity -> {
+					g2d.fillOval((int) (game.getWidth()-300 + entity.getX()), (int) (50 + entity.getY()), 1, 1);
+				});
+				
+				g2d.setColor(Color.green);
+				Vector2D pos = new Vector2D(clamp(game.getPlayer().getPosition().getXint(), game.getMapManager().getWorldSize().getXint(), 250), clamp(game.getPlayer().getPosition().getYint(), game.getMapManager().getWorldSize().getYint(), 250));
+				g2d.fillOval(game.getWidth()-300 + pos.getXint(), (50 + pos.getYint()), 3, 3);
+			} else {
+				g2d.setColor(Color.DARK_GRAY.darker());
+				Image img = SpriteTools.getSprite((SpriteTools.assetDirectory + "Art/Maps/" + game.getMapManager().selectedMap + ".png"), new Vector2D(0, 0), new Vector2D(100));
+				img = SpriteTools.tintGrayscaleImage(SpriteTools.toBufferedImage(img), new Color(50, 50, 50, 10));
+				img = SpriteTools.setOpacity(SpriteTools.toBufferedImage(img), 0.75f);
+				g2d.drawImage(img, game.getWidth()/3, 300, game.getWidth()/3, game.getWidth()/3, null);
+				
+				g2d.setColor(Color.red);
+				entityPositions.forEach(entity -> {
+					g2d.fillOval((int) (game.getWidth()/3 + entity.getX()), (int) (300 + entity.getY()), 1, 1);
+				});
+				
+				g2d.setColor(Color.green);
+				Vector2D pos = new Vector2D(clamp(game.getPlayer().getPosition().getXint(), game.getMapManager().getWorldSize().getXint(), game.getWidth()/3), clamp(game.getPlayer().getPosition().getYint(), game.getMapManager().getWorldSize().getYint(), game.getWidth()/3));
+				g2d.fillOval(game.getWidth()/3 + pos.getXint(), (300 + pos.getYint()), 3, 3);
+			}
 		});
 		return render;
 	}
@@ -61,11 +78,17 @@ public class MiniMap {
 		entityPositions.clear();
 		game.instantiatedEntities.forEach(entity -> {
 			if(entity instanceof Enemy) {
-				
-				Vector2D pos = new Vector2D(clamp(entity.getPosition().getXint(), game.getMapManager().getWorldSize().getXint(), 250), clamp(entity.getPosition().getYint(), game.getMapManager().getWorldSize().getYint(), 250));
-				//Debug.log(this, game.getMapManager().getWorldSize());
-				//Debug.log(this, pos.toString());
-				entityPositions.add(pos);
+				if(!this.minimized) {
+					Vector2D pos = new Vector2D(clamp(entity.getPosition().getXint(), game.getMapManager().getWorldSize().getXint(), game.getWidth()/3), clamp(entity.getPosition().getYint(), game.getMapManager().getWorldSize().getYint(), game.getWidth()/3));
+					//Debug.log(this, game.getMapManager().getWorldSize());
+					//Debug.log(this, pos.toString());
+					entityPositions.add(pos);
+				} else {
+					Vector2D pos = new Vector2D(clamp(entity.getPosition().getXint(), game.getMapManager().getWorldSize().getXint(), 250), clamp(entity.getPosition().getYint(), game.getMapManager().getWorldSize().getYint(), 250));
+					//Debug.log(this, game.getMapManager().getWorldSize());
+					//Debug.log(this, pos.toString());
+					entityPositions.add(pos);
+				}
 			}
 		});
 	}
@@ -74,5 +97,13 @@ public class MiniMap {
         int factor = originalMax / newMax;
         return x / factor;
     }
+
+	public boolean isMinimized() {
+		return minimized;
+	}
+
+	public void setMinimized(boolean minimized) {
+		this.minimized = minimized;
+	}
 
 }

@@ -75,6 +75,7 @@ public class Landmine extends Placeable {
 	            }
 	        }
 	    });
+		game.getCamera().shake(1, 10);
 	}
 
 	public int getRadius() {

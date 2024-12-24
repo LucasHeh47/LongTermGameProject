@@ -6,9 +6,11 @@ import com.lucasj.gamedev.events.GameEvent;
 public class ControllerEvent implements GameEvent {
 
 	private Controls key;
+	private boolean pressed;
 	
-	public ControllerEvent(Controls key) {
+	public ControllerEvent(Controls key, boolean pressed) {
 		this.setKey(key);
+		this.pressed = pressed;
 	}
 
 	public Controls getKey() {
@@ -23,6 +25,10 @@ public class ControllerEvent implements GameEvent {
 	public void setCancelled(boolean isCancelled) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	public boolean getPressed() {
+		return pressed;
 	}
 	
 }

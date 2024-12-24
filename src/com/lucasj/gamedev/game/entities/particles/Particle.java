@@ -84,6 +84,9 @@ public class Particle {
 				} else if (shape == ParticleShape.Text) {
 					if(text != null) {
 						g2d.setFont(game.font.deriveFont(size));
+						g2d.setColor(Color.DARK_GRAY);
+						g2d.drawString(text, this.getPosition().getXint(), this.getPosition().getYint()+2);
+						g2d.setColor(color);
 						g2d.drawString(text, this.getPosition().getXint(), this.getPosition().getYint());
 					}
 				}

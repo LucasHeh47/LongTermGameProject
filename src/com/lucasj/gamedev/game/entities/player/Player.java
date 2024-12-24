@@ -17,11 +17,15 @@ import java.util.Random;
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.Game;
 import com.lucasj.gamedev.essentials.InputHandler;
+import com.lucasj.gamedev.essentials.controls.Controller;
+import com.lucasj.gamedev.essentials.controls.Controls;
 import com.lucasj.gamedev.essentials.ui.GameColors;
 import com.lucasj.gamedev.essentials.ui.GameColors.colors;
 import com.lucasj.gamedev.essentials.ui.Layer;
 import com.lucasj.gamedev.essentials.ui.Render;
+import com.lucasj.gamedev.essentials.ui.Tooltip;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
+import com.lucasj.gamedev.events.input.ControllerEvent;
 import com.lucasj.gamedev.events.input.KeyboardEventListener;
 import com.lucasj.gamedev.events.input.MouseClickEventListener;
 import com.lucasj.gamedev.events.input.MouseMotionEventListener;
@@ -33,12 +37,16 @@ import com.lucasj.gamedev.events.player.PlayerStaminaUseEvent;
 import com.lucasj.gamedev.events.weapons.SwapWeaponEvent;
 import com.lucasj.gamedev.game.entities.Entity;
 import com.lucasj.gamedev.game.entities.ai.BreadcrumbCache;
+import com.lucasj.gamedev.game.entities.collectibles.Mana;
 import com.lucasj.gamedev.game.entities.particles.Particle;
 import com.lucasj.gamedev.game.entities.particles.ParticleShape;
 import com.lucasj.gamedev.game.entities.placeables.Placeable;
 import com.lucasj.gamedev.game.entities.player.multiplayer.PlayerMP;
 import com.lucasj.gamedev.game.entities.projectiles.Bullet;
 import com.lucasj.gamedev.game.levels.LevelUpManager;
+import com.lucasj.gamedev.game.skills.Dash;
+import com.lucasj.gamedev.game.skills.Skill;
+import com.lucasj.gamedev.game.skills.Teleport;
 import com.lucasj.gamedev.game.weapons.AmmoMod;
 import com.lucasj.gamedev.game.weapons.Gun;
 import com.lucasj.gamedev.game.weapons.guns.AssaultRifle;
@@ -49,7 +57,7 @@ import com.lucasj.gamedev.physics.CollisionSurface;
 import com.lucasj.gamedev.utils.ConcurrentList;
 import com.lucasj.gamedev.world.map.MiniMap;
 
-public class Player extends Entity implements PlayerMP, MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener, LevelUpEventListener {
+public class Player extends Entity implements PlayerMP, MouseClickEventListener, MouseMotionEventListener, KeyboardEventListener, LevelUpEventListener, Controller {
 	
 	private BufferedImage[][] walking;
 	private int currentWalkingImage = 1; // 1 = down 2 = up = 3 = left 4 = right
@@ -73,6 +81,13 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private long lastTimeHurt;
 	private float timeToRegen = 2.5f;
+	
+	private int maxMana = 60;
+	private float mana = 0;
+	private float manaRegenRate = 0.25f;
+	private int manaBarColorIndex = 0;
+	private boolean manaBarColorReversed;
+	private long lastManaBarUpdate;
 	
 	private float staminaUseRate = 40;
 	private float stamina = 100;
@@ -106,7 +121,9 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private LevelUpManager lvlUpManager;
 	
-	private int money = 5000;
+	private Skill equippedSkill;
+	
+	private int money = 500;
 	private int gems = 0;
 	
 	private int xp;
@@ -123,6 +140,8 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	private MiniMap minimap;
 	
 	private PlayerWavesStats wavesStats;
+	
+	private Tooltip activeTooltip;
 	
 	
 	public Player(Game game, InputHandler input) {
@@ -143,7 +162,10 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		input.addMouseClickListener(this);
 		input.addMouseMotionListener(this);
 		
+		game.getEventManager().addListener(this, ControllerEvent.class);
+		
 		this.primaryGun = new AssaultRifle(game, this);
+		this.equippedSkill = new Teleport(game);
 		
 		this.wavesStats = new PlayerWavesStats();
 		
@@ -172,6 +194,8 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		this.primaryGun.update();
 		move(deltaTime);
 		
+		regenMana(deltaTime);
+		
 		if((System.currentTimeMillis() - this.lastTimeHurt)/1000.0 >= this.healthUnderlayDelay) {
 			this.healthUnderlayLength -= this.healthUnderlayRate;
 			if(this.healthUnderlayLength <= this.health) this.healthUnderlayLength = this.health;
@@ -179,9 +203,13 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		
 		if(playerAttacking && (System.currentTimeMillis() - lastAttack)/1000.0 > primaryGun.getFireRate()) attack(deltaTime);
 		crumbManager.update(deltaTime);
+		
 		float checkAnimationSpeed = animationSpeed;
+		// Sprint Multiplier
 		if(isSprinting) checkAnimationSpeed = animationSpeed/sprintMultiplier;
-		else checkAnimationSpeed = animationSpeed;
+		// Dashing Multiplier
+		if(this.isDashing()) checkAnimationSpeed = checkAnimationSpeed/((Dash)this.equippedSkill).getSprintMultiplier();
+		// Apply Multiplier
 		if((System.currentTimeMillis() - lastAnimationUpdate)/1000.0 > checkAnimationSpeed) {
 			animationTick++;
 			if (animationTick > 4) {
@@ -195,9 +223,67 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		this.activePlaceables.forEach(placeable -> {
 			placeable.update(deltaTime);
 		});
+		
+		if(this.activeTooltip != null) {
+			if(this.activeTooltip.getTitle().equals("Player Information")) {
+			
+				activeTooltip = new Tooltip(
+						game,
+						"Player Information",
+						
+						String.format("""
+						{RED}Health{LIGHT_GRAY}: 
+						{WHITE} %s{LIGHT_GRAY} / {WHITE}%s{LIGHT_GRAY} ({WHITE}%s%%{LIGHT_GRAY}) {NL}
+						{BLUE}Stamina{LIGHT_GRAY}: 
+						{WHITE} %s{LIGHT_GRAY} / {WHITE}%s{LIGHT_GRAY} ({WHITE}%s%%{LIGHT_GRAY}) {NL}
+						{LIGHT_BLUE}Mana{LIGHT_GRAY}: 
+						{WHITE} %s{LIGHT_GRAY} / {WHITE}%s{LIGHT_GRAY} ({WHITE}%s%%{LIGHT_GRAY})
+						""", 
+						(int) (this.health),
+						(int) (this.maxHealth),
+						(int) ((this.health / this.maxHealth) * 100),
+						(int) (this.stamina),
+						(int) (this.maxStamina),
+						(int) ((this.stamina / this.maxStamina) * 100), 
+						(int) this.mana,
+						(int) this.maxMana,
+						(int) ((this.mana / this.maxMana) * 100)),
+						
+						this.mousePosition.getXint(),
+						this.mousePosition.getYint(),
+						new Color(Color.DARK_GRAY.getRed(), Color.DARK_GRAY.getGreen(), Color.DARK_GRAY.getBlue(), 150),
+						Color.white
+						);
+			} else if(this.activeTooltip.getTitle().equals("Gun Information")) {
+					
+					activeTooltip = new Tooltip(
+							game,
+							"Gun Information",
+							
+							String.format("""
+							{LIGHT_RED}Damage{LIGHT_GRAY}: 
+							{WHITE} %s{LIGHT_GRAY}{NL}
+							{LIGHT_RED}Fire Rate{LIGHT_GRAY}: 
+							{WHITE} %s{NL}
+							{LIGHT_RED}Projectile Speed{LIGHT_GRAY}: 
+							{WHITE} %s{NL}{NL}
+							{%s}%s
+							""", 
+							(this.primaryGun.getDamage()),
+							this.primaryGun.getFireRate(),
+							this.primaryGun.getProjectileSpeed(),
+							this.primaryGun.getTier().toString().toUpperCase(),
+							this.primaryGun.getTier().toString()),
+							
+							this.mousePosition.getXint(),
+							this.mousePosition.getYint(),
+							new Color(Color.DARK_GRAY.getRed(), Color.DARK_GRAY.getGreen(), Color.DARK_GRAY.getBlue(), 150),
+							Color.white
+							);
+				}
+		}
+		
 		if(minimap != null) minimap.update(deltaTime);
-		
-		
 
     	if(game.party != null) {
     		game.getSocketClient().getPacketManager().playerInfoPacket(health, maxHealth, position, this.currentWalkingImage);
@@ -259,7 +345,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 			Graphics2D g2d = (Graphics2D)g;
 		    renderHealthBar(g2d);
 		    renderMoney(g2d);
-		    renderStaminaBar(g2d);
+		    renderStaminaAndMana(g2d);
 		    renderPlaceable(g2d);
 		    renderEquippedGun(g2d);
 		    renderAmmo(g2d);
@@ -274,8 +360,12 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	}
 	
 	private void renderAmmo(Graphics2D g2d) {
+		int strWidth = g2d.getFontMetrics().stringWidth(this.primaryGun.getCurrentClip() + "/" + this.getPrimaryGun().getClipSize());
+		g2d.setColor(Color.white);
+		g2d.drawString(this.primaryGun.getCurrentClip() + "/" + this.getPrimaryGun().getClipSize(), game.getWidth()/2-(strWidth/2), game.getHeight()-47);
+
 		g2d.setColor(Color.black);
-		g2d.drawString(this.primaryGun.getCurrentClip() + "/" + this.getPrimaryGun().getClipSize(), game.getWidth()/2-100, game.getHeight()-50);
+		g2d.drawString(this.primaryGun.getCurrentClip() + "/" + this.getPrimaryGun().getClipSize(), game.getWidth()/2-(strWidth/2), game.getHeight()-50);
 	}
 	
 	private void renderPlaceable(Graphics2D g2d) {
@@ -427,7 +517,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		int x = game.getWidth()/2 - (healthBarSize*healthBarLength)/2;
 		
 		g2d.setColor(Color.black);
-		g2d.fillRect(x, game.getHeight()-(margin*2), healthBarLength * healthBarSize, healthBarSize);
+		g2d.fillRect(x, game.getHeight()-(margin*2) - 15, healthBarLength * healthBarSize, healthBarSize + 15);
 
 		g2d.setColor(colors.LIGHT_RED.getValue());
 		g2d.fillRect((int)(x + (healthBarSize*0.1))
@@ -442,7 +532,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 				(int)(healthBarSize - (healthBarSize * 0.2)));
 	}
 	
-	private void renderStaminaBar(Graphics2D g2d) {
+	private void renderStaminaAndMana(Graphics2D g2d) {
 		
 		int margin = 100;
 		int staminaBarSize = 100;
@@ -457,6 +547,26 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 				, (int) (game.getHeight() - margin*2 + margin*0.1), 
 				(int) (((staminaBarSize * staminaBarLength) - (margin*0.2)) * ((double) stamina/maxStamina)), 
 				(int)(staminaBarSize/3 - (staminaBarSize * 0.2)));
+		
+		if((System.currentTimeMillis() - this.lastManaBarUpdate)/1000.0 > 0.25f) {
+			int increment = this.manaBarColorReversed ? -1 : 1;
+			manaBarColorIndex += increment;
+			if(manaBarColorIndex >= 16) {
+				manaBarColorIndex = 15;
+				manaBarColorReversed = true;
+			}
+			if(manaBarColorIndex < 0) {
+				manaBarColorIndex = 0;
+				manaBarColorReversed = false;
+			}
+			lastManaBarUpdate = System.currentTimeMillis();
+		}
+		
+		g2d.setColor(Mana.colors.get(this.manaBarColorIndex));
+		g2d.fillRect((int)(x + (staminaBarSize*0.1))
+				, (int) (game.getHeight() - margin*2 + margin*0.1) - (int)(staminaBarSize/3 - (staminaBarSize * 0.2)), 
+				(int) (((staminaBarSize * staminaBarLength) - (margin*0.2)) * ((double) mana/maxMana)), 
+				(int)(staminaBarSize/3 - (staminaBarSize * 0.2)));
 	}
 	
 	private void renderMoney(Graphics2D g2d) {
@@ -465,11 +575,15 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	    g2d.setColor(Color.black);
 	    g2d.drawString("$" + NumberFormat.getInstance(Locale.US).format(this.money), game.getWidth()/2 - 200, game.getHeight() - 220);
+	    g2d.setColor(Color.green);
+	    g2d.drawString("$" + NumberFormat.getInstance(Locale.US).format(this.money), game.getWidth()/2 - 197, game.getHeight() - 220);
 
-	    g2d.setColor(Color.black);
 	    g2d.drawImage(SpriteTools.getSprite(SpriteTools.assetDirectory + "Art/Currency/Gem.png", new Vector2D(0, 0), new Vector2D(32, 32)), 
-	    		game.getWidth()/2 + 100, game.getHeight() - 275, 64, 64, null);
-	    g2d.drawString(Integer.toString(this.gems), game.getWidth()/2 + 175, game.getHeight() - 220);
+	    		game.getWidth()/2 + 150, game.getHeight() - 275, 64, 64, null);
+	    g2d.setColor(Color.black);
+	    g2d.drawString(Integer.toString(this.gems), game.getWidth()/2 + 150 - g2d.getFontMetrics().stringWidth(Integer.toString(this.gems)), game.getHeight() - 220);
+	    g2d.setColor(GameColors.colors.PURPLE.getValue());
+	    g2d.drawString(Integer.toString(this.gems), game.getWidth()/2 + 147 - g2d.getFontMetrics().stringWidth(Integer.toString(this.gems)), game.getHeight() - 220);
 	}
 	
 	private void regenHealth() {
@@ -479,30 +593,46 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		}
 	}
 	
+	private void regenMana(double deltaTime) {
+		if(this.mana < this.maxMana) {
+			this.mana += this.manaRegenRate * deltaTime;
+			if(this.mana > this.maxMana) this.mana = this.maxMana;
+		}
+	}
+	
 	private void move(double deltaTime) {
 		
-		Vector2D camPosUpdate = new Vector2D(0, 0);
+		Vector2D posUpdate = new Vector2D(0, 0);
 
 	    // Update camera position based on WASD input
 	    if (WASD[0]) { // W - Move up
-	        camPosUpdate.addY(-1);
+	    	posUpdate.addY(-1);
 	    }
 	    if (WASD[1]) { // A - Move left
-	        camPosUpdate.addX(-1);
+	    	posUpdate.addX(-1);
 	    }
 	    if (WASD[2]) { // S - Move down
-	        camPosUpdate.addY(1);
+	    	posUpdate.addY(1);
 	    }
 	    if (WASD[3]) { // D - Move right
-	        camPosUpdate.addX(1);
+	    	posUpdate.addX(1);
 	    }
 	    
-	    camPosUpdate = camPosUpdate.normalize();
-	    if (camPosUpdate.distanceTo(Vector2D.zero()) != 0) {
+	    posUpdate = posUpdate.normalize();
+	    if (posUpdate.distanceTo(Vector2D.zero()) != 0) {
 	        isMoving = true;
 	    }
+	    float speed = movementSpeed;
+	    boolean dashing = false;
+	    
+	    if(this.equippedSkill instanceof Dash) {
+	    	if(((Dash)equippedSkill).isActive()) {
+	    		speed = movementSpeed * ((Dash)this.equippedSkill).getSprintMultiplier();
+	    		dashing = true;
+	    	}
+	    }
 
-	    Vector2D movement = camPosUpdate.multiply(movementSpeed * deltaTime);
+	    Vector2D movement = posUpdate.multiply(speed * deltaTime);
 	    movement = movement.multiply(this.getPlayerUpgrades().getMovementSpeedMultiplier());
 	    
 	    if(isReadyToSprint && stamina > 0 && isMoving) {
@@ -573,8 +703,14 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    }
 
 
+	    if(dashing) {
+	    	((Dash)this.equippedSkill).setDistanceTravelled((int) (((Dash)this.equippedSkill).getDistanceTravelled() + movement.magnitude()));
+	    	if(((Dash)this.equippedSkill).getDistanceTravelled() > ((Dash)this.equippedSkill).getDashDistance()) ((Dash)this.equippedSkill).setActive(false);
+	    }
+	    
 	    
 	    this.position = this.position.add(movement);
+	    this.screenPosition = game.getCamera().worldToScreenPosition(this.position);
 	    e.setPositionAfter(this.position.copy());
 	    e.setPositionChange(movement);
 	    if(!e.getPositionChange().isZero()) {
@@ -586,41 +722,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	    		this.lastWalkSound = System.currentTimeMillis();
 	    	}
 		}
-
-	    // Calculate camera boundaries and player position relative to the camera
-	    Vector2D newCamPos = this.position.subtract(new Vector2D(game.getWidth() / 2, game.getHeight() / 2));
-	    Vector2D cameraWorldPosition = game.getCamera().getWorldPosition();
-	    Vector2D viewport = game.getCamera().getViewport();
-	    Vector2D worldSize = game.getMapManager().getWorldSize();
-
-	    // Determine if the camera is bounded in each direction
-	    boolean cameraAtLeft = newCamPos.getX() <= 0;
-	    boolean cameraAtTop = newCamPos.getY() <= 0;
-	    boolean cameraAtRight = newCamPos.getX() + viewport.getX() >= worldSize.getX();
-	    boolean cameraAtBottom = newCamPos.getY() + viewport.getY() >= worldSize.getY();
-
-	    // Update the camera's position while respecting the boundaries
-	    double newCamX = cameraWorldPosition.getX();
-	    double newCamY = cameraWorldPosition.getY();
-
-	    // If the camera is not bounded on the left or right, update its X position
-	    if (!cameraAtLeft && !cameraAtRight) {
-	        newCamX = newCamPos.getX();
-	    }
-
-	    // If the camera is not bounded on the top or bottom, update its Y position
-	    if (!cameraAtTop && !cameraAtBottom) {
-	        newCamY = newCamPos.getY();
-	    }
-
-	    // Set the new camera position
-	    game.getCamera().setWorldPosition(new Vector2D(newCamX, newCamY));
-
-	    // Update the player's screen position based on the camera's world position
-	    this.screenPosition = this.position.subtract(game.getCamera().getWorldPosition());
-
-
-
+	    
 		float dx = (float) (mousePosition.getX() - this.getScreenPosition().add(new Vector2D(this.getSize()).divide(2)).getX());
 		float dy = (float) (mousePosition.getY() - this.getScreenPosition().add(new Vector2D(this.getSize()).divide(2)).getY());
 
@@ -640,9 +742,6 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	
 	private void attack(double deltaTime) {
 		if(!isClickAnAttack() || this.primaryGun.isReloading()) return;
-		
-		// Implement the guns fire() method
-		game.getCamera().shake(1, 50);
 		
 		this.getWavesStats().shoot();
 		
@@ -774,6 +873,21 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		return true;
 	}
 	
+	private void useSkill() {
+		if(this.mana < this.equippedSkill.getManaCost()) return;
+		if(this.equippedSkill instanceof Dash) {
+			Dash skill = (Dash) equippedSkill;
+			if(skill.isActive()) return;
+			skill.setActive(true);
+		} else if (this.equippedSkill instanceof Teleport) {
+			Teleport skill = (Teleport) equippedSkill;
+			
+			this.position = this.game.getCamera().screenToWorldPosition(mousePosition);
+			
+		}
+		this.mana -= equippedSkill.getManaCost();
+	}
+	
 	public boolean takeDamage(float dmg) {
 		this.wavesStats.damageTaken += dmg;
 		//return false;
@@ -801,65 +915,114 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	@Override
 	public void onMousePressed(MouseEvent e) {
-		if(e.getButton() == MouseEvent.BUTTON1) playerAttacking = true;
 	}
 
 	@Override
 	public void onMouseReleased(MouseEvent e) {
-		if(e.getButton() == MouseEvent.BUTTON1) playerAttacking = false;
 	}
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_W) {
-        	WASD[0] = true;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_A) {
-        	WASD[1] = true;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_S) {
-        	WASD[2] = true;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_D) {
-        	WASD[3] = true;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
-        	isReadyToSprint = true;
-        }
-        
-        if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-        	if(game.getWavesManager().getNPCManager().isAnyOpen()) {
-        		game.getWavesManager().getNPCManager().closeAll();
-        	} else game.setPaused(!game.isPaused());
-        }
-        if(e.getKeyCode() == KeyEvent.VK_Q) {
-        	this.swapWeapons();
-        }
-		if(e.getKeyCode() == KeyEvent.VK_1) {
-			if(this.placeableManager.getEquippedPlaceable() != null) {
-				this.placeableManager.getEquippedPlaceable().instantiate(game.getCamera().screenToWorldPosition(mousePosition));
-				this.placeableManager.setEquippedPlaceable(null);
-			}
-		}
+		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		if(e.getKeyCode() == KeyEvent.VK_W) {
-        	WASD[0] = false;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_A) {
-        	WASD[1] = false;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_S) {
-        	WASD[2] = false;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_D) {
-        	WASD[3] = false;
-        }
-        if(e.getKeyCode() == KeyEvent.VK_SHIFT) {
-        	isReadyToSprint = false;
-        }
+		
+	}
+
+	@Override
+	public void onControlKeyPressed(Controls control) {
+		switch(control) {
+		case UP:
+	        WASD[0] = true;
+	        break;
+	        	
+		case DOWN:
+			WASD[2] = true;
+			break;
+			
+		case LEFT:
+			WASD[1] = true;
+			break;
+			
+		case RIGHT:
+			WASD[3] = true;
+			break;
+		
+		case SPRINT:
+        	isReadyToSprint = true;
+			break;
+        	
+		case PRIMARY:
+			playerAttacking = true;
+			break;
+			
+		case SECONDARY:
+			useSkill();
+			break;
+			
+		case SWAP:
+        	this.swapWeapons();
+			break;
+			
+		case RELOAD:
+			if(!this.primaryGun.isReloading() && this.primaryGun.getCurrentClip() < this.primaryGun.getClipSize()) this.primaryGun.reload();
+			break;
+			
+		case SPECIAL:
+			break;
+			
+		case PLACE:
+			if(this.placeableManager.getEquippedPlaceable() != null) {
+				this.placeableManager.getEquippedPlaceable().instantiate(game.getCamera().screenToWorldPosition(mousePosition));
+				this.placeableManager.setEquippedPlaceable(null);
+			}
+			break;
+		
+		case MAP:
+        	this.minimap.setMinimized(!this.minimap.isMinimized());
+			break;
+        	
+		case PAUSE:
+        	if(game.getWavesManager().getNPCManager().isAnyOpen()) {
+        		game.getWavesManager().getNPCManager().closeAll();
+        	} else game.setPaused(!game.isPaused());
+			break;
+        	
+		}
+	}
+
+	@Override
+	public void onControlKeyReleased(Controls control) {
+		switch(control) {
+		case UP:
+	        WASD[0] = false;
+	        break;
+	        	
+		case DOWN:
+			WASD[2] = false;
+			break;
+			
+		case LEFT:
+			WASD[1] = false;
+			break;
+			
+		case RIGHT:
+			WASD[3] = false;
+			break;
+        	
+		case PRIMARY:
+			playerAttacking = false;
+			break;
+		
+		case SPRINT:
+	    	isReadyToSprint = false;
+			break;
+			
+		default:
+			break;
+		}
 		
 	}
 
@@ -884,11 +1047,16 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	@Override
 	public void onMouseDragged(MouseEvent e) {
 		this.onMouseMoved(e);
+		this.handleTooltips(e);
 	}
 
 	@Override
 	public void onMouseMoved(MouseEvent e) {
+		if(!game.getWavesManager().hasGameStarted()) return;
 		mousePosition = new Vector2D(e.getX(), e.getY());
+		
+		this.handleTooltips(e);
+		
 		float dx = (float) (mousePosition.getX() - this.getScreenPosition().getX());
 		float dy = (float) (mousePosition.getY() - this.getScreenPosition().getY());
 		playerRotation = (float) Math.atan2(dy, dx);
@@ -901,6 +1069,89 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		        // Vertical movement
 		        currentWalkingImage = (direction.getY() > 0) ? 1 : 2; // Down: 1, Up: 2
 		    }
+		}
+	}
+	
+	public void handleTooltips(MouseEvent e ) {
+		mousePosition = new Vector2D(e.getX(), e.getY());
+		
+		int margin = 100;
+		int healthBarSize = 100;
+		int healthBarLength = 4; //length x size = actual length
+		int x = game.getWidth()/2 - (healthBarSize*healthBarLength)/2;
+		int y = game.getHeight()-(margin*2) - 15;
+		int length = healthBarLength * healthBarSize;
+		int height = healthBarSize + 15;
+		double mouseX = mousePosition.getX();
+		double mouseY = mousePosition.getY();
+		
+		boolean isInsideInfoBox = (mouseX >= x && mouseX <= x + length &&
+                mouseY >= y && mouseY <= y + height);
+		
+		int primaryGunX = 128;
+		int primaryGunY = game.getHeight()-228;
+		int primaryGunLength = 128;
+		int primaryGunHeight= 128;
+		
+		boolean isInsideGunBox = (mouseX >= primaryGunX && mouseX <= primaryGunX + primaryGunLength &&
+                mouseY >= primaryGunY && mouseY <= primaryGunY + primaryGunHeight);
+
+		if (isInsideInfoBox) {
+			activeTooltip = new Tooltip(
+					game,
+					"Player Information",
+					
+					String.format("""
+					{RED}Health{LIGHT_GRAY}: 
+					{WHITE} %s{LIGHT_GRAY} / {WHITE}%s{LIGHT_GRAY} ({WHITE}%s%%{LIGHT_GRAY}) {NL}
+					{BLUE}Stamina{LIGHT_GRAY}: 
+					{WHITE} %s{LIGHT_GRAY} / {WHITE}%s{LIGHT_GRAY} ({WHITE}%s%%{LIGHT_GRAY}) {NL}
+					{LIGHT_BLUE}Mana{LIGHT_GRAY}: 
+					{WHITE} %s{LIGHT_GRAY} / {WHITE}%s{LIGHT_GRAY} ({WHITE}%s%%{LIGHT_GRAY})
+					""", 
+					(int) (this.health),
+					(int) (this.maxHealth),
+					(int) ((this.health / this.maxHealth) * 100),
+					(int) (this.stamina),
+					(int) (this.maxStamina),
+					(int) ((this.stamina / this.maxStamina) * 100), 
+					(int) this.mana,
+					(int) this.maxMana,
+					(int) ((this.mana / this.maxMana) * 100)),
+					
+					this.mousePosition.getXint(),
+					this.mousePosition.getYint(),
+					new Color(Color.DARK_GRAY.getRed(), Color.DARK_GRAY.getGreen(), Color.DARK_GRAY.getBlue(), 150),
+					Color.white
+					);
+		} else if (isInsideGunBox) {
+			activeTooltip = new Tooltip(
+					game,
+					"Gun Information",
+					
+					String.format("""
+					{LIGHT_RED}Damage{LIGHT_GRAY}: 
+					{WHITE} %s{LIGHT_GRAY}{NL}
+					{LIGHT_RED}Fire Rate{LIGHT_GRAY}: 
+					{WHITE} %s{NL}
+					{LIGHT_RED}Projectile Speed{LIGHT_GRAY}: 
+					{WHITE} %s{NL}{NL}
+					{%s}%s
+					""", 
+					(this.primaryGun.getDamage()),
+					this.primaryGun.getFireRate(),
+					this.primaryGun.getProjectileSpeed(),
+					this.primaryGun.getTier().toString().toUpperCase(),
+					this.primaryGun.getTier().toString()),
+					
+					this.mousePosition.getXint(),
+					this.mousePosition.getYint(),
+					new Color(Color.DARK_GRAY.getRed(), Color.DARK_GRAY.getGreen(), Color.DARK_GRAY.getBlue(), 150),
+					Color.white
+					);
+			
+		} else {
+			this.activeTooltip = null;
 		}
 	}
 	
@@ -942,6 +1193,11 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 		
 		Particle.spawnSingleParticle(particle, new Vector2D(game.getWidth()/2 - 200, game.getHeight() - 220));
 		
+	}
+	
+	public void addMana(float mana) {
+		this.mana += mana;
+		if(this.mana > this.maxMana) this.mana = this.maxMana;
 	}
 	
 	public static PlayerStats getGlobalStats() {
@@ -1048,6 +1304,7 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 
 	@Override
 	public Entity setMaxHealth(float num) {
+		this.maxHealth = num;
 		return this;
 	}
 
@@ -1078,6 +1335,29 @@ public class Player extends Entity implements PlayerMP, MouseClickEventListener,
 	@Override
 	public void onLevelUp(LevelUpEvent e) {
 		this.wavesStats.finalLevel = e.getNewLevel();
+	}
+
+	public Skill getEquippedSkill() {
+		return equippedSkill;
+	}
+
+	public void setEquippedSkill(Skill equippedSkill) {
+		this.equippedSkill = equippedSkill;
+	}
+	
+	public Tooltip getActiveTooltip() {
+		return this.activeTooltip;
+	}
+	
+	public boolean isDashing() {
+		if(this.getEquippedSkill() != null && this.equippedSkill instanceof Dash) {
+			if(((Dash)this.equippedSkill).isActive()) return true;
+		}
+		return false;
+	}
+
+	public boolean isSprinting() {
+		return isSprinting;
 	}
 	
 }

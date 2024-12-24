@@ -88,11 +88,15 @@ public class Button extends UIComponent implements MouseClickEventListener {
         g2d.setStroke(new BasicStroke(3));
         
         g2d.setFont(game.font);
-        g2d.setColor(textColor);
         int textWidth = g2d.getFontMetrics().stringWidth(text);
         int textX = x + (width - textWidth) / 2;
         int textY = y + (height + g2d.getFontMetrics().getAscent()) / 2 - 5;
+        
+        g2d.setColor(Color.black);
+        g2d.drawString(text, textX, textY+3);
+        g2d.setColor(textColor);
         g2d.drawString(text, textX, textY);
+        
     }
 
     public boolean isClicked(MouseEvent e) {

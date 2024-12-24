@@ -3,6 +3,8 @@ package com.lucasj.gamedev.mathutils;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.lucasj.gamedev.misc.Debug;
+
 public class BiMap<K, V> {
     private final Map<K, V> keyToValue = new HashMap<>();
     private final Map<V, K> valueToKey = new HashMap<>();

@@ -66,6 +66,8 @@ public class WindowHandler implements ComponentListener, WindowListener{
 		game.getSettings().save();
 		Player.getGlobalStats().save(game.gameData);
 		game.getSocketClient().getPacketManager().requestLogoffPacket();
+		game.getAudioPlayer().shutdown();
+		game.getEnemyMovementExecutor().shutdown();
 	}
 
 	@Override

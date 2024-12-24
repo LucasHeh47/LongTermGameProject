@@ -218,12 +218,14 @@ public class WavesManager implements EntityDamagedEventListener, EntityDeathEven
 		        // Set the new font for the Graphics2D object
 		        g2d.setFont(newFont);
 				
-		        g2d.drawString(Integer.toString(intermissionLength-intermissionTick), (game.getWidth() - titleWidth) / 2, 100);
+		        //g2d.drawString(Integer.toString(intermissionLength-intermissionTick), (game.getWidth() - titleWidth) / 2, 100);
 			}
 	
 			g2d.setFont(game.font.deriveFont(58f)); // Derive the font size explicitly as a float
+		    g2d.setColor(Color.white);
+		    g2d.drawString(Integer.toString(this.wave), game.getWidth()/2 - g2d.getFontMetrics().stringWidth(Integer.toString(this.wave))/2, 157);
 		    g2d.setColor(Color.black);
-		    g2d.drawString("Wave: " + Integer.toString(this.wave), 520, game.getHeight() - 160);
+		    g2d.drawString(Integer.toString(this.wave), game.getWidth()/2 - g2d.getFontMetrics().stringWidth(Integer.toString(this.wave))/2, 160);
 	//	    g2d.drawString("Left: " + Integer.toString(enemiesThisWave - enemiesKilledThisWave), 520, game.getHeight() - 100);
 	//	    int enemyCount = (int) game.instantiatedEntities.stream()
 	//                .filter(entity -> entity instanceof Enemy)

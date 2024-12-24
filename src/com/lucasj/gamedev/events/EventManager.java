@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.lucasj.gamedev.essentials.controls.Controller;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEvent;
 import com.lucasj.gamedev.events.collectibles.CoinCollectedEventListener;
 import com.lucasj.gamedev.events.entities.EntityCollisionEvent;
@@ -12,6 +13,7 @@ import com.lucasj.gamedev.events.entities.EntityDamagedEvent;
 import com.lucasj.gamedev.events.entities.EntityDamagedEventListener;
 import com.lucasj.gamedev.events.entities.EntityDeathEvent;
 import com.lucasj.gamedev.events.entities.EntityDeathEventListener;
+import com.lucasj.gamedev.events.input.ControllerEvent;
 import com.lucasj.gamedev.events.level.LevelUpEvent;
 import com.lucasj.gamedev.events.level.LevelUpEventListener;
 import com.lucasj.gamedev.events.player.PlayerAttackEvent;
@@ -138,6 +140,19 @@ public class EventManager {
                 listeners.forEach(listener -> {
                     if (listener instanceof LevelUpEventListener) {
                         ((LevelUpEventListener) listener).onLevelUp((LevelUpEvent) e);
+                    }
+                });
+            }
+    	} else if (e instanceof ControllerEvent) {
+    		List<Object> listeners = eventMap.get(ControllerEvent.class);
+            if (listeners != null) {
+                listeners.forEach(listener -> {
+                    if (listener instanceof Controller) {
+                    	if(((ControllerEvent) e).getPressed()) {
+                            ((Controller) listener).onControlKeyPressed(((ControllerEvent) e).getKey());
+                    	} else {
+                            ((Controller) listener).onControlKeyReleased(((ControllerEvent) e).getKey());
+                    	}
                     }
                 });
             }

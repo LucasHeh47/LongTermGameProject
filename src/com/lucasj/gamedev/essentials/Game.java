@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
@@ -14,9 +13,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.lucasj.gamedev.Assets.SpriteTools;
 import com.lucasj.gamedev.essentials.audio.AudioPlayer;
+import com.lucasj.gamedev.essentials.controls.ControlManager;
 import com.lucasj.gamedev.essentials.ui.Layer;
 import com.lucasj.gamedev.essentials.ui.Menus;
 import com.lucasj.gamedev.essentials.ui.Render;
@@ -94,11 +96,15 @@ public class Game {
     
     private Window window;
     
+    private ControlManager controlManager;
+    
     public String username = "LucasHeh1";
     public Party party;
     
     private GameClient socketClient;
     public String authToken;
+    
+    private final ExecutorService enemyMovementExecutor;
     
     public Game(InputHandler input, GraphicUtils gUtils, SettingsManager settings, Dimension screen, Window window) {
     	gameData = new GameData("projectgame", "playerStats.dat");
@@ -139,6 +145,12 @@ public class Game {
         menus = new Menus(this);
         input.addMouseClickListener(menus);
         input.addMouseMotionListener(menus);
+        
+        controlManager = new ControlManager(this);
+        input.addMouseClickListener(controlManager);
+        input.addKeyboardListener(controlManager);
+        
+        this.enemyMovementExecutor = Executors.newSingleThreadExecutor();
         
         camera = new Camera(this, new Vector2D(getWidth(), getHeight()), new Vector2D(0, 0));
         instantiatedEntities = new ConcurrentList<Entity>();
@@ -487,6 +499,10 @@ public class Game {
 	
 	public void addBroadcast(Broadcast cast) {
 		this.broadcastQueue.add(cast);
+	}
+
+	public ExecutorService getEnemyMovementExecutor() {
+		return enemyMovementExecutor;
 	}
 	
 }

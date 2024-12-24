@@ -11,23 +11,27 @@ public class PlayerUpgrades {
     private final float DEFAULT_HEALTH_REGEN = 0.01f;
     private final float DEFAULT_DAMAGE_MULTIPLIER = 1.0f;
     private final float DEFAULT_MOVEMENT_SPEED_MULTIPLIER = 1.0f;
+    private final float DEFAULT_MANA_DROP_MULTIPLIER = 1.0f;
     
     private int upgradedMaxHealth = 0;
     private boolean hasHealthRegen = false;
     private float upgradedHealthRegen = 0;
     private float upgradedDamageMultiplier = 0;
     private float upgradedMovementSpeedMultiplier = 0;
+    private float upgradedManaDropMultiplier = 0;
     
     // How much you get from each upgrade
     private int maxHealthUpgrade = 25;
     private float healthRegenUpgrade = 0.03f;
     private float damageMultiplierUpgrade = 0.33f;
     private float movementSpeedMultiplier = 0.1f;
+    private float manaDropMultiplier = 0.25f;
     
     private int regenUpgradeCount = 0;
     private int damageUpgradeCount = 0;
     private int movementUpgradeCount = 0;
     private int maxHealthUpgradeCount = 0;
+    private int manaDropUpgradeCount = 0;
     
     private Player player;
     private Game game;
@@ -39,6 +43,7 @@ public class PlayerUpgrades {
     	this.upgradedHealthRegen = DEFAULT_HEALTH_REGEN;
     	this.upgradedDamageMultiplier = DEFAULT_DAMAGE_MULTIPLIER;
     	this.upgradedMovementSpeedMultiplier = DEFAULT_MOVEMENT_SPEED_MULTIPLIER;
+    	this.upgradedManaDropMultiplier = DEFAULT_MANA_DROP_MULTIPLIER;
     	
     }
     
@@ -47,6 +52,7 @@ public class PlayerUpgrades {
     	this.upgradedHealthRegen = DEFAULT_HEALTH_REGEN;
     	this.upgradedDamageMultiplier = DEFAULT_DAMAGE_MULTIPLIER;
     	this.upgradedMovementSpeedMultiplier = DEFAULT_MOVEMENT_SPEED_MULTIPLIER;
+    	this.upgradedManaDropMultiplier = DEFAULT_MANA_DROP_MULTIPLIER;
     }
 
     public boolean upgrade(String type) {
@@ -71,6 +77,10 @@ public class PlayerUpgrades {
                     this.player.setMaxHealth(this.upgradedMaxHealth);
                     maxHealthUpgradeCount++;
                     break;
+                case "mana":
+                    this.upgradedManaDropMultiplier += this.manaDropMultiplier;
+                    manaDropUpgradeCount++;
+                    break;
                 default:
                     System.out.println("Unknown upgrade type");
                     return false;
@@ -92,6 +102,8 @@ public class PlayerUpgrades {
                 return movementUpgradeCount + 1;
             case "maxHealth":
                 return maxHealthUpgradeCount + 1;
+            case "mana":
+                return manaDropUpgradeCount + 1;
             default:
                 return Integer.MAX_VALUE; // Unknown upgrade type
         }
@@ -189,6 +201,10 @@ public class PlayerUpgrades {
 
     public float getMovementSpeedMultiplier() {
         return upgradedMovementSpeedMultiplier;
+    }
+
+    public float getManaDropMultiplier() {
+        return upgradedManaDropMultiplier;
     }
 }
 
